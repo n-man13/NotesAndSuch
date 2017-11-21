@@ -1,0 +1,239 @@
+Welcome to the Card Trading Center!
+Enter number of basketball cards in the stock: Enter number of baseball cards in the stock: Enter number of football cards in the stock: Select from the following menu: 
+0. Display stock and exit. 
+1. Customer enters with request to buy cards. 
+2. Customer enters with cards to sell cards. 
+3. Customer with request is served. 
+4. Display customers waiting to be served and their requests. 
+5. Display pending requests waiting to be processed. 
+6. Process pending requests. 
+7. Display number of customers whose requests have been processed. 
+8. Display menu again 
+
+You know the choices; make your menu selection now: 
+
+No customer is waiting to be served!
+You know the choices; make your menu selection now: 
+
+No customers waiting to be served!
+You know the choices; make your menu selection now: 
+
+No customer requests are pending!
+You know the choices; make your menu selection now: 
+
+No customers have been served yet!
+You know the choices; make your menu selection now: 
+
+Welcome, your name, please: 
+How many basketball cards do you want: 
+How many baseball cards do you want: 
+How many football cards do you want: 
+Homer requesting 2 basketball, 0 baseball and 0 football cards is now waiting.
+You know the choices; make your menu selection now: 
+
+Welcome, your name, please: 
+How many basketball cards do you want: 
+How many baseball cards do you want: 
+How many football cards do you want: 
+Bart requesting 2 basketball, 1 baseball and 1 football cards is now waiting.
+You know the choices; make your menu selection now: 
+
+Homer requesting 2 basketball, 0 baseball and 0 football cards 
+Bart requesting 2 basketball, 1 baseball and 1 football cards 
+
+You know the choices; make your menu selection now: 
+
+No customer requests are pending!
+You know the choices; make your menu selection now: 
+
+No customers have been served yet!
+You know the choices; make your menu selection now: 
+
+Homer is leaving with 2 basketball, 0 baseball and 0 football cards.
+You know the choices; make your menu selection now: 
+
+Bart requesting 2 basketball, 1 baseball and 1 football cards 
+
+You know the choices; make your menu selection now: 
+
+No customer requests are pending!
+You know the choices; make your menu selection now: 
+
+1 customer(s) have been served.
+You know the choices; make your menu selection now: 
+
+Bart's request for 2 basketball, 1 baseball and 1 football cardsis now pending. Goodbye Bart. We will let you know when the order is processed!
+You know the choices; make your menu selection now: 
+
+No customers waiting to be served!
+You know the choices; make your menu selection now: 
+
+Bart requesting 2 basketball, 1 baseball and 1 football cards 
+You know the choices; make your menu selection now: 
+
+1 customer(s) have been served.
+You know the choices; make your menu selection now: 
+
+No request could be processed!
+You know the choices; make your menu selection now: 
+
+Welcome, your name, please: 
+How many basketball cards do you have: 
+How many baseball cards do you have: 
+How many football cards do you have: 
+Thanks Marge, here is your reciept for the 3 basketball, 0 baseball and 0 football cards!
+You know the choices; make your menu selection now: 
+
+Welcome, your name, please: 
+How many basketball cards do you want: 
+How many baseball cards do you want: 
+How many football cards do you want: 
+Lisa requesting 4 basketball, 2 baseball and 1 football cards is now waiting.
+You know the choices; make your menu selection now: 
+
+Lisa requesting 4 basketball, 2 baseball and 1 football cards 
+
+You know the choices; make your menu selection now: 
+
+Bart requesting 2 basketball, 1 baseball and 1 football cards 
+You know the choices; make your menu selection now: 
+
+2 customer(s) have been served.
+You know the choices; make your menu selection now: 
+
+Welcome, your name, please: 
+How many basketball cards do you want: 
+How many baseball cards do you want: 
+How many football cards do you want: 
+Apu requesting 5 basketball, 3 baseball and 2 football cards is now waiting.
+You know the choices; make your menu selection now: 
+
+Welcome, your name, please: 
+How many basketball cards do you want: 
+How many baseball cards do you want: 
+How many football cards do you want: 
+Maggie requesting 2 basketball, 1 baseball and 1 football cards is now waiting.
+You know the choices; make your menu selection now: 
+
+Welcome, your name, please: 
+How many basketball cards do you want: 
+How many baseball cards do you want: 
+How many football cards do you want: 
+Ned requesting 2 basketball, 2 baseball and 1 football cards is now waiting.
+You know the choices; make your menu selection now: 
+
+Welcome, your name, please: 
+How many basketball cards do you want: 
+How many baseball cards do you want: 
+How many football cards do you want: 
+Moe requesting 3 basketball, 6 baseball and 2 football cards is now waiting.
+You know the choices; make your menu selection now: 
+
+Lisa requesting 4 basketball, 2 baseball and 1 football cards 
+Apu requesting 5 basketball, 3 baseball and 2 football cards 
+Maggie requesting 2 basketball, 1 baseball and 1 football cards 
+Ned requesting 2 basketball, 2 baseball and 1 football cards 
+Moe requesting 3 basketball, 6 baseball and 2 football cards 
+
+You know the choices; make your menu selection now: 
+
+Bart requesting 2 basketball, 1 baseball and 1 football cards 
+You know the choices; make your menu selection now: 
+
+2 customer(s) have been served.
+You know the choices; make your menu selection now: 
+
+Lisa's request for 4 basketball, 2 baseball and 1 football cardsis now pending. Goodbye Lisa. We will let you know when the order is processed!
+You know the choices; make your menu selection now: 
+
+Apu's request for 5 basketball, 3 baseball and 2 football cardsis now pending. Goodbye Apu. We will let you know when the order is processed!
+You know the choices; make your menu selection now: 
+
+Maggie is leaving with 2 basketball, 1 baseball and 1 football cards.
+You know the choices; make your menu selection now: 
+
+Ned's request for 2 basketball, 2 baseball and 1 football cardsis now pending. Goodbye Ned. We will let you know when the order is processed!
+You know the choices; make your menu selection now: 
+
+Moe requesting 3 basketball, 6 baseball and 2 football cards 
+
+You know the choices; make your menu selection now: 
+
+Bart requesting 2 basketball, 1 baseball and 1 football cards Lisa requesting 4 basketball, 2 baseball and 1 football cards Apu requesting 5 basketball, 3 baseball and 2 football cards Ned requesting 2 basketball, 2 baseball and 1 football cards 
+You know the choices; make your menu selection now: 
+
+3 customer(s) have been served.
+You know the choices; make your menu selection now: 
+
+No request could be processed!
+You know the choices; make your menu selection now: 
+
+Moe requesting 3 basketball, 6 baseball and 2 football cards 
+
+You know the choices; make your menu selection now: 
+
+Bart requesting 2 basketball, 1 baseball and 1 football cards Lisa requesting 4 basketball, 2 baseball and 1 football cards Apu requesting 5 basketball, 3 baseball and 2 football cards Ned requesting 2 basketball, 2 baseball and 1 football cards 
+You know the choices; make your menu selection now: 
+
+3 customer(s) have been served.
+You know the choices; make your menu selection now: 
+
+Welcome, your name, please: 
+How many basketball cards do you have: 
+How many baseball cards do you have: 
+How many football cards do you have: 
+Thanks Krusty, here is your reciept for the 10 basketball, 10 baseball and 10 football cards!
+You know the choices; make your menu selection now: 
+
+Ned's request of 2 basketball, 2 baseball and 1 football cards has been processed and the customer has been notified.
+Apu's request of 5 basketball, 3 baseball and 2 football cards has been processed and the customer has been notified.
+Lisa's request of 4 basketball, 2 baseball and 1 football cards has been processed and the customer has been notified.
+You know the choices; make your menu selection now: 
+
+Moe requesting 3 basketball, 6 baseball and 2 football cards 
+
+You know the choices; make your menu selection now: 
+
+Bart requesting 2 basketball, 1 baseball and 1 football cards 
+You know the choices; make your menu selection now: 
+
+7 customer(s) have been served.
+You know the choices; make your menu selection now: 
+
+Welcome, your name, please: 
+How many basketball cards do you have: 
+How many baseball cards do you have: 
+How many football cards do you have: 
+Thanks Millhouse, here is your reciept for the 5 basketball, 7 baseball and 3 football cards!
+You know the choices; make your menu selection now: 
+
+Bart's request of 2 basketball, 1 baseball and 1 football cards has been processed and the customer has been notified.
+You know the choices; make your menu selection now: 
+
+Moe requesting 3 basketball, 6 baseball and 2 football cards 
+
+You know the choices; make your menu selection now: 
+
+No customer requests are pending!
+You know the choices; make your menu selection now: 
+
+9 customer(s) have been served.
+You know the choices; make your menu selection now: 
+
+Moe is leaving with 3 basketball, 6 baseball and 2 football cards.
+You know the choices; make your menu selection now: 
+
+No customers waiting to be served!
+You know the choices; make your menu selection now: 
+
+No customer requests are pending!
+You know the choices; make your menu selection now: 
+
+No customer requests are pending!
+You know the choices; make your menu selection now: 
+
+10 customer(s) have been served.
+You know the choices; make your menu selection now: 
+
+The Card Trading Center has 1 basketball, 3 baseball and 7 football cards and is now closing.
+Goodbye.

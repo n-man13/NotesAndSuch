@@ -1,0 +1,382 @@
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+List of size 0 has the following items : []
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+Error: list is empty
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+Error: list is empty
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+You are now inserting an item into the list.
+	 Enter item : 	 Enter position to insert item in : Item Data inserted in position 0 in the list.
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+List of size 1 has the following items : [Data]
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+You are now inserting an item into the list.
+	 Enter item : 	 Enter position to insert item in : Item Beverly inserted in position 0 in the list.
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+List of size 2 has the following items : [Beverly, Data]
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+You are now inserting an item into the list.
+	 Enter item : 	 Enter position to insert item in : Error: Position specified is out of range
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+List of size 2 has the following items : [Beverly, Data]
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+You are now inserting an item into the list.
+	 Enter item : 	 Enter position to insert item in : Item Jean-Luc inserted in position 2 in the list.
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+You are now inserting an item into the list.
+	 Enter item : 	 Enter position to insert item in : Item Geordi inserted in position 2 in the list.
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+You are now inserting an item into the list.
+	 Enter item : 	 Enter position to insert item in : Item Worf inserted in position 3 in the list.
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+List of size 5 has the following items : [Beverly, Data, Geordi, Worf, Jean-Luc]
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+Largest item Worf deleted.
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+List of size 4 has the following items : [Beverly, Data, Geordi, Jean-Luc]
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+Enter position to remove item from : Error: Position specified is out of range
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+Enter position to remove item from : Item Jean-Luc has been removed.
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+List of size 3 has the following items : [Beverly, Data, Geordi]
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+Enter position to remove item from : Item Beverly has been removed.
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+You are now inserting an item into the list.
+	 Enter item : 	 Enter position to insert item in : Item Will inserted in position 0 in the list.
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+List of size 3 has the following items : [Will, Data, Geordi]
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+Enter position to retrieve item from : Item Geordi retrieved from position 2 in the list.
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+Enter position to retrieve item from : Item Will retrieved from position 0 in the list.
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+Enter position to retrieve item from : Error: Position specified is out of range
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+List of size 3 has the following items : [Will, Data, Geordi]
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+Largest item Will deleted.
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+List of size 2 has the following items : [Data, Geordi]
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+Largest item Geordi deleted.
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+List of size 1 has the following items : [Data]
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+List of size 0 has the following items : []
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+Error: list is empty
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+Exiting program...Good Bye
+

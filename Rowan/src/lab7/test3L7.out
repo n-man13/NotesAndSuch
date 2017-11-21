@@ -1,0 +1,404 @@
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 1
+Please enter value of n: 0
+Please enter value of k: 0
+After recursing through, the value computed is: 1
+
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 1
+Please enter value of n: 100
+Please enter value of k: 0
+After recursing through, the value computed is: 1
+
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 1
+Please enter value of n: 100
+Please enter value of k: 1
+After recursing through, the value computed is: 100
+
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 1
+Please enter value of n: 100
+Please enter value of k: 99
+After recursing through, the value computed is: 100
+
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 1
+Please enter value of n: 7
+Please enter value of k: 7
+After recursing through, the value computed is: 1
+
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 1
+Please enter value of n: 6
+Please enter value of k: 4
+After recursing through, the value computed is: 15
+
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 1
+Please enter value of n: 6
+Please enter value of k: 5
+After recursing through, the value computed is: 6
+
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 1
+Please enter value of n: 6
+Please enter value of k: 3
+After recursing through, the value computed is: 20
+
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 1
+Please enter value of n: 4
+Please enter value of k: 2
+After recursing through, the value computed is: 6
+
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 2
+Please enter value of n: 1
+1 
+
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 2
+Please enter value of n: 2
+1 
+1 1 
+
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 2
+Please enter value of n: 3
+1 
+1 1 
+1 2 1 
+
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 2
+Please enter value of n: 4
+1 
+1 1 
+1 2 1 
+1 3 3 1 
+
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 2
+Please enter value of n: 5
+1 
+1 1 
+1 2 1 
+1 3 3 1 
+1 4 6 4 1 
+
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 2
+Please enter value of n: 6
+1 
+1 1 
+1 2 1 
+1 3 3 1 
+1 4 6 4 1 
+1 5 10 10 5 1 
+
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 2
+Please enter value of n: 7
+1 
+1 1 
+1 2 1 
+1 3 3 1 
+1 4 6 4 1 
+1 5 10 10 5 1 
+1 6 15 20 15 6 1 
+
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 2
+Please enter value of n: 8
+1 
+1 1 
+1 2 1 
+1 3 3 1 
+1 4 6 4 1 
+1 5 10 10 5 1 
+1 6 15 20 15 6 1 
+1 7 21 35 35 21 7 1 
+
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 3
+Please enter value of n: 0
+Please enter value of k: 0
+After iterating through, the value computed is: 1
+
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 3
+Please enter value of n: 100
+Please enter value of k: 0
+After iterating through, the value computed is: 1
+
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 3
+Please enter value of n: 100
+Please enter value of k: 1
+After iterating through, the value computed is: 100
+
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 3
+Please enter value of n: 100
+Please enter value of k: 99
+After iterating through, the value computed is: 100
+
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 3
+Please enter value of n: 7
+Please enter value of k: 7
+After iterating through, the value computed is: 1
+
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 3
+Please enter value of n: 6
+Please enter value of k: 4
+After iterating through, the value computed is: 15
+
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 3
+Please enter value of n: 6
+Please enter value of k: 5
+After iterating through, the value computed is: 6
+
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 3
+Please enter value of n: 6
+Please enter value of k: 3
+After iterating through, the value computed is: 20
+
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 3
+Please enter value of n: 4
+Please enter value of k: 2
+After iterating through, the value computed is: 6
+
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 4
+Please enter value of n: 0
+Please enter value of k: 0
+After completing the formula, the value is: 1
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 4
+Please enter value of n: 100
+Please enter value of k: 0
+After completing the formula, the value is: 1
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 4
+Please enter value of n: 100
+Please enter value of k: 1
+After completing the formula, the value is: 100
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 4
+Please enter value of n: 100
+Please enter value of k: 99
+After completing the formula, the value is: 100
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 4
+Please enter value of n: 7
+Please enter value of k: 7
+After completing the formula, the value is: 1
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 4
+Please enter value of n: 6
+Please enter value of k: 4
+After completing the formula, the value is: 15
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 4
+Please enter value of n: 6
+Please enter value of k: 5
+After completing the formula, the value is: 6
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 4
+Please enter value of n: 6
+Please enter value of k: 3
+After completing the formula, the value is: 20
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 4
+Please enter value of n: 4
+Please enter value of k: 2
+After completing the formula, the value is: 6
+1. Recursive Binomial calculation. 
+2. Display Pascal's triangle. 
+3. Iterative Binomial calculation. 
+4. Formula based Binomial calculation. 
+5. Exit
+
+Please enter your choice: 5
+Goodbye.

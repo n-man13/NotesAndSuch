@@ -1,0 +1,171 @@
+1. Insert item at the end of the queue. 
+2. Remove item from beginning of queue. 
+3. Get item from beginning of queue. 
+4. Clear queue. 
+5. Display content of queue. 
+6. Exit program. 
+
+Make your menu selection now: 5
+This queue is empty.
+
+1. Insert item at the end of the queue. 
+2. Remove item from beginning of queue. 
+3. Get item from beginning of queue. 
+4. Clear queue. 
+5. Display content of queue. 
+6. Exit program. 
+
+Make your menu selection now: 4
+Error: Queue is already empty.
+
+1. Insert item at the end of the queue. 
+2. Remove item from beginning of queue. 
+3. Get item from beginning of queue. 
+4. Clear queue. 
+5. Display content of queue. 
+6. Exit program. 
+
+Make your menu selection now: 3
+Error: Queue is empty.
+
+1. Insert item at the end of the queue. 
+2. Remove item from beginning of queue. 
+3. Get item from beginning of queue. 
+4. Clear queue. 
+5. Display content of queue. 
+6. Exit program. 
+
+Make your menu selection now: 1
+You are now inserting an item into the end of the queue.
+	 Enter item : item0
+Item item0 inserted in the queue.
+
+1. Insert item at the end of the queue. 
+2. Remove item from beginning of queue. 
+3. Get item from beginning of queue. 
+4. Clear queue. 
+5. Display content of queue. 
+6. Exit program. 
+
+Make your menu selection now: 1
+You are now inserting an item into the end of the queue.
+	 Enter item : item1
+Item item1 inserted in the queue.
+
+1. Insert item at the end of the queue. 
+2. Remove item from beginning of queue. 
+3. Get item from beginning of queue. 
+4. Clear queue. 
+5. Display content of queue. 
+6. Exit program. 
+
+Make your menu selection now: 1
+You are now inserting an item into the end of the queue.
+	 Enter item : item2
+Item item2 inserted in the queue.
+
+1. Insert item at the end of the queue. 
+2. Remove item from beginning of queue. 
+3. Get item from beginning of queue. 
+4. Clear queue. 
+5. Display content of queue. 
+6. Exit program. 
+
+Make your menu selection now: 1
+You are now inserting an item into the end of the queue.
+	 Enter item : item3
+Item item3 inserted in the queue.
+
+1. Insert item at the end of the queue. 
+2. Remove item from beginning of queue. 
+3. Get item from beginning of queue. 
+4. Clear queue. 
+5. Display content of queue. 
+6. Exit program. 
+
+Make your menu selection now: 1
+You are now inserting an item into the end of the queue.
+	 Enter item : item4
+Item item4 inserted in the queue.
+
+1. Insert item at the end of the queue. 
+2. Remove item from beginning of queue. 
+3. Get item from beginning of queue. 
+4. Clear queue. 
+5. Display content of queue. 
+6. Exit program. 
+
+Make your menu selection now: 5
+The queue contains: item0 item1 item2 item3 item4 
+
+1. Insert item at the end of the queue. 
+2. Remove item from beginning of queue. 
+3. Get item from beginning of queue. 
+4. Clear queue. 
+5. Display content of queue. 
+6. Exit program. 
+
+Make your menu selection now: 2
+Item  removed from beginning of queue
+
+1. Insert item at the end of the queue. 
+2. Remove item from beginning of queue. 
+3. Get item from beginning of queue. 
+4. Clear queue. 
+5. Display content of queue. 
+6. Exit program. 
+
+Make your menu selection now: 2
+Item  removed from beginning of queue
+
+1. Insert item at the end of the queue. 
+2. Remove item from beginning of queue. 
+3. Get item from beginning of queue. 
+4. Clear queue. 
+5. Display content of queue. 
+6. Exit program. 
+
+Make your menu selection now: 5
+The queue contains: item2 item3 item4 
+
+1. Insert item at the end of the queue. 
+2. Remove item from beginning of queue. 
+3. Get item from beginning of queue. 
+4. Clear queue. 
+5. Display content of queue. 
+6. Exit program. 
+
+Make your menu selection now: 3
+item item2 has been retrieved.
+
+1. Insert item at the end of the queue. 
+2. Remove item from beginning of queue. 
+3. Get item from beginning of queue. 
+4. Clear queue. 
+5. Display content of queue. 
+6. Exit program. 
+
+Make your menu selection now: 4
+Queue has been cleared.
+
+1. Insert item at the end of the queue. 
+2. Remove item from beginning of queue. 
+3. Get item from beginning of queue. 
+4. Clear queue. 
+5. Display content of queue. 
+6. Exit program. 
+
+Make your menu selection now: 5
+This queue is empty.
+
+1. Insert item at the end of the queue. 
+2. Remove item from beginning of queue. 
+3. Get item from beginning of queue. 
+4. Clear queue. 
+5. Display content of queue. 
+6. Exit program. 
+
+Make your menu selection now: 6
+Exiting...
+
+Goodbye

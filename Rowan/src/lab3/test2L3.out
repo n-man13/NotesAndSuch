@@ -1,0 +1,63 @@
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+You are now inserting an item into the list.
+	 Enter item : 	 Enter position to insert item in : Item 0 inserted in position 0 in the list.
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+You are now inserting an item into the list.
+	 Enter item : 	 Enter position to insert item in : Item 1 inserted in position 1 in the list.
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+You are now inserting an item into the list.
+	 Enter item : 	 Enter position to insert item in : Item 2 inserted in position 2 in the list.
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+List of size 3 has the following items : [0, 1, 2]
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+Largest item 2 deleted.
+
+1. Insert item to list. 
+2. Remove item from list. 
+3. Get item from list. 
+4. Clear list. 
+5. Print size and content of list. 
+6. Delete largest item in the list. 
+7. Reverse the list. 
+8. Exit program.
+Exiting program...Good Bye
+
