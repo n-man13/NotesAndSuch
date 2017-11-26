@@ -16,7 +16,7 @@ public class OtherSorts {
 		int pivot = start;
 		int topLow = 1;
 		int topHi = 1;
-		while (topHi <= end) {
+		while (topHi <= end) { // Random edit
 			if (data[topHi] < data[pivot]) {
 				swap(data, topHi, topLow);
 				result.swaps++;
