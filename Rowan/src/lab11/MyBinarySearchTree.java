@@ -20,6 +20,19 @@ public class MyBinarySearchTree<T extends KeyedItem<KT>, KT extends Comparable<?
 	} // end insert
 
 	public T retrieve(KT searchKey) {
+		TreeNode<T> curr = root;
+		while (curr.getLeftChild() != null || curr.getRightChild() != null) {
+			if (searchKey.compareTo(curr.getItem().getKey()) < 0)
+				curr = curr.getLeftChild();
+			else if (searchKey.compareTo(curr.getItem().getKey()) > 0)
+				curr = curr.getRightChild();
+			else 
+				break;
+		}
+		if (curr.getItem().equals(searchKey))
+			return curr.getItem();
+		else
+			return null;
 		// implement iteratively
 	} // end retrieve
 
@@ -114,7 +127,13 @@ public class MyBinarySearchTree<T extends KeyedItem<KT>, KT extends Comparable<?
 	} // end deleteNode
 
 	protected T findLeftmost(TreeNode<T> tNode) {
-		// implement iteratively
+		if (tNode == null)
+			return null;
+		TreeNode<T> curr = tNode;
+		while (curr.getLeftChild() != null) {
+			curr = curr.getLeftChild();
+		}
+		return curr.getItem();
 	} // end findLeftmost
 
 	protected TreeNode<T> deleteLeftmost(TreeNode<T> tNode) {
