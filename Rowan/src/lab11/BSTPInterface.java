@@ -3,7 +3,7 @@ package lab11;
 public interface BSTPInterface<T extends KeyedItem<KT>, KT extends Comparable<? super KT>> {
 
 	public int getHeight();
-	// returns the height of the tree (recursive implementation)
+	// returns the (maximum?) height of the tree (recursive implementation)
 
 	public int getSize();
 	// returns the number of nodes in the tree(recursive implementation)
