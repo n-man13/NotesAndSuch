@@ -1,5 +1,14 @@
 package lab11;
 
+/*
+ * Purpose: Data Structure and Algorithms Lab 11 Problem 2
+ * Status: Complete but untested
+ * Last update: 11/26/17
+ * Submitted:  11/28/17
+ * Comment: 
+ * @author: Nikhil Shah
+ * @version: 2017.11.26
+ */
 public class MyBinarySearchTreePlus<T extends KeyedItem<KT>, KT extends Comparable<? super KT>>
 		extends MyBinarySearchTree<T, KT> implements BSTPInterface<T, KT> {
 
