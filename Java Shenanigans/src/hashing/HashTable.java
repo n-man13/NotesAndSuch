@@ -1,16 +1,17 @@
-package lab12;
+package hashing;
+
 
 //********************************************************
 //Hash table implementation.
 //Assumption: A table contains unique items(at most one 
-//          item with a given search key at any time)
+//        item with a given search key at any time)
 //*********************************************************
 
-public class HashTableGenerics<K, V> implements HashTableInterface<K, V> {
+public class HashTable<K, V> {
 	private ChainNode[] table; // hash table
 	private int size = 0; // size of ADT table
 
-	public HashTableGenerics() {
+	public HashTable() {
 		table = new ChainNode[3];
 	} // end default constructor
 
