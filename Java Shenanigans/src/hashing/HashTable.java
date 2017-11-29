@@ -32,14 +32,19 @@ public class HashTable<K extends Hashable, V> {
 	 * false; returns true if the key already has an associated value in HashTable
 	 */
 	public boolean tableInsert(K key, V value) {
-		ChainNode<K,V> node = table[hashIndex(key)];
-		while (node.getNext() != null) {
-			if (node.getNext().getKey().equals(key)) {
-				node.setNext(new ChainNode<K,V>(key, value,node.getNext().getNext()));
-				return true;
-			}
+		int hashIndex = hashIndex(key);
+		ChainNode<K,V> node = table[hashIndex];
+		if (node == null) {
+			table[hashIndex] = new ChainNode<>(key, value, null);
+			return true;
+		}			
+		while(node.getNext() != null && !node.getKey().equals(key)) {
+			if (node.getKey().equals(key))
+				return false;
+			node = node.getNext();
 		}
-		return false;
+		node.setNext(new ChainNode<K,V>(key, value, node.getNext()));
+		return true;
 	}
 
 	/*

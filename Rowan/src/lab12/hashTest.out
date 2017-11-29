@@ -1,0 +1,171 @@
+Welcome to the Hash Table Program!
+Today we are going to use Strings as the key and Integers as values.
+
+Menu:
+1. Insert a symbol key with an associated value in the table.
+2. Delete a symbol from the table.
+3. Retrieve and display the value associated with a symbol key in the table.
+4. Display the hash value of a symbol key
+5. Exit the program.
+Please select from this menu: 
+Inserting into the table: 
+
+Please enter the key you would like to insert:
+Please enter the value you would like:
+Now inserting (TOP,34)
+Item has been inserted.
+
+Menu:
+1. Insert a symbol key with an associated value in the table.
+2. Delete a symbol from the table.
+3. Retrieve and display the value associated with a symbol key in the table.
+4. Display the hash value of a symbol key
+5. Exit the program.
+Please select from this menu: 
+Inserting into the table: 
+
+Please enter the key you would like to insert:
+Please enter the value you would like:
+Now inserting (POT,32)
+Item has been inserted.
+
+Menu:
+1. Insert a symbol key with an associated value in the table.
+2. Delete a symbol from the table.
+3. Retrieve and display the value associated with a symbol key in the table.
+4. Display the hash value of a symbol key
+5. Exit the program.
+Please select from this menu: 
+Inserting into the table: 
+
+Please enter the key you would like to insert:
+Please enter the value you would like:
+Now inserting (POW,109)
+Item has been inserted.
+
+Menu:
+1. Insert a symbol key with an associated value in the table.
+2. Delete a symbol from the table.
+3. Retrieve and display the value associated with a symbol key in the table.
+4. Display the hash value of a symbol key
+5. Exit the program.
+Please select from this menu: 
+Inserting into the table: 
+
+Please enter the key you would like to insert:
+Please enter the value you would like:
+Now inserting (POZ,54)
+Item has been inserted.
+
+Menu:
+1. Insert a symbol key with an associated value in the table.
+2. Delete a symbol from the table.
+3. Retrieve and display the value associated with a symbol key in the table.
+4. Display the hash value of a symbol key
+5. Exit the program.
+Please select from this menu: 
+Printing full table:
+(TOP,34), (POT,32), (POW,109), (POZ,54)
+
+Menu:
+1. Insert a symbol key with an associated value in the table.
+2. Delete a symbol from the table.
+3. Retrieve and display the value associated with a symbol key in the table.
+4. Display the hash value of a symbol key
+5. Exit the program.
+Please select from this menu: 
+Inserting into the table: 
+
+Please enter the key you would like to insert:
+Please enter the value you would like:
+Now inserting (A,22)
+Item has been inserted.
+
+Menu:
+1. Insert a symbol key with an associated value in the table.
+2. Delete a symbol from the table.
+3. Retrieve and display the value associated with a symbol key in the table.
+4. Display the hash value of a symbol key
+5. Exit the program.
+Please select from this menu: 
+Inserting into the table: 
+
+Please enter the key you would like to insert:
+Please enter the value you would like:
+Now inserting (D,23)
+Item has been inserted.
+
+Menu:
+1. Insert a symbol key with an associated value in the table.
+2. Delete a symbol from the table.
+3. Retrieve and display the value associated with a symbol key in the table.
+4. Display the hash value of a symbol key
+5. Exit the program.
+Please select from this menu: 
+Inserting into the table: 
+
+Please enter the key you would like to insert:
+Please enter the value you would like:
+Now inserting (G,44)
+Item has been inserted.
+
+Menu:
+1. Insert a symbol key with an associated value in the table.
+2. Delete a symbol from the table.
+3. Retrieve and display the value associated with a symbol key in the table.
+4. Display the hash value of a symbol key
+5. Exit the program.
+Please select from this menu: 
+Inserting into the table: 
+
+Please enter the key you would like to insert:
+Please enter the value you would like:
+Now inserting (K,432)
+Item has been inserted.
+
+Menu:
+1. Insert a symbol key with an associated value in the table.
+2. Delete a symbol from the table.
+3. Retrieve and display the value associated with a symbol key in the table.
+4. Display the hash value of a symbol key
+5. Exit the program.
+Please select from this menu: 
+Inserting into the table: 
+
+Please enter the key you would like to insert:
+Please enter the value you would like:
+Now inserting (O,223)
+Item has been inserted.
+
+Menu:
+1. Insert a symbol key with an associated value in the table.
+2. Delete a symbol from the table.
+3. Retrieve and display the value associated with a symbol key in the table.
+4. Display the hash value of a symbol key
+5. Exit the program.
+Please select from this menu: 
+Inserting into the table: 
+
+Please enter the key you would like to insert:
+Please enter the value you would like:
+Now inserting (S,12)
+Item has been inserted.
+
+Menu:
+1. Insert a symbol key with an associated value in the table.
+2. Delete a symbol from the table.
+3. Retrieve and display the value associated with a symbol key in the table.
+4. Display the hash value of a symbol key
+5. Exit the program.
+Please select from this menu: 
+Printing full table:
+(TOP,34), (POT,32), (POW,109), (POZ,54), (O,223), (A,22), (D,23), (G,44), (S,12), (K,432)
+
+Menu:
+1. Insert a symbol key with an associated value in the table.
+2. Delete a symbol from the table.
+3. Retrieve and display the value associated with a symbol key in the table.
+4. Display the hash value of a symbol key
+5. Exit the program.
+Please select from this menu: 
+Goodbye!
