@@ -1,5 +1,14 @@
 package lab12;
 
+/*-
+ * Purpose: Data Structure and Algorithms Lab 12 Problem 1
+ * Status: Complete and thoroughly tested/Incomplete/ Barely started (choose only one!!!)
+ * Last update: 11/29/17
+ * Submitted:  11/30/17
+ * Comment: test suite and sample run attached
+ * @author: Nikhil Shah
+ * @version: 2017.11.29
+ */
 public class HashTable implements HashTableInterface<String, Integer> {
 	private ChainNode<String, Integer>[] table;
 	private int size;
@@ -21,12 +30,11 @@ public class HashTable implements HashTableInterface<String, Integer> {
 		ChainNode<String, Integer> node = findNode(key);
 		if (node.getKey().equals(key)) {
 			return false;
-			//set value to new value
+			//set value to new value -- unable to
 		}
 		else {
 			node.setNext(new ChainNode<String, Integer>(key, value, null));
 			return true;
-			//set node.next to new node with key and value
 		}
 	}
 
