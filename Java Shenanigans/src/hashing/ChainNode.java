@@ -27,4 +27,7 @@ public class ChainNode<K, V> {
 		this.next = next;
 	} // end setNext
 
+	public String toString() {
+		return "(" + key.toString() + "," + value.toString();
+	}
 } // end ChainNode
