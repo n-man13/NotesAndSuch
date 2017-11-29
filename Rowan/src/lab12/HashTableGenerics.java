@@ -41,9 +41,12 @@ public class HashTableGenerics<K, V> implements HashTableInterface<K, V> {
 		return null; // placeholder
 	}
 
-	public int hashIndex(K key) {
-		//A = 65
+	public int hash(K key) {
 		return -1; // placeholder
+	}
+	
+	private int hashIndex(K key) {
+		return hash(key) % table.length;
 	}
 
 } // end HashTable

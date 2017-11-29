@@ -16,6 +16,6 @@ public interface HashTableInterface<K, V> {
 	public V tableRetrieve(K searchKey); // returns the value associated with searchkey in HashMap or null if there is
 											// no association
 
-	public int hashIndex(K key);
+	public int hash(K key); // returns hash value using Horner's rule of key
 
 } // end HashTableInterface
