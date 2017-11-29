@@ -6,11 +6,11 @@ package lab12;
 //          item with a given search key at any time)
 //*********************************************************
 
-public class HashTable<K, V> implements HashTableInterface<K, V> {
+public class HashTableGenerics<K, V> implements HashTableInterface<K, V> {
 	private ChainNode[] table; // hash table
 	private int size = 0; // size of ADT table
 
-	public HashTable() {
+	public HashTableGenerics() {
 		table = new ChainNode[3];
 	} // end default constructor
 
