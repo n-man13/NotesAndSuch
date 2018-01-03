@@ -80,7 +80,7 @@ public class HashTable implements HashTableInterface<String, Integer> {
 	 */
 	public int hash(String key) {
 		int hash = 0;
-		;
+		
 		for (int i = 0; i < key.length(); i++) {
 			int shifted = (key.charAt(i) - 'A' + 1) << (5 * (key.length() - i - 1));
 			hash += shifted;
