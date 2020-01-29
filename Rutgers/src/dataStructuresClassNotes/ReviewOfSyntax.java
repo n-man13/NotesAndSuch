@@ -1,7 +1,7 @@
 /**
  * 
  */
-package dataStructuresNotes;
+package dataStructuresClassNotes;
 
 /**
  * @author nikis

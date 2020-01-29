@@ -1,4 +1,4 @@
-package dataStructuresNotes;
+package dataStructuresClassNotes;
 
 public class InitArray {
 
