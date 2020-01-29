@@ -15,6 +15,7 @@ public class CalculatorApp {
 				new BinaryOperation(new AddOperator(), new BinaryOperation(new PowerOperator(), sideA, 2),
 						new BinaryOperation(new PowerOperator(), sideB, 2)),
 				0.5);
+		// Square side a, square side b, add, then square root
 
 		final double sideC = pythagoreanCalculation.getResult();
 		if (Math.abs(sideC - 5) < 0.001) {
