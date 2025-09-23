@@ -1,6 +1,6 @@
-Task 1: Full Adder
-    Part 1.1: Derive the logic for a 1-bit adder
-    Truth Table:
+# Task 1: Full Adder
+## Part 1.1: Derive the logic for a 1-bit adder
+### Truth Table:
 |   CI   |   B   |   A   |  CO   |   S   |
 | ------ | ----- | ----- | ----- | ----- |
 |   0    |   0   |   0   |   0   |   0   |
@@ -12,9 +12,9 @@ Task 1: Full Adder
 |   1    |   1   |   0   |   1   |   0   |
 |   1    |   1   |   1   |   1   |   1   |
 
-Boolean Logic:
+### Boolean Logic:
 
-Carry Over Bit:
+#### Carry Over Bit:
 
 $ CO = A B \bar{CI} + A \bar{B} CI + \bar{A}B CI + A B CI $
 
@@ -26,8 +26,21 @@ $ = A CI + A B +\bar{A} B CI = A B + CI(\bar{A} B + A) $
 
 $ = A B + CI (B + A) = A B + B CI + A CI $
 
-Sum Bit:
+#### Sum Bit:
 
 $ S = A \bar{B CI} + \bar{A} B \bar{CI} + \bar{A B} CI + A B CI $
 
 $ = A \oplus B \oplus CI $
+
+
+## Part 1.2: Implement the 1-bit adder
+```Verilog
+module FullAdder(input a, input b, input ci, output s, output co);
+    /*
+    Implement a full adder using verilog
+    */
+    assign s = a ^ b ^ ci;
+    assign co = (a & b) | (b & ci) | (a & ci);
+
+endmodule
+```
