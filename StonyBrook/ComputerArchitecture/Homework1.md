@@ -12,10 +12,21 @@ Task 1: Full Adder
 |   1    |   1   |   0   |   1   |   0   |
 |   1    |   1   |   1   |   1   |   1   |
 
-Boolean Logic: 
-$$ 
-CO = AB \bar{CI} + A\bar{B}CI + \bar{A}BCI + ABCI 
-$$
-$$ 
-S = A\bar{BCI} + \bar{A}B\bar{CI} + \bar{AB}CI + ABCI 
-$$
+Boolean Logic:
+
+Carry Over Digit:
+
+$ CO = A B \bar{CI} + A \bar{B} CI + \bar{A}B CI + A B CI $
+
+$ CO = A B( CI + \bar{CI}) + \bar{A} B CI + A \bar{B} CI = A B + \bar{A} B CI + A \bar{B} CI$
+
+$ = A(\bar{B} CI + B) + \bar{A} B CI = A (CI + B) + \bar{A} B CI $
+
+$ = A CI + A B +\bar{A} B CI = A B + CI(\bar{A} B + A) $
+
+$ = A B + CI(B + A) = A B + B CI + A CI $
+
+Sum Digit:
+
+$ S = A \bar{B CI} + \bar{A} B \bar{CI} + \bar{A B} CI + A B CI $
+No Simplification possible
