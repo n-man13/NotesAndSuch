@@ -14,7 +14,7 @@ Task 1: Full Adder
 
 Boolean Logic:
 
-Carry Over Digit:
+Carry Over Bit:
 
 $ CO = A B \bar{CI} + A \bar{B} CI + \bar{A}B CI + A B CI $
 
@@ -24,9 +24,10 @@ $ = A(\bar{B} CI + B) + \bar{A} B CI = A (CI + B) + \bar{A} B CI $
 
 $ = A CI + A B +\bar{A} B CI = A B + CI(\bar{A} B + A) $
 
-$ = A B + CI(B + A) = A B + B CI + A CI $
+$ = A B + CI (B + A) = A B + B CI + A CI $
 
-Sum Digit:
+Sum Bit:
 
 $ S = A \bar{B CI} + \bar{A} B \bar{CI} + \bar{A B} CI + A B CI $
-No Simplification possible
+
+$ = A \oplus B \oplus CI $
