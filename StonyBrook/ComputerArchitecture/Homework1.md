@@ -13,4 +13,5 @@ Task 1: Full Adder
 |   1    |   1   |   1   |   1   |   1   |
 
 Boolean Logic: 
-$$AB \bar{CI} + A\bar{B}CI + \bar{A}BCI + ABCI $$
+$$ CO = AB \bar{CI} + A\bar{B}CI + \bar{A}BCI + ABCI $$
+$$ S = A\bar{BCI} + \bar{A}B\bar{CI} + \bar{AB}CI + ABCI $$
