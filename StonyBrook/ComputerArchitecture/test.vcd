@@ -1,5 +1,5 @@
 $date
-	Tue Sep 23 17:22:05 2025
+	Wed Sep 24 19:52:55 2025
 $end
 $version
 	Icarus Verilog
@@ -16,18 +16,24 @@ $var reg 1 % cin $end
 $scope module adder $end
 $var wire 1 # a $end
 $var wire 1 $ b $end
+$var wire 1 & bar $end
+$var wire 1 ' baz $end
 $var wire 1 % ci $end
 $var wire 1 " co $end
+$var wire 1 ( foo $end
+$var wire 1 ) quux $end
 $var wire 1 ! s $end
-$upscope $end
-$upscope $end
-$scope module test $end
-$scope module adder $end
+$var wire 1 * temp $end
 $upscope $end
 $upscope $end
 $enddefinitions $end
 #0
 $dumpvars
+0*
+0)
+0(
+0'
+0&
 0%
 0$
 0#
@@ -38,26 +44,38 @@ $end
 1!
 1%
 #20
+1*
 0%
 1$
 #30
 1"
+1)
 0!
+1&
 1%
 #40
 0"
+0)
 1!
+0&
 0%
 0$
 1#
 #50
 1"
 0!
+1'
 1%
 #60
+1)
+0'
+0*
+1(
 0%
 1$
 #70
 1!
+1&
+1'
 1%
 #80
