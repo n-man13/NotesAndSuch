@@ -62,3 +62,8 @@ module FullAdder(input a, input b, input ci, output s, output co);
 
 endmodule
 ```
+
+## Part 1.3: Using the 1bit adder, implement a 4 bit adder
+```Verilog
+
+```
