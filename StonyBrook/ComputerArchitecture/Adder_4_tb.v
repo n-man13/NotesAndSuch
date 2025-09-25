@@ -1,7 +1,7 @@
 module Adder_4_tb;
     reg [3:0] a;
     reg [3:0] b;
-    reg [4:0] s;
+    wire [4:0] s;
     integer i;
 
     FourBitAdder four(a, b, s);
