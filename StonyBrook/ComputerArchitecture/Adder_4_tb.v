@@ -2,23 +2,23 @@ module Adder_4_tb;
     reg [3:0] a;
     reg [3:0] b;
     wire [4:0] s;
-    integer i;
+    integer i, j;
 
     FourBitAdder four(a, b, s);
 
-    /* initial begin
+    initial begin
         a = 4'b0000;
         b = 4'b0000;
         for (i = 0; i < 16; i = i + 1) begin
             a = i;
-            for (integer j = 0; j < 16; j = j + 1) begin
+            for (j = 0; j < 16; j = j + 1) begin
                 b = j;
             end
-            #10
+            #10;
         end
-    end */
+    end 
 
-    initial begin
+    /* initial begin
         a = 4'b0000; b = 4'b0000;
         #10;
         a = 4'b0000; b = 4'b0001;
@@ -30,7 +30,7 @@ module Adder_4_tb;
         a = 4'b0001; b = 4'b1111;
         #10;
         $finish;
-    end
+    end */
 
     initial begin
         $dumpfile("test_four.vcd");
