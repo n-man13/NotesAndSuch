@@ -43,8 +43,8 @@ module test;
 
 
 
-    FullAdder adder(a,b,cin,s,co);
-    // FourBitAdder four(one,two,sum);
+    FullAdder adder(a, b, cin, s, co);
+    // FourBitAdder four(one, two, sum);
 
     initial begin
         
