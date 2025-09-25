@@ -9,11 +9,8 @@ module Adder_4_tb;
     initial begin
         a = 4'b0000;
         b = 4'b0000;
-        for (i = 0; i < 16; i = i + 1) begin
-            a = i;
-            for (j = 0; j < 16; j = j + 1) begin
-                b = j;
-            end
+        for (i = 0; i < 256; i = i + 1) begin
+            {a, b} = i;
             #10;
         end
     end 
