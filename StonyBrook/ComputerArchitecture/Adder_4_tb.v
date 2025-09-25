@@ -20,16 +20,16 @@ module Adder_4_tb;
 
     initial begin
         a = 4'b0000; b = 4'b0000;
-        #10
+        #10;
         a = 4'b0000; b = 4'b0001;
-        #10
+        #10;
         a = 4'b0000; b = 4'b1111;
-        #10
+        #10;
         a = 4'b1111; b = 4'b1111;
-        #10
+        #10;
         a = 4'b0001; b = 4'b1111;
-        #10
-        $finish
+        #10;
+        $finish;
     end
 
     initial begin
