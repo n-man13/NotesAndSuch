@@ -35,48 +35,47 @@ module FourBitAdder(input [3:0] a, input [3:0] b, output [4:0] s);
 endmodule
 
 module test;
-reg a,b,cin;
-// reg [3:0] one,two;
-// reg [4:0] sum;
-wire s,co;
-integer i;
+    reg a,b,cin;
+    // reg [3:0] one,two;
+    // reg [4:0] sum;
+    wire s,co;
+    integer i;
 
 
 
-FullAdder adder(a,b,cin,s,co);
-// FourBitAdder four(one,two,sum);
+    FullAdder adder(a,b,cin,s,co);
+    // FourBitAdder four(one,two,sum);
 
-initial begin
-    
-    a = 0; b = 0; cin = 0; 
-    #10
-    a = 0; b = 0; cin = 1;
-    #10
-    a = 0; b = 1; cin = 0;
-    #10
-    a = 0; b = 1; cin = 1;
-    #10
-    a = 1; b = 0; cin = 0;
-    #10
-    a = 1; b = 0; cin = 1;
-    #10
-    a = 1; b = 1; cin = 0;
-    #10
-    a = 1; b = 1; cin = 1;
-    #10 
-
-    /* for (i = 0; i < 16; i = i + 1) begin
-        {one, two} = i;
+    initial begin
+        
+        a = 0; b = 0; cin = 0; 
         #10
-    end */
+        a = 0; b = 0; cin = 1;
+        #10
+        a = 0; b = 1; cin = 0;
+        #10
+        a = 0; b = 1; cin = 1;
+        #10
+        a = 1; b = 0; cin = 0;
+        #10
+        a = 1; b = 0; cin = 1;
+        #10
+        a = 1; b = 1; cin = 0;
+        #10
+        a = 1; b = 1; cin = 1;
+        #10 
 
-    $finish();
-end
+        /* for (i = 0; i < 16; i = i + 1) begin
+            {one, two} = i;
+            #10
+        end */
 
-initial
-begin
-   $dumpfile("test.vcd");
-   $dumpvars(0,test);
-end
+        $finish();
+    end
+
+    initial begin
+        $dumpfile("test.vcd");
+        $dumpvars(0,test);
+    end
                 
 endmodule
