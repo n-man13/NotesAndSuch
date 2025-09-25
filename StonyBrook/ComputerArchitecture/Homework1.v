@@ -1,3 +1,6 @@
+// Deprecated file - replaced by rest of the files in the folder
+// still was used to test the FullAdder class
+
 module FullAdder(input a, input b, input ci, output s, output co);
     /*
     Implement a full adder using verilog
