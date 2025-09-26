@@ -62,6 +62,8 @@ module FullAdder(input a, input b, input ci, output s, output co);
 
 endmodule
 ```
+Used a testbench to test the values for each value of a, b, and ci with a #10 delay. Here is the GTKWave screenshot, and test.vcd is here if you want to use a waveform viewer.
+![One Bit Adder](./images/1BitAdder.png)
 
 ## Part 1.3: Using the 1bit adder, implement a 4 bit adder
 ```Verilog
@@ -79,6 +81,8 @@ module FourBitAdder(input [3:0] a, input [3:0] b, output [4:0] s);
 
 endmodule
 ```
+I created a testbench using a loop from 0 to 255 to assign the value to both inputs and used gtkwave to confirm that each value was correctly assigned. test_four.vcd is the filename for waveform simulation
+![Four Bit Adder](./images/4BitAdder.png)
 
 # Task 2: 7 Segment
 
