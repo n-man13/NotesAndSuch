@@ -1,3 +1,4 @@
 FullAdder.v
 FourBitAdder.v
-Homework1.v
+SevenSegment.v
+SevenSegment_tb.v

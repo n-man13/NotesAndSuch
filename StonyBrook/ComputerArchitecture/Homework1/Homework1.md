@@ -1,6 +1,7 @@
 # Task 1: Full Adder
 ## Part 1.1: Derive the logic for a 1-bit adder
 ### Truth Table:
+
 |   CI   |   B   |   A   |  CO   |   S   |
 | ------ | ----- | ----- | ----- | ----- |
 |   0    |   0   |   0   |   0   |   0   |
@@ -34,6 +35,7 @@ $ = A \oplus B \oplus CI $
 
 
 ## Part 1.2: Implement the 1-bit adder
+
 ```Verilog
 module FullAdder(input a, input b, input ci, output s, output co);
     /*
@@ -66,13 +68,14 @@ Used a testbench to test the values for each value of a, b, and ci with a #10 de
 ![One Bit Adder](./images/1BitAdder.png)
 
 ## Part 1.3: Using the 1bit adder, implement a 4 bit adder
+
 ```Verilog
 module FourBitAdder(input [3:0] a, input [3:0] b, output [4:0] s);
     /*
-    implement a 4 bit adder using full adder from before
+    implement a 4 bit adder using full adder from above
     */
     wire [2:0] c;
-    FullAdder first(a[0], b[0], 0, s[0], c[0]);
+    FullAdder first(a[0], b[0], 1'b0, s[0], c[0]);
     FullAdder second(a[1], b[1], c[0], s[1], c[1]);
     FullAdder third(a[2], b[2], c[1], s[2], c[2]);
     FullAdder fourth(a[3], b[3], c[2], s[3], s[4]);
@@ -87,6 +90,7 @@ I created a testbench using a loop from 0 to 255 to assign the value to both inp
 # Task 2: 7 Segment
 
 ## Part 2.1: Convert a binary number to 7-segment display encoding
+
 | Display |  S3  |  S2  | S1  |  S0  |   a  |  b  |  c  |  d  |  e  |  f  |  g  |
 | ------- | ---- | ---- | --- | ---- | ---- | --- | --- | --- | --- | --- | --- |
 |    0    |  0   |  0   |  0  |  0   |   0  |  0  |  0  |  0  |  0  |  0  |  1  |
@@ -107,3 +111,4 @@ I created a testbench using a loop from 0 to 255 to assign the value to both inp
 |    F    |  1   |  1   |  1  |  1   |   0  |  1  |  1  |  1  |  0  |  0  |  0  |
 
 ## Part 2.2: 7-Segment Display
+
