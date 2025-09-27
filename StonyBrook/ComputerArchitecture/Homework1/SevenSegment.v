@@ -1,12 +1,14 @@
 module SevenSegment(input [3:0] a, input [3:0] b, output [6:0] d, output overflow);
     reg [6:0] d;
     wire [4:0] s;
+    wire [3:0] lessSig;
 
     FourBitAdder add(a, b, s);
-    //overflow = s[4];
+    assign overflow = s[4];
+    assign lessSig = s[3:0];
 
-    always @(s) begin
-        case (s)
+    always @(lessSig) begin
+        case (lessSig)
             0 : d = 7'b0000001;
             1 : d = 7'b1001110;
             2 : d = 7'b0010010;

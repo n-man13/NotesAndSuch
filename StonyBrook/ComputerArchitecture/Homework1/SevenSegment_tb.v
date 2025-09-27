@@ -1,7 +1,9 @@
+`timescale 1ns/1ps
+
 module SevenSegment_tb;
     reg [3:0] a;
     reg [3:0] b;
-    reg [6:0] segment;
+    wire [6:0] segment;
     wire over;
     integer i, j;
 
@@ -9,6 +11,8 @@ module SevenSegment_tb;
 
     // same code from Adder_4_tb
     initial begin
+        $dumpfile("test_seven.vcd");
+        $dumpvars(0, SevenSegment_tb);
         a = 4'b0000;
         b = 4'b0000;
         for (i = 0; i < 256; i = i + 1) begin
@@ -16,10 +20,5 @@ module SevenSegment_tb;
             #10;
         end
     end 
-
-    initial begin
-        $dumpfile("test_seven.vcd");
-        $dumpvars(0, SevenSegment_tb);
-    end
 
 endmodule
