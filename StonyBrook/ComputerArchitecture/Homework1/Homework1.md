@@ -148,3 +148,146 @@ endmodule
 
 Used a similar testbench to the FourBitAdder, with code in SevenSegment_tb.v where each value for the less significant digits are assigned to a binary according to the truth table above. Image for simulation below.
 ![Seven Segment Output](./images/SevenSegment.png)
+
+
+# Task 3: Finite State Machine
+## Part 3.1: Design the FSM
+### (i) Draw the State Diagram
+![State Diagram](./images/StateDiagram.png)
+
+### (ii) Draw a table describing the states to binary values
+| state | binary value |
+| ----- | ------------ |
+| init  |     0000     |
+|  RA   |     0001     |
+|  RAB  |     0011     |
+|  RABC |     0111     |
+|  LA   |     1000     |
+|  LAB  |     1100     |
+|  LABC |     1110     |
+
+### (iii) How to map binary state value to outputs
+| state | binary value | Output signals |
+| ----- | ------------ | -------------- |
+| init  |     0000     |     000000     |
+|  RA   |     0001     |     001000     |
+|  RAB  |     0011     |     011000     |
+|  RABC |     0111     |     111000     |
+|  LA   |     1000     |     000100     |
+|  LAB  |     1100     |     000110     |
+|  LABC |     1110     |     000111     |
+
+## Part 3.2: Implement the FSM
+```Verilog
+module TailLight(input rst, input clk, input l, input r, 
+output reg lc, output reg lb, output reg la, 
+output reg ra, output reg rb, output reg rc);
+    
+    reg [3:0] state, nextState;
+    
+    // various states
+    parameter INIT = 4'b0000;
+    parameter RA = 4'b0001;
+    parameter RAB = 4'b0011;
+    parameter RABC = 4'b0111;
+    parameter LA = 4'b1000;
+    parameter LAB = 4'b1100;
+    parameter LABC = 4'b1110;
+
+    // handle state register update on clock cycle
+    always @ (posedge clk) begin
+        if(rst)
+            state <= INIT;
+        else
+            state <= nextState;
+    end
+
+    // next state logic
+    always @(*) begin
+        case(state)
+            INIT:   nextState = l ? LA : r ? RA : INIT;
+            RA:     nextState = RAB;
+            RAB:    nextState = RABC;
+            RABC:   nextState = l ? LA : r ? RA : INIT;
+            LA:     nextState = LAB;
+            LAB:    nextState = LABC;
+            LABC:   nextState = l ? LA : r ? RA : INIT;
+            default:nextState = INIT;
+        endcase
+    end
+
+    // Output logic
+    always @(*) begin
+        case(state)
+            INIT: begin
+                lc <= 0;
+                lb <= 0;
+                la <= 0;
+                ra <= 0;
+                rb <= 0;
+                rc <= 0;
+            end
+            RA: begin
+                lc <= 0;
+                lb <= 0;
+                la <= 0;
+                ra <= 1;
+                rb <= 0;
+                rc <= 0;
+            end
+            RAB: begin
+                lc <= 0;
+                lb <= 0;
+                la <= 0;
+                ra <= 1;
+                rb <= 1;
+                rc <= 0;
+            end
+            RABC: begin
+                lc <= 0;
+                lb <= 0;
+                la <= 0;
+                ra <= 1;
+                rb <= 1;
+                rc <= 1;
+            end
+            LA: begin
+                lc <= 0;
+                lb <= 0;
+                la <= 1;
+                ra <= 0;
+                rb <= 0;
+                rc <= 0;
+            end
+            LAB: begin
+                lc <= 0;
+                lb <= 1;
+                la <= 1;
+                ra <= 0;
+                rb <= 0;
+                rc <= 0;
+            end
+            LABC: begin
+                lc <= 1;
+                lb <= 1;
+                la <= 1;
+                ra <= 0;
+                rb <= 0;
+                rc <= 0;
+            end
+            default: begin
+                lc <= 0;
+                lb <= 0;
+                la <= 0;
+                ra <= 0;
+                rb <= 0;
+                rc <= 0;
+            end
+        endcase
+    end
+
+endmodule
+```
+I wrote a testbench that tests various cases, including reset in the middle of a cycle, both inputs being on at the same time, and if states can be consecutively swapped between each other. Below is a screenshot of GTKWave and the full code for the testbench is in TailLight_tb.v 
+I was struggling initially to get the outputs driven in the TailLight.v, so I changed all the outputs to register types. I am still looking into how to do this with wires instead.
+![Tail Light waveform](./images/TailLights.png)
