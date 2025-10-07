@@ -62,9 +62,37 @@
               "icon": "lucide-file",
               "title": "Applied ML"
             }
+          },
+          {
+            "id": "604f7f0dc093a55c",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "APG.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "APG"
+            }
+          },
+          {
+            "id": "8f3dfd7d463324f6",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Acoustic Ranging and Tracking.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Acoustic Ranging and Tracking"
+            }
           }
         ],
-        "currentTab": 3
+        "currentTab": 5
       }
     ],
     "direction": "vertical"
@@ -197,13 +225,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Applied ML.md",
+                "file": "Acoustic Ranging and Tracking.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Applied ML"
+              "title": "Outline of Acoustic Ranging and Tracking"
             }
           }
         ],
@@ -224,8 +252,11 @@
       "bases:Create new base": false
     }
   },
-  "active": "52a867526f419a09",
+  "active": "8f3dfd7d463324f6",
   "lastOpenFiles": [
+    "APG.md",
+    "Acoustic Ranging and Tracking.md",
+    "Applied ML.md",
     "MUSE.md",
     "Read a Paper.md",
     "Sensor Fusion.md",
@@ -233,7 +264,6 @@
     "Class 6.md",
     "Class 7.md",
     "Class 9.md",
-    "Applied ML.md",
     "Inertial Measurement Unit.md",
     "Gyroscope.md",
     "Accelerometer.md",
