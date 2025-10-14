@@ -97,12 +97,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "IoT in Sports Analysis.md",
+                "file": "Kalman Filter.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "IoT in Sports Analysis"
+              "title": "Kalman Filter"
             }
           }
         ],
@@ -239,13 +239,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "IoT in Sports Analysis.md",
+                "file": "Kalman Filter.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of IoT in Sports Analysis"
+              "title": "Outline of Kalman Filter"
             }
           }
         ],
@@ -268,13 +268,17 @@
   },
   "active": "65089aaebea8e436",
   "lastOpenFiles": [
-    "Class 11.md",
+    "LiftRight.md",
+    "Magnetometer.md",
+    "Class 3.md",
+    "Class 1.md",
+    "APG.md",
     "IoT in Sports Analysis.md",
+    "Class 11.md",
     "FingerIO.md",
     "LIMU-BERT.md",
     "Class 10.md",
     "Acoustic Ranging and Tracking.md",
-    "APG.md",
     "Applied ML.md",
     "MUSE.md",
     "Read a Paper.md",
@@ -287,12 +291,8 @@
     "Gyroscope.md",
     "Accelerometer.md",
     "Kalman Filter.md",
-    "Magnetometer.md",
     "Class 5.md",
     "Class 4.md",
-    "Class 3.md",
-    "Class 2.md",
-    "The Computer for the 21st Century.md",
-    "Sensors.md"
+    "Class 2.md"
   ]
 }
