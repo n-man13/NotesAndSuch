@@ -1,0 +1,6 @@
+.tag[href="#lectureNotes"]{
+	color:blue !important;
+}
+.graph-view.color-fill.tag[href="#lectureNotes"] {
+color: blue;
+}

@@ -1,0 +1,1 @@
+[[Magnetometer]] measures strength and direction of the earths magnetic field.
