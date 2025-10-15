@@ -22,6 +22,7 @@ supartha@cs.stonybrook.edu -- use [CSE540]
 Scribing 10% - 3+ pages per lecture
 
 Textbook: Computational complexity: a modern approach by Sanjeev Arora and Boaz Barak
+file:///C:/Users/nikis/Downloads/Computational+complexity_+A+mod+-+Sanjeev+Arora.pdf
 
 Supplementary Text: Computational Complexity by Christos Papadimitriou
 
