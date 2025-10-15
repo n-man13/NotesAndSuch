@@ -1,4 +1,7 @@
-module addi ( input regi [7:0], output register [7:0], input value [15:0]);
+module addi ( input regi [31:0], output register [31:0], input value [15:0]);
     // Add immediate value to register
-    assign register = regi + value[7:0];
+    // sign extend value
+    wire [31:0] sign_extended_value;
+    assign sign_extended_value = {{16{value[15]}}, value[15:0]};
+    assign register = regi + sign_extended_value;
 endmodule

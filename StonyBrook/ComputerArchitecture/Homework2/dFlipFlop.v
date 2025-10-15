@@ -1,3 +1,4 @@
+// unused, just using an array for registers
 module dFlipFlop ( input clk, input d, output reg q, output reg qbar);
     always @(posedge clk) begin
         q <= d;
