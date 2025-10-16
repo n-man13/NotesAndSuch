@@ -11,10 +11,14 @@
             "id": "f6d4e213b81b2b42",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "LIMU-BERT.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "LIMU-BERT"
             }
           }
         ]
@@ -179,6 +183,8 @@
   },
   "active": "f6d4e213b81b2b42",
   "lastOpenFiles": [
+    "Class 12.md",
+    "LIMU-BERT.md",
     "Kalman Filter.md",
     "LiftRight.md",
     "Magnetometer.md",
@@ -188,7 +194,6 @@
     "IoT in Sports Analysis.md",
     "Class 11.md",
     "FingerIO.md",
-    "LIMU-BERT.md",
     "Class 10.md",
     "Acoustic Ranging and Tracking.md",
     "Applied ML.md",
@@ -203,7 +208,6 @@
     "Gyroscope.md",
     "Accelerometer.md",
     "Class 5.md",
-    "Class 4.md",
-    "Class 2.md"
+    "Class 4.md"
   ]
 }
