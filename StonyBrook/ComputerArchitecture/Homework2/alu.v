@@ -20,5 +20,4 @@ module alu ( input [31:0] A, input [31:0] B, input [2:0] ALU_Sel, output reg [31
             default: ALU_Out = 8'b00000000;   // Default case set to zero
         endcase
     end
-    
 endmodule
