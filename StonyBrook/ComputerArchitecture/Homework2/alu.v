@@ -1,12 +1,12 @@
 module alu ( input [31:0] A, input [31:0] B, input [2:0] ALU_Sel, output reg [31:0] ALU_Out );
-    parameter ADD = 3'b000;
-    parameter MUL = 3'b001;
-    parameter AND = 3'b010;
-    parameter OR  = 3'b011;
-    parameter XOR = 3'b100;
-    parameter NOR = 3'b101;
-    parameter SLL = 3'b110;
-    parameter SRL = 3'b111;
+    parameter ADD = 3'b000; // 32
+    parameter MUL = 3'b001; // 24
+    parameter AND = 3'b010; // 36
+    parameter OR  = 3'b011; // 37
+    parameter XOR = 3'b100; // 38
+    parameter NOR = 3'b101; // 39
+    parameter SLL = 3'b110; // 0
+    parameter SRL = 3'b111; // 2
     always @(*) begin
         case (ALU_Sel)
             3'b000: ALU_Out = A + B;          // Addition
