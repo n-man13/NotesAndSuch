@@ -1,12 +1,12 @@
 module processor ( input [31:0] instruction );
     // Simple single-cycle processor
-    wire clk, write_enable;
+    wire clk, write_enable_mem, write_enable_reg;
     wire [7:0] read_reg1, read_reg2, write_reg;
     wire [31:0] alu_result, mem_address, mem_data, reg_data1, reg_data2, write_data;
     clock myClock(clk);
-    memoryFile mem( mem_address, mem_data);
-    registerFile regFile( .readReg1(read-reg1), .readReg2(read_reg2), 
-    .writeReg(write_reg), .writeData(write_data), .writeEnable(write_enable), 
+    memoryFile mem( mem_address, write_enable_mem, mem_data);
+    registerFile regFile( .readReg1(read_reg1), .readReg2(read_reg2), 
+    .writeReg(write_reg), .writeData(write_data), .writeEnable(write_enable_reg), 
     .readData1(reg_data1), .readData2(reg_data2));
 
     always @(posedge clk) begin
