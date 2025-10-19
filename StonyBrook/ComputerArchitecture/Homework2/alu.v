@@ -15,8 +15,8 @@ module alu ( input [31:0] A, input [31:0] B, input [2:0] ALU_Sel, output reg [31
             3'b011: ALU_Out = A | B;          // Bitwise OR
             3'b100: ALU_Out = A ^ B;          // Bitwise XOR
             3'b101: ALU_Out = ~(A | B);       // Bitwise NOR
-            3'b110: ALU_Out = A << 1;         // Logical left shift
-            3'b111: ALU_Out = A >> 1;         // Logical right shift
+            3'b110: ALU_Out = A << B;         // Logical left shift
+            3'b111: ALU_Out = A >> B;         // Logical right shift
             default: ALU_Out = 8'b00000000;   // Default case set to zero
         endcase
     end
