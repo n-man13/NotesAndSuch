@@ -141,9 +141,9 @@ module processor ( input [31:0] initial_pc);
             end
             2: begin
                 // J instruction
-                pc = {(pc[31:28], instruction[25:0])/4}-1;
+                pc = {pc[31:26], instruction[25:0]}-1;
             end
-            
+
             default: $finish; // do nothing
         endcase
         pc = pc + 1;
