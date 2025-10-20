@@ -139,7 +139,11 @@ module processor ( input [31:0] initial_pc);
                 write_enable_reg = 1;
                 write_enable_reg = 0;
             end
-
+            2: begin
+                // J instruction
+                pc = {(pc[31:28], instruction[25:0])/4}-1;
+            end
+            
             default: $finish; // do nothing
         endcase
         pc = pc + 1;
