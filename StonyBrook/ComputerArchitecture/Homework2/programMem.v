@@ -1,4 +1,4 @@
-module programMem ( input reg [31:0] pc, output reg [31:0] instruction);
+module programMem ( input [31:0] pc, output reg [31:0] instruction);
     reg [31:0] instructions [31:0];
 
 

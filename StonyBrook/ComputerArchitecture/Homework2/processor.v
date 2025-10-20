@@ -2,7 +2,7 @@ module processor ( input [31:0] initial_pc);
     // Simple single-cycle processor
     reg clk, write_enable_mem, write_enable_reg;
     reg [5:0] read_reg1, read_reg2, write_reg;
-    reg [31:0] alu_result, mem_address, mem_data, reg_data1, reg_data2, write_data, read_data;
+    reg [31:0] mem_address, mem_data, reg_data1, reg_data2, write_data, read_data;
 
     clock myClock(clk);
 
@@ -12,21 +12,21 @@ module processor ( input [31:0] initial_pc);
     
     memoryFile mem( mem_address, write_enable_mem, mem_data, read_data);
     
-    registerFile regFile( .readReg1(read_reg1), .readReg2(read_reg2), 
-    .writeReg(write_reg), .writeData(write_data), .writeEnable(write_enable_reg), 
-    .readData1(reg_data1), .readData2(reg_data2));
+    registerFile regFile( .readReg1(read_reg1), .readReg2(read_reg2), .writeReg(write_reg), .writeData(write_data), .writeEnable(write_enable_reg), .readData1(reg_data1), .readData2(reg_data2));
 
     reg [5:0] opcode;
     reg [5:0] funct;
     reg [4:0] rs, rt, rd, base;
     reg [15:0] immediate;
     wire [2:0] ALU_Sel;
-    wire [31:0] ANDI_in, ADDI_in, ADDI_out, ORI_in, a, b;
+    wire [15:0] immediate_wire;
+    wire [31:0] ANDI_in, ADDI_in, ADDI_out, ORI_in, a, b, ALU_Out, ANDI_out, ORI_out;
 
-    alu myALU (.A(a), .B(b), .ALU_Sel(ALU_Sel), .ALU_Out(write_data)); // TODO: cant use reg as variable, must be wires
-    andi myANDI (.reg_in(ANDI_in), .reg_out(write_data), .immediate(immediate));
-    addi myADDI (.reg_in(ADDI_in), .reg_out(ADDI_out), .immediate(immediate));
-    ori myORI (.reg_in(ORI_in), .reg_out(write_data), .immediate(immediate));
+    alu myALU (.A(a), .B(b), .ALU_Sel(ALU_Sel), .ALU_Out(ALU_Out)); // TODO: cant use reg as variable, must be wires
+    andi myANDI (.reg_in(ANDI_in), .reg_out(ANDI_out), .immediate(immediate_wire));
+    addi myADDI (.reg_in(ADDI_in), .reg_out(ADDI_out), .immediate(immediate_wire));
+    ori myORI (.reg_in(ORI_in), .reg_out(ORI_out), .immediate(immediate_wire));
+    assign immediate_wire = immediate;
 
     always @(posedge clk) begin
         // Decode instruction
@@ -54,7 +54,7 @@ module processor ( input [31:0] initial_pc);
                         ALU_Sel = 3'b010;
                     end
                     24: begin
-                        // MULT
+                        // MUL
                         ALU_Sel = 3'b001;
                     end
                     37: begin
@@ -74,6 +74,7 @@ module processor ( input [31:0] initial_pc);
                         ALU_Sel = 3'b111;
                     end
                 endcase
+                assign write_data = ALU_Out;
                 write_enable_reg = 0;
             end
             8: begin
