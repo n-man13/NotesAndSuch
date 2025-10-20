@@ -20,8 +20,8 @@ module processor ( input [31:0] initial_pc);
     reg [5:0] funct;
     reg [4:0] rs, rt, rd, base;
     reg [15:0] immediate;
-    reg [2:0] ALU_Sel;
-    reg [31:0] ANDI_in, ADDI_in, ADDI_out, ORI_in, a, b;
+    wire [2:0] ALU_Sel;
+    wire [31:0] ANDI_in, ADDI_in, ADDI_out, ORI_in, a, b;
 
     alu myALU (.A(a), .B(b), .ALU_Sel(ALU_Sel), .ALU_Out(write_data)); // TODO: cant use reg as variable, must be wires
     andi myANDI (.reg_in(ANDI_in), .reg_out(write_data), .immediate(immediate));
