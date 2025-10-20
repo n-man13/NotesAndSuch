@@ -1,10 +1,14 @@
-module processor ( input [31:0] instruction );
+module processor ( input [31:0] initial_pc);
     // Simple single-cycle processor
     reg clk, write_enable_mem, write_enable_reg;
     wire [5:0] read_reg1, read_reg2, write_reg;
     wire [31:0] alu_result, mem_address, mem_data, reg_data1, reg_data2, write_data, read_data;
 
     clock myClock(clk);
+
+    reg [31:0] pc, instruction;
+    initial pc = initial_pc;
+    programMem prog_mem (.pc(pc), .instruction(instruction));
     
     memoryFile mem( mem_address, write_enable_mem, mem_data, read_data);
     
@@ -26,7 +30,6 @@ module processor ( input [31:0] instruction );
 
     always @(posedge clk) begin
         // Decode instruction
-        
         opcode = instruction[31:26];
         case (opcode)
             0: begin
@@ -136,5 +139,6 @@ module processor ( input [31:0] instruction );
 
             default: ; // do nothing
         endcase
+        pc = pc + 1;
     end
 endmodule
