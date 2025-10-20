@@ -26,7 +26,7 @@ module processor ( input [31:0] initial_pc);
     andi myANDI (.reg_in(ANDI_in), .reg_out(ANDI_out), .immediate(immediate_wire));
     addi myADDI (.reg_in(ADDI_in), .reg_out(ADDI_out), .immediate(immediate_wire));
     ori myORI (.reg_in(ORI_in), .reg_out(ORI_out), .immediate(immediate_wire));
-    assign immediate_wire = immediate;
+    assign immediate_wire = instruction[15:0];
 
     always @(posedge clk) begin
         // Decode instruction
@@ -81,7 +81,6 @@ module processor ( input [31:0] initial_pc);
                 // ADDI instruction
                 rs = instruction[25:21];
                 rt = instruction[20:16];
-                immediate = instruction[15:0];
                 read_reg1 = rs;
                 write_reg = rt;
                 ADDI_in = reg_data1;
@@ -94,7 +93,6 @@ module processor ( input [31:0] initial_pc);
                 // SW instruction
                 base = instruction[25:21];
                 rt = instruction[20:16];
-                immediate = instruction[15:0];
                 read_reg1 = base;
                 read_reg2 = rt;
                 // Calculate memory address
@@ -108,7 +106,6 @@ module processor ( input [31:0] initial_pc);
                 // LW instruction
                 base = instruction[25:21];
                 rt = instruction[20:16];
-                immediate = instruction[15:0];
                 read_reg1 = base;
                 // Calculate memory address
                 ADDI_in = reg_data1;
@@ -122,7 +119,6 @@ module processor ( input [31:0] initial_pc);
                 // ANDI instruction
                 rs = instruction[25:21];
                 rt = instruction[20:16];
-                immediate = instruction[15:0];
                 read_reg1 = rs;
                 ANDI_in = reg_data1;
                 write_reg = rt;
@@ -133,7 +129,6 @@ module processor ( input [31:0] initial_pc);
                 // ORI instruction
                 rs = instruction[25:21];
                 rt = instruction[20:16];
-                immediate = instruction[15:0];
                 read_reg1 = rs;
                 write_reg = rt;
                 ORI_in = reg_data1;
