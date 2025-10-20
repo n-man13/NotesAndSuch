@@ -74,7 +74,7 @@ module processor ( input [31:0] initial_pc);
                         ALU_Sel = 3'b111;
                     end
                 endcase
-                assign write_data = ALU_Out;
+                write_data = ALU_Out;
                 write_enable_reg = 0;
             end
             8: begin
