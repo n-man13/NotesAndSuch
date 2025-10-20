@@ -1,4 +1,4 @@
-module ori ( input reg_in [31:0], output reg_out [31:0], input immediate [15:0]);
+module ori ( input [31:0] reg_in , output [31:0] reg_out, input [15:0] immediate);
     // OR immediate value to register
     // sign extend immediate
     wire [31:0] sign_extended_immediate;

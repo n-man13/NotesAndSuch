@@ -1,8 +1,8 @@
 module processor ( input [31:0] initial_pc);
     // Simple single-cycle processor
     reg clk, write_enable_mem, write_enable_reg;
-    wire [5:0] read_reg1, read_reg2, write_reg;
-    wire [31:0] alu_result, mem_address, mem_data, reg_data1, reg_data2, write_data, read_data;
+    reg [5:0] read_reg1, read_reg2, write_reg;
+    reg [31:0] alu_result, mem_address, mem_data, reg_data1, reg_data2, write_data, read_data;
 
     clock myClock(clk);
 
@@ -16,14 +16,14 @@ module processor ( input [31:0] initial_pc);
     .writeReg(write_reg), .writeData(write_data), .writeEnable(write_enable_reg), 
     .readData1(reg_data1), .readData2(reg_data2));
 
-    wire [5:0] opcode;
-    wire [5:0] funct;
-    wire [4:0] rs, rt, rd, base;
-    wire [15:0] immediate;
-    wire [2:0] ALU_Sel;
-    wire [31:0] ANDI_in, ADDI_in, ADDI_out, ORI_in;
+    reg [5:0] opcode;
+    reg [5:0] funct;
+    reg [4:0] rs, rt, rd, base;
+    reg [15:0] immediate;
+    reg [2:0] ALU_Sel;
+    reg [31:0] ANDI_in, ADDI_in, ADDI_out, ORI_in, a, b;
 
-    alu myALU (.A(rs), .B(rt), .ALU_Sel(ALU_Sel), .ALU_Out(write_data));
+    alu myALU (.A(a), .B(b), .ALU_Sel(ALU_Sel), .ALU_Out(write_data));
     andi myANDI (.reg_in(ANDI_in), .reg_out(write_data), .immediate(immediate));
     addi myADDI (.reg_in(ADDI_in), .reg_out(ADDI_out), .immediate(immediate));
     ori myORI (.reg_in(ORI_in), .reg_out(write_data), .immediate(immediate));
@@ -38,6 +38,10 @@ module processor ( input [31:0] initial_pc);
                 rt = instruction[20:16];
                 rd = instruction[15:11];
                 funct = instruction[5:0];
+                read_reg1 = rs;
+                read_reg2 = rt;
+                a = reg_data1;
+                b = reg_data2;
                 write_reg = rd;
                 write_enable_reg = 1;
                 case (funct )
@@ -81,10 +85,10 @@ module processor ( input [31:0] initial_pc);
                 write_reg = rt;
                 ADDI_in = reg_data1;
                 write_enable_reg = 1;
-                ADDI_out = write_data;
+                write_data = ADDI_out;
                 write_enable_reg = 0;
             end
-            default: result = 32'b0;
+            default: ; // do nothing for now
             43: begin
                 // SW instruction
                 base = instruction[25:21];
@@ -94,7 +98,7 @@ module processor ( input [31:0] initial_pc);
                 read_reg2 = rt;
                 // Calculate memory address
                 ADDI_in = reg_data1;
-                ADDI_out = mem_address;
+                mem_address = ADDI_out;
                 write_enable_mem = 1;
                 mem_data = reg_data2;
                 write_enable_mem = 0;
@@ -107,7 +111,7 @@ module processor ( input [31:0] initial_pc);
                 read_reg1 = base;
                 // Calculate memory address
                 ADDI_in = reg_data1;
-                ADDI_out = mem_address;
+                mem_address = ADDI_out;
                 write_reg = rt;
                 write_enable_reg = 1;
                 write_data = read_data;
@@ -133,11 +137,10 @@ module processor ( input [31:0] initial_pc);
                 write_reg = rt;
                 ORI_in = reg_data1;
                 write_enable_reg = 1;
-                ORI_in = reg_data1;
                 write_enable_reg = 0;
             end
 
-            default: ; // do nothing
+            default: $finish; // do nothing
         endcase
         pc = pc + 1;
     end
