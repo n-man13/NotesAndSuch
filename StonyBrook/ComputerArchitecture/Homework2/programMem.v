@@ -1,4 +1,4 @@
-module programMem ( input [31:0] pc, output instruction);
+module programMem ( input reg [31:0] pc, output reg [31:0] instruction);
     reg [31:0] instructions [31:0];
 
 
@@ -27,8 +27,8 @@ module programMem ( input [31:0] pc, output instruction);
         instructions[18] = 32'b101011_01000_10010_0000_0000_0000_0000; // SW
         instructions[19] = 32'b000000_00000_00000_00000_00000_000000; // HALT
         
-    
-    always @(pc) begin
-        instruction = instructions[pc];
     end
+    always @(*)
+        instruction <= instructions[pc];
+    
 endmodule
