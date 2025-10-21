@@ -195,10 +195,10 @@ module processor ( input [31:0] initial_pc);
                 write_enable_reg = 0;
                 pc = {pc[31:26], instruction[25:0]} - 1;
             end
-            63: begin
+            /* 63: begin
                 // HALT instruction
                 $finish;
-            end
+            end */
 
             default: $finish; // do nothing
         endcase

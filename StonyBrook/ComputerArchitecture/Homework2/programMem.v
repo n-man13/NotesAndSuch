@@ -1,6 +1,16 @@
 module programMem ( input [31:0] pc, output reg [31:0] instruction);
     reg [31:0] instructions [31:0];
 
+    /* Test 1
+        addi $t0, $0, 4
+        addi $t1, $0, 15
+        addi $t2, $0, 100
+        addi $s1, $0, 8
+        sw $t0, 0($s1)
+        sw $t1, 8($s1)
+        sw $t2, -4($s1)
+        halt
+    */
 
     initial begin
          // Test 1
