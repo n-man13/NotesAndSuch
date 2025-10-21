@@ -11,6 +11,20 @@ module programMem ( input [31:0] pc, output [31:0] instruction);
         sw $t2, -4($s1)
         halt
     */
+    /* Test 2
+        addi $t0, $0, 8
+        addi $t1, $0, 15
+        sw $t1, 0($t0)
+        add $t2, $t1, $t0
+        sub $t3, $t1, $t0
+        mul $s1, $t2, $t3
+        addi $t0, $t0, 4
+        lw $s2, ‐4($t0)
+        sub $s2, $s1, $s2
+        sll $s2, $s1, 2
+        sw $s2, 0($t0)
+        halt
+    */
     assign instruction = instruction_reg; // why isnt this working???
 
     initial begin
@@ -41,7 +55,7 @@ module programMem ( input [31:0] pc, output [31:0] instruction);
         
     end
     always @(pc) begin
-        instruction_reg = instructions[pc];
+        instruction_reg = instructions[pc]; // this works
     end
     
 endmodule
