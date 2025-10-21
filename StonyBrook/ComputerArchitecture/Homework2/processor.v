@@ -18,14 +18,19 @@ module processor ( input [31:0] initial_pc);
     reg [5:0] funct;
     reg [4:0] rs, rt, rd, base;
     reg [15:0] immediate;
-    wire [2:0] ALU_Sel;
+    reg [2:0] ALU_Sel;
     wire [15:0] immediate_wire;
-    wire [31:0] ANDI_in, ADDI_in, ADDI_out, ORI_in, ALU_Out, ANDI_out, ORI_out;
+    reg [31:0] ANDI_in, ADDI_in, ADDI_out, ORI_in, ALU_Out, ANDI_out, ORI_out;
+    wire [31:0] ANDI_in_wire, ADDI_in_wire, ORI_in_wire;
 
     alu myALU (.A(a), .B(b), .ALU_Sel(ALU_Sel), .ALU_Out(ALU_Out)); // TODO: cant use reg as variable, must be wires
-    andi myANDI (.reg_in(ANDI_in), .reg_out(ANDI_out), .immediate(immediate_wire));
-    addi myADDI (.reg_in(ADDI_in), .reg_out(ADDI_out), .immediate(immediate_wire));
-    ori myORI (.reg_in(ORI_in), .reg_out(ORI_out), .immediate(immediate_wire));
+    andi myANDI (.reg_in(ANDI_in_wire), .reg_out(ANDI_out), .immediate(immediate_wire));
+    addi myADDI (.reg_in(ADDI_in_wire), .reg_out(ADDI_out), .immediate(immediate_wire));
+    ori myORI (.reg_in(ORI_in_wire), .reg_out(ORI_out), .immediate(immediate_wire));
+
+    assign ANDI_in_wire = ANDI_in;
+    assign ORI_in_wire = ORI_in;
+    assign ADDI_in_wire = ADDI_in;
     assign immediate_wire = instruction[15:0];
 
     always @(posedge clk) begin

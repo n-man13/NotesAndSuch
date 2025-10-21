@@ -1,6 +1,5 @@
 `timescale 1ns / 1ps
 module processor_tb;
-    reg [31:0] instruction;
 
     processor myProcessor(.initial_pc(0));
 
@@ -30,9 +29,7 @@ module processor_tb;
         halt
     */
 
-    initial begin
-
-        // Test 1
+        /* // Test 1
         instruction = 32'b001000_00000_01000_0000_0000_0000_0100; // ADDI
         #10;
         instruction = 32'b001000_00000_01001_0000_0000_0000_1111; // ADDI
@@ -48,7 +45,7 @@ module processor_tb;
         instruction = 32'b101011_10001_01010_1111_1111_1111_1100; // SW
         #10;
         instruction = 32'b000000_00000_00000_00000_00000_000000; // HALT
-        #10;
+        #10; */
 
         /* 
         // Test 2
@@ -76,7 +73,6 @@ module processor_tb;
         #10;
         instruction = 32'b000000_00000_00000_00000_00000_000000; // HALT
         #10; */
-        $finish;
-    end
+
 
 endmodule
