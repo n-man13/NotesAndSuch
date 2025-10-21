@@ -1,6 +1,6 @@
-module programMem ( input [31:0] pc, output reg [31:0] instruction);
+module programMem ( input [31:0] pc, output [31:0] instruction);
     reg [31:0] instructions [31:0];
-
+    reg [31:0] instruction_reg;
     /* Test 1
         addi $t0, $0, 4
         addi $t1, $0, 15
@@ -11,6 +11,7 @@ module programMem ( input [31:0] pc, output reg [31:0] instruction);
         sw $t2, -4($s1)
         halt
     */
+    assign instruction = instruction_reg;
 
     initial begin
          // Test 1
@@ -38,8 +39,8 @@ module programMem ( input [31:0] pc, output reg [31:0] instruction);
         instructions[19] = 32'b111111_00000_00000_00000_00000_000000; // HALT
         
     end
-    always @(*) begin
-        instruction = instructions[pc];
+    always @(pc) begin
+        instruction_reg = instructions[pc];
     end
     
 endmodule

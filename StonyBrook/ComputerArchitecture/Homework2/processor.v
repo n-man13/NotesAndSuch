@@ -19,13 +19,14 @@ module processor ( input [31:0] initial_pc);
     reg [31:0] pc, instruction;
     wire [31:0] instruction_wire;
     initial pc = initial_pc;
-    programMem prog_mem (.pc(pc), .instruction(instruction_wire));
+
+    programMem prog_mem (.pc(pc), .instruction(instruction_wire)); // instruction is not updating???
     
     memoryFile mem( mem_address, write_enable_mem, mem_data, read_data_wire);
     
     registerFile regFile( .readReg1(read_reg1), .readReg2(read_reg2), .writeReg(write_reg), .writeData(write_data), .writeEnable(write_enable_reg), .readData1(reg_data1_wire), .readData2(reg_data2_wire));
 
-    alu myALU (.A(a), .B(b), .ALU_Sel(ALU_Sel), .ALU_Out(ALU_out_wire)); // TODO: cant use reg as variable, must be wires
+    alu myALU (.A(a), .B(b), .ALU_Sel(ALU_Sel), .ALU_Out(ALU_out_wire)); 
     andi myANDI (.reg_in(ANDI_in_wire), .reg_out(ANDI_out_wire), .immediate(immediate_wire));
     addi myADDI (.reg_in(ADDI_in_wire), .reg_out(ADDI_out_wire), .immediate(immediate_wire));
     ori myORI (.reg_in(ORI_in_wire), .reg_out(ORI_out_wire), .immediate(immediate_wire));
@@ -40,7 +41,7 @@ module processor ( input [31:0] initial_pc);
     assign reg_data1_wire = reg_data1;
     assign reg_data2_wire = reg_data2;
     assign immediate_wire = instruction[15:0];
-    assign instruction_wire = instruction;
+    assign instruction_wire = instruction; // why isnt this working???
     assign read_data_wire = read_data;
 
     always @(posedge clk) begin
@@ -195,12 +196,12 @@ module processor ( input [31:0] initial_pc);
                 write_enable_reg = 0;
                 pc = {pc[31:26], instruction[25:0]} - 1;
             end
-            /* 63: begin
+            6'b111111: begin
                 // HALT instruction
                 $finish;
-            end */
+            end 
 
-            default: $finish; // do nothing
+            default:; // do nothing
         endcase
         // pc = pc + 1;
     end
