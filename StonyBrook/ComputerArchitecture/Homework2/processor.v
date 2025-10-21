@@ -41,11 +41,14 @@ module processor ( input [31:0] initial_pc);
     assign reg_data1_wire = reg_data1;
     assign reg_data2_wire = reg_data2;
     assign immediate_wire = instruction[15:0];
-    assign instruction_wire = instruction; // why isnt this working???
+    assign instruction_wire = instruction;
     assign read_data_wire = read_data;
 
     always @(posedge clk) begin
         pc = pc + 1;
+    end
+
+    always @(*) begin
         // Decode instruction
         opcode = instruction[31:26];
         case (opcode)
