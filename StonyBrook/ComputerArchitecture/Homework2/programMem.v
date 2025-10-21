@@ -29,6 +29,6 @@ module programMem ( input [31:0] pc, output reg [31:0] instruction);
         
     end
     always @(*)
-        instruction <= instructions[pc];
+        instruction = instructions[pc];
     
 endmodule

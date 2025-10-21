@@ -5,7 +5,7 @@ module registerFile ( input [4:0] readReg1, input [4:0] readReg2, input [4:0] wr
     initial begin
         // Initialize registers to 0
         for (i = 0; i < 32; i = i + 1) begin
-            registers[i] = 32'b0;
+            registers[i] <= 0;
         end
     end
 
@@ -13,8 +13,8 @@ module registerFile ( input [4:0] readReg1, input [4:0] readReg2, input [4:0] wr
         if (writeEnable) begin
             registers[writeReg] <= writeData;
         end
-        assign readData1 = registers[readReg1];
-        assign readData2 = registers[readReg2];
+        readData1 = registers[readReg1];
+        readData2 = registers[readReg2];
     end
     
 endmodule
