@@ -9,7 +9,7 @@ module processor_tb;
         #200; // Run simulation for 200 time units
         $finish;
     end
-    processor myProcessor(.initial_pc(0));
+    processor myProcessor(.initial_pc(-1));
 
     /* Test 1
         addi $t0, $0, 4

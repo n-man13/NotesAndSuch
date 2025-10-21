@@ -14,6 +14,7 @@ module programMem ( input [31:0] pc, output [31:0] instruction);
     assign instruction = instruction_reg;
 
     initial begin
+        instruction_reg = 0;
          // Test 1
         instructions[0] = 32'b001000_00000_01000_0000_0000_0000_0100; // ADDI
         instructions[1] = 32'b001000_00000_01001_0000_0000_0000_1111; // ADDI
