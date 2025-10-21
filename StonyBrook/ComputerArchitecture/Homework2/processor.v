@@ -1,10 +1,10 @@
 module processor ( input [31:0] initial_pc);
     // Simple single-cycle processor
     reg clk, write_enable_mem, write_enable_reg;
-    reg [5:0] read_reg1, read_reg2, write_reg;
-    reg [31:0] mem_address, mem_data, reg_data1, reg_data2, write_data, read_data;
+    reg [4:0] read_reg1, read_reg2, write_reg;
+    reg [31:0] mem_address, mem_data, a, b, reg_data1, reg_data2, write_data, read_data;
 
-    clock myClock(clk);
+    clock myClock(.clk(clk));
 
     reg [31:0] pc, instruction;
     initial pc = initial_pc;
@@ -20,7 +20,7 @@ module processor ( input [31:0] initial_pc);
     reg [15:0] immediate;
     wire [2:0] ALU_Sel;
     wire [15:0] immediate_wire;
-    wire [31:0] ANDI_in, ADDI_in, ADDI_out, ORI_in, a, b, ALU_Out, ANDI_out, ORI_out;
+    wire [31:0] ANDI_in, ADDI_in, ADDI_out, ORI_in, ALU_Out, ANDI_out, ORI_out;
 
     alu myALU (.A(a), .B(b), .ALU_Sel(ALU_Sel), .ALU_Out(ALU_Out)); // TODO: cant use reg as variable, must be wires
     andi myANDI (.reg_in(ANDI_in), .reg_out(ANDI_out), .immediate(immediate_wire));
@@ -73,6 +73,19 @@ module processor ( input [31:0] initial_pc);
                         // SRL
                         ALU_Sel = 3'b111;
                     end
+                    8: begin
+                        // JR
+                        pc = reg_data1 - 1;
+                    end
+                    42: begin
+                        // SLT
+                        write_enable_reg = 1;
+                        if (a < b)
+                            write_data = 32'b1;
+                        else
+                            write_data = 32'b0;
+                        write_enable_reg = 0;
+                    end
                 endcase
                 write_data = ALU_Out;
                 write_enable_reg = 0;
@@ -88,10 +101,9 @@ module processor ( input [31:0] initial_pc);
                 write_data = ADDI_out;
                 write_enable_reg = 0;
             end
-            default: ; // do nothing for now
             43: begin
                 // SW instruction
-                base = instruction[25:21];
+                rs = instruction[25:21];
                 rt = instruction[20:16];
                 read_reg1 = base;
                 read_reg2 = rt;
@@ -138,6 +150,38 @@ module processor ( input [31:0] initial_pc);
             2: begin
                 // J instruction
                 pc = {pc[31:26], instruction[25:0]}-1;
+            end
+            4: begin
+                // BEQ instruction
+                rs = instruction[25:21];
+                rt = instruction[20:16];
+                read_reg1 = rs;
+                read_reg2 = rt;
+                if (reg_data1 == reg_data2) begin
+                    pc = pc + {{14{instruction[15]}}, instruction[15:0]} - 1;
+                end
+            end
+            5: begin
+                // BNE instruction
+                rs = instruction[25:21];
+                rt = instruction[20:16];
+                read_reg1 = rs;
+                read_reg2 = rt;
+                if (reg_data1 != reg_data2) begin
+                    pc = pc + {{14{instruction[15]}}, instruction[15:0]} - 1;
+                end
+            end
+            3: begin
+                // JAL instruction
+                write_reg = 5'b11111; // $ra
+                write_enable_reg = 1;
+                write_data = pc + 1;
+                write_enable_reg = 0;
+                pc = {pc[31:26], instruction[25:0]} - 1;
+            end
+            63: begin
+                // HALT instruction
+                $finish;
             end
 
             default: $finish; // do nothing

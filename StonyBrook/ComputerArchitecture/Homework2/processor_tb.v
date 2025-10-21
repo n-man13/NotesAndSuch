@@ -2,7 +2,7 @@
 module processor_tb;
     reg [31:0] instruction;
 
-    processor myProcessor(.instruction(instruction));
+    processor myProcessor(.initial_pc(0));
 
     /* Test 1
         addi $t0, $0, 4
