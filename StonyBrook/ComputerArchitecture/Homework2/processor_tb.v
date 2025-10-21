@@ -1,12 +1,15 @@
 `timescale 1ns / 1ps
 module processor_tb;
 
+    wire clk;
     initial begin
         $dumpfile("hw2.vcd");
         $dumpvars(0, processor_tb);
+        //$stop;
         #2000; // Run simulation for 2000 time units
         $finish;
     end
+    clock myClock(.clk(clk));
     processor myProcessor(.initial_pc(0));
 
     /* Test 1

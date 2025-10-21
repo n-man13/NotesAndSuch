@@ -38,7 +38,8 @@ module programMem ( input [31:0] pc, output reg [31:0] instruction);
         instructions[19] = 32'b111111_00000_00000_00000_00000_000000; // HALT
         
     end
-    always @(*)
+    always @(*) begin
         instruction = instructions[pc];
+    end
     
 endmodule
