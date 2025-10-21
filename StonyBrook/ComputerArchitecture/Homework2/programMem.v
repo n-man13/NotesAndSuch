@@ -23,7 +23,7 @@ module programMem ( input [31:0] pc, output [31:0] instruction);
         instructions[4] = 32'b101011_10001_01000_0000_0000_0000_0000; // SW
         instructions[5] = 32'b101011_10001_01001_0000_0000_0000_1000; // SW
         instructions[6] = 32'b101011_10001_01010_1111_1111_1111_1100; // SW
-        instructions[7] = 32'b111111_00000_00000_00000_00000_000000; // HALT
+        instructions[7] = 32'b111111_00000_00000_0000_0000_0000_0000; // HALT
 
         // Test 2
         instructions[8] = 32'b001000_00000_01000_0000_0000_0000_1000; // ADDI
@@ -37,7 +37,7 @@ module programMem ( input [31:0] pc, output [31:0] instruction);
         instructions[16] = 32'b000000_10001_10010_10010_00000_100010; // SUB
         instructions[17] = 32'b000000_10001_00000_10010_00000_000000; // SLL
         instructions[18] = 32'b101011_01000_10010_0000_0000_0000_0000; // SW
-        instructions[19] = 32'b111111_00000_00000_00000_00000_000000; // HALT
+        instructions[19] = 32'b111111_00000_00000_0000_0000_0000_0000; // HALT
         
     end
     always @(pc) begin
