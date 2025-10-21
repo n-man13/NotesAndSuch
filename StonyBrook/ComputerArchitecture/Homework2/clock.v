@@ -2,6 +2,9 @@
 module clock ( output reg clk );
     initial begin
         clk = 0;
-        forever #5 clk = ~clk;
+        forever begin
+            #5;
+            clk = ~clk;
+        end
     end
 endmodule
