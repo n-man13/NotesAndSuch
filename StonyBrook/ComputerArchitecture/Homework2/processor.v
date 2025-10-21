@@ -20,7 +20,7 @@ module processor ( input [31:0] initial_pc);
     wire [31:0] instruction_wire;
     initial pc = initial_pc;
 
-    programMem prog_mem (.pc(pc), .instruction(instruction_wire)); // instruction is not updating???
+    programMem prog_mem (.pc(pc), .instruction(instruction_wire)); // instruction_wire is not updating???
     
     memoryFile mem( mem_address, write_enable_mem, mem_data, read_data_wire);
     

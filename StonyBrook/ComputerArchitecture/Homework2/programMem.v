@@ -11,7 +11,7 @@ module programMem ( input [31:0] pc, output [31:0] instruction);
         sw $t2, -4($s1)
         halt
     */
-    assign instruction = instruction_reg;
+    assign instruction = instruction_reg; // why isnt this working???
 
     initial begin
         instruction_reg = 0;
