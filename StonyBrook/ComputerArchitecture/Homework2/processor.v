@@ -11,7 +11,7 @@ module processor ( input [31:0] initial_pc);
     reg [15:0] immediate;
     reg [2:0] ALU_Sel;
     wire [15:0] immediate_wire;
-    reg [31:0] ANDI_in, ADDI_in, ADDI_out, ORI_in, ALU_out, ANDI_out, ORI_out;
+    reg [31:0] ANDI_in, ADDI_in, ORI_in;
     wire [31:0] ANDI_in_wire, ADDI_in_wire, ORI_in_wire, ANDI_out_wire, ADDI_out_wire, ORI_out_wire, ALU_out_wire, reg_data1, reg_data2, read_data_wire;
 
     clock myClock(.clk(clk));
@@ -43,6 +43,14 @@ module processor ( input [31:0] initial_pc);
     assign instruction_wire = instruction;
     assign read_data_wire = read_data;
     assign write_enable = write_enable_reg;
+
+    initial begin
+        ANDI_in = 0;
+        ORI_in = 0;
+        ADDI_in = 0;
+        write_enable_mem = 0;
+        write_enable_reg = 0;
+    end
 
     always @(posedge clk) begin
         pc = pc + 1;
@@ -107,7 +115,7 @@ module processor ( input [31:0] initial_pc);
                         write_enable_reg = 0;
                     end
                 endcase
-                write_data = ALU_out;
+                write_data = ALU_out_wire;
                 write_enable_reg = 0;
             end
             8: begin
