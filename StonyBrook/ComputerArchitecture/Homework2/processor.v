@@ -1,4 +1,4 @@
-module processor ( input [31:0] initial_pc);
+module processor ( input [63:0] initial_pc);
     // Simple single-cycle processor
     wire clk;
     reg write_enable_mem, write_enable_reg;
@@ -16,7 +16,8 @@ module processor ( input [31:0] initial_pc);
 
     clock myClock(.clk(clk));
 
-    reg [31:0] pc, instruction_reg;
+    reg [63:0] pc;
+    reg [31:0] instruction_reg;
     wire [31:0] instruction;
     initial pc = initial_pc;
 
@@ -201,7 +202,6 @@ module processor ( input [31:0] initial_pc);
             end
             6'b111111: begin
                 // HALT instruction
-                #2;
                 $finish;
             end 
 
