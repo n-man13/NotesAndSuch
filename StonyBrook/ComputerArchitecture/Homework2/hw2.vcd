@@ -8,6 +8,7 @@ $timescale
 	1ps
 $end
 $scope module processor_tb $end
+$var reg 64 ! pc [63:0] $end
 $scope module myProcessor $end
 $var wire 32 ! ADDI_in_wire [31:0] $end
 $var wire 32 " ANDI_in_wire [31:0] $end
@@ -68,10 +69,10 @@ $var reg 32 S ALU_Out [31:0] $end
 $upscope $end
 $upscope $end
 $scope module myALU $end
-$var wire 32 T A [31:0] $end
-$var wire 3 U ALU_Sel [2:0] $end
-$var wire 32 V B [31:0] $end
-$var reg 32 W ALU_Out [31:0] $end
+$var wire 32 U A [31:0] $end
+$var wire 3 V ALU_Sel [2:0] $end
+$var wire 32 W B [31:0] $end
+$var reg 32 X ALU_Out [31:0] $end
 $upscope $end
 $scope module myANDI $end
 $var wire 16 X immediate [15:0] $end
@@ -182,8 +183,8 @@ bx 7
 bx 6
 bx 5
 bx 4
-bx 3
-b110 2
+b110 3
+bx 2
 bx 1
 bx 0
 bx /
@@ -200,7 +201,7 @@ bx %
 b0 $
 bx #
 bx "
-bx !
+b0 !
 $end
 #1000
 0&
