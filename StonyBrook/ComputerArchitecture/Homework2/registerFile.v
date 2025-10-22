@@ -12,11 +12,13 @@ input [31:0] writeData, input writeEnable, output reg [31:0] readData1, output r
     end
 
     always @(*) begin
-        if (writeEnable) begin
-            registers[writeReg] <= writeData;
-        end
         readData1 = registers[readReg1];
         readData2 = registers[readReg2];
     end
+
+    always @(posedge writeEnable) begin
+        registers[writeReg] <= writeData;
+    end
+
     
 endmodule

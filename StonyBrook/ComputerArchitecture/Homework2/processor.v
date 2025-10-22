@@ -3,7 +3,7 @@ module processor ( input [31:0] initial_pc);
     wire clk;
     reg write_enable_mem, write_enable_reg;
     reg [4:0] read_reg1, read_reg2, write_reg;
-    reg [31:0] mem_address, mem_data, a, b, write_data, read_data;
+    reg [31:0] mem_address, mem_data, a, b, write_data;
 
     reg [5:0] opcode;
     reg [5:0] funct;
@@ -17,7 +17,7 @@ module processor ( input [31:0] initial_pc);
     clock myClock(.clk(clk));
 
     reg [31:0] pc;
-    reg [31:0] instruction_reg;
+    //reg [31:0] instruction_reg;
     wire [31:0] instruction;
     initial pc = initial_pc;
 
@@ -35,22 +35,8 @@ module processor ( input [31:0] initial_pc);
     assign ANDI_in_wire = ANDI_in;
     assign ORI_in_wire = ORI_in;
     assign ADDI_in_wire = ADDI_in;
-    //assign ALU_out_wire = ALU_out;
-    //assign ANDI_out_wire = ANDI_out;
-    //assign ORI_out_wire = ORI_out;
-    //assign ADDI_out_wire = ADDI_out;
     assign immediate_wire = instruction[15:0];
-    assign instruction_wire = instruction;
-    assign read_data_wire = read_data;
     assign write_enable = write_enable_reg;
-
-    initial begin
-        ANDI_in = 0;
-        ORI_in = 0;
-        ADDI_in = 0;
-        write_enable_mem = 0;
-        write_enable_reg = 0;
-    end
 
     always @(posedge clk) begin
         pc = pc + 1;
@@ -116,6 +102,7 @@ module processor ( input [31:0] initial_pc);
                     end
                 endcase
                 write_data = ALU_out_wire;
+                #1;
                 write_enable_reg = 0;
             end
             8: begin
@@ -154,7 +141,7 @@ module processor ( input [31:0] initial_pc);
                 mem_address = ADDI_out_wire;
                 write_reg = rt;
                 write_enable_reg = 1;
-                write_data = read_data;
+                write_data = read_data_wire;
                 #1;
                 write_enable_reg = 0;
             end
@@ -222,6 +209,5 @@ module processor ( input [31:0] initial_pc);
 
             default:; // do nothing
         endcase
-        // pc = pc + 1;
     end
 endmodule
