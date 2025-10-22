@@ -3,7 +3,7 @@ module processor ( input [31:0] initial_pc);
     wire clk;
     reg write_enable_mem, write_enable_reg;
     reg [4:0] read_reg1, read_reg2, write_reg;
-    reg [31:0] mem_address, mem_data, a, b, reg_data1, reg_data2, write_data, read_data;
+    reg [31:0] mem_address, mem_data, a, b, write_data, read_data;
 
     reg [5:0] opcode;
     reg [5:0] funct;
@@ -12,7 +12,7 @@ module processor ( input [31:0] initial_pc);
     reg [2:0] ALU_Sel;
     wire [15:0] immediate_wire;
     reg [31:0] ANDI_in, ADDI_in, ADDI_out, ORI_in, ALU_out, ANDI_out, ORI_out;
-    wire [31:0] ANDI_in_wire, ADDI_in_wire, ORI_in_wire, ANDI_out_wire, ADDI_out_wire, ORI_out_wire, ALU_out_wire, reg_data1_wire, reg_data2_wire, read_data_wire;
+    wire [31:0] ANDI_in_wire, ADDI_in_wire, ORI_in_wire, ANDI_out_wire, ADDI_out_wire, ORI_out_wire, ALU_out_wire, reg_data1, reg_data2, read_data_wire;
 
     clock myClock(.clk(clk));
 
@@ -25,7 +25,7 @@ module processor ( input [31:0] initial_pc);
     
     memoryFile mem( mem_address, write_enable_mem, mem_data, read_data_wire);
     
-    registerFile regFile( .readReg1(read_reg1), .readReg2(read_reg2), .writeReg(write_reg), .writeData(write_data), .writeEnable(write_enable_reg), .readData1(reg_data1_wire), .readData2(reg_data2_wire));
+    registerFile regFile( .readReg1(read_reg1), .readReg2(read_reg2), .writeReg(write_reg), .writeData(write_data), .writeEnable(write_enable_reg), .readData1(reg_data1), .readData2(reg_data2));
 
     alu myALU (.A(a), .B(b), .ALU_Sel(ALU_Sel), .ALU_Out(ALU_out_wire)); 
     andi myANDI (.reg_in(ANDI_in_wire), .reg_out(ANDI_out_wire), .immediate(immediate_wire));
@@ -35,15 +35,14 @@ module processor ( input [31:0] initial_pc);
     assign ANDI_in_wire = ANDI_in;
     assign ORI_in_wire = ORI_in;
     assign ADDI_in_wire = ADDI_in;
-    assign ALU_out_wire = ALU_out;
-    assign ANDI_out_wire = ANDI_out;
-    assign ORI_out_wire = ORI_out;
-    assign ADDI_out_wire = ADDI_out;
-    assign reg_data1_wire = reg_data1;
-    assign reg_data2_wire = reg_data2;
+    //assign ALU_out_wire = ALU_out;
+    //assign ANDI_out_wire = ANDI_out;
+    //assign ORI_out_wire = ORI_out;
+    //assign ADDI_out_wire = ADDI_out;
     assign immediate_wire = instruction[15:0];
     assign instruction_wire = instruction;
     assign read_data_wire = read_data;
+    assign write_enable = write_enable_reg;
 
     always @(posedge clk) begin
         pc = pc + 1;
@@ -119,7 +118,8 @@ module processor ( input [31:0] initial_pc);
                 write_reg = rt;
                 ADDI_in = reg_data1;
                 write_enable_reg = 1;
-                write_data = ADDI_out;
+                write_data = ADDI_out_wire;
+                #1;
                 write_enable_reg = 0;
             end
             43: begin
@@ -130,9 +130,10 @@ module processor ( input [31:0] initial_pc);
                 read_reg2 = rt;
                 // Calculate memory address
                 ADDI_in = reg_data1;
-                mem_address = ADDI_out;
+                mem_address = ADDI_out_wire;
                 write_enable_mem = 1;
                 mem_data = reg_data2;
+                #1;
                 write_enable_mem = 0;
             end
             35: begin
@@ -142,10 +143,11 @@ module processor ( input [31:0] initial_pc);
                 read_reg1 = base;
                 // Calculate memory address
                 ADDI_in = reg_data1;
-                mem_address = ADDI_out;
+                mem_address = ADDI_out_wire;
                 write_reg = rt;
                 write_enable_reg = 1;
                 write_data = read_data;
+                #1;
                 write_enable_reg = 0;
             end
             36: begin
@@ -156,6 +158,8 @@ module processor ( input [31:0] initial_pc);
                 ANDI_in = reg_data1;
                 write_reg = rt;
                 write_enable_reg = 1;
+                write_data = ANDI_out_wire;
+                #1;
                 write_enable_reg = 0;
             end
             13: begin
@@ -166,6 +170,8 @@ module processor ( input [31:0] initial_pc);
                 write_reg = rt;
                 ORI_in = reg_data1;
                 write_enable_reg = 1;
+                write_data = ORI_out_wire;
+                #1;
                 write_enable_reg = 0;
             end
             2: begin
@@ -197,6 +203,7 @@ module processor ( input [31:0] initial_pc);
                 write_reg = 5'b11111; // $ra
                 write_enable_reg = 1;
                 write_data = pc + 1;
+                #1;
                 write_enable_reg = 0;
                 pc = {pc[31:26], instruction[25:0]} - 1;
             end
