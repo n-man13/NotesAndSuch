@@ -47,7 +47,7 @@ factorial: addi $sp, $sp, ‐8
         mul $v0, $a0, $v0
         jr $ra
     */
-    assign instruction = instruction_reg; // why isnt this working???
+    assign instruction = instruction_reg;
 
     initial begin
         instruction_reg = 0;
