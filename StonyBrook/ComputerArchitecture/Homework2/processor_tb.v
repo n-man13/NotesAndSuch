@@ -2,7 +2,7 @@
 module processor_tb;
 
     wire clk;
-    wire [63:0] pc;
+    wire [31:0] pc;
     initial begin
         $dumpfile("hw2.vcd");
         $dumpvars(0, processor_tb);
