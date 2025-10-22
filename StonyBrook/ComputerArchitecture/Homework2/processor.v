@@ -16,11 +16,11 @@ module processor ( input [31:0] initial_pc);
 
     clock myClock(.clk(clk));
 
-    reg [31:0] pc, instruction;
-    wire [31:0] instruction_wire;
+    reg [31:0] pc, instruction_reg;
+    wire [31:0] instruction;
     initial pc = initial_pc;
 
-    programMem prog_mem (.pc(pc), .instruction(instruction_wire)); // instruction_wire is not updating???
+    programMem prog_mem ( .pc(pc), .instruction(instruction));
     
     memoryFile mem( mem_address, write_enable_mem, mem_data, read_data_wire);
     
@@ -201,6 +201,7 @@ module processor ( input [31:0] initial_pc);
             end
             6'b111111: begin
                 // HALT instruction
+                #2;
                 $finish;
             end 
 

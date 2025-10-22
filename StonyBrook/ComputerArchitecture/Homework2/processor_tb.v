@@ -2,6 +2,7 @@
 module processor_tb;
 
     wire clk;
+    wire [31:0] instruction;
     initial begin
         $dumpfile("hw2.vcd");
         $dumpvars(0, processor_tb);
@@ -10,6 +11,7 @@ module processor_tb;
         $finish;
     end
     processor myProcessor(.initial_pc(0));
+    //programMem prog_mem ( .pc(0), .instruction(instruction));
 
     /* Test 1
         addi $t0, $0, 4
