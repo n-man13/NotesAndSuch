@@ -47,7 +47,7 @@ Not necessary, can replace with any constant > 1/2 like $1/2 + 1/poly(n) or 1-2^
 Theorem: (Error Reduction BPP) suppose M is a PTM running in time T(n) such that
 $x \in L \leftrightarrow Pr[M(x) = 1] \geq 1/2+\epsilon$
 $x \notin L \leftrightarrow Pr[M(x) = 1] \geq 1/2+\epsilon$ 
-\forall x, Pr[M(X)=L(x)] \geq 1/2 + \epsilon
+$\forall x, Pr[M(X)=L(x)] \geq 1/2 + \epsilon$
 then there exists a PTM M' running in time $O(log(1/\delta)/\epsilon^2 T(n))$  such that $Pr[M'(x) = L(x)] \leq 1-\delta$
 Proof:
 On input x:
