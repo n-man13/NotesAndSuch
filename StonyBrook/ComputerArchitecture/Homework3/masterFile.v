@@ -427,7 +427,7 @@ module processor_tb;
 
     wire clk;
     initial begin
-        $dumpfile("hw2.vcd");
+        $dumpfile("hw3.vcd");
         $dumpvars(0, processor_tb);
         //$stop;
         #200; // Run simulation for 200 time units
