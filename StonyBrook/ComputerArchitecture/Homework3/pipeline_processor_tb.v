@@ -11,15 +11,17 @@ module pipeline_processor_tb;
     reg reset;
 
     // Instantiate the processor under test
+    wire done;
     pipelined_processor DUT(
         .clk(clk),
         .reset(reset),
-        .initial_pc(32'd0)
+        .initial_pc(20),
+        .done(done)
     );
 
     // Clock generator: 10 time unit period (toggle every 5)
     initial begin
-        clk = 0;
+        clk = 1;
         forever begin
             #5 clk = ~clk;
         end
@@ -34,10 +36,17 @@ module pipeline_processor_tb;
         reset = 1;
         #12;           // hold reset for slightly more than one clock edge
         reset = 0;
-
-        // Let the simulation run for a while so you can inspect waves
-        #1000;
+        // Let the simulation run; the testbench will finish when DUT.done is asserted
+        // Safety timeout in case done never asserts
+        #5000;
         $finish;
+    end
+
+    // Watch for done (HALT propagated to MEM/WB) and finish immediately
+    always @(posedge clk) begin
+        if (done) begin
+            #1 $finish;
+        end
     end
 
 endmodule

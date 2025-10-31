@@ -8,7 +8,8 @@
 module pipelined_processor(
     input wire clk,
     input wire reset,
-    input wire [31:0] initial_pc
+    input wire [31:0] initial_pc,
+    output wire done
 );
 
     // ------------------------------------------------------------------
@@ -46,6 +47,10 @@ module pipelined_processor(
         .next_pc_out(ifid_next_pc_out)
     );
 
+    // detect HALT as soon as instruction memory outputs it (IF stage)
+    wire halt_if = (instr_if[31:26] == 6'b111111);
+
+
     /* ------------------------------------------------------------------
      * ID stage: decode, register file read, control generation
      * ------------------------------------------------------------------
@@ -73,6 +78,8 @@ module pipelined_processor(
     wire RegDst_id;      // choose rd (R-type) vs rt (I-type) as destination
     wire Branch_id;      // branch signal (BEQ/BNE)
     wire [2:0] ALUOp_id; // ALU operation selection (width as needed)
+    // ExtOp: 0 = sign-extend (default), 1 = zero-extend (for ANDI/ORI)
+    wire ExtOp_id;
 
     // instantiate control unit
     control_unit CU(
@@ -85,7 +92,8 @@ module pipelined_processor(
         .ALUSrc(ALUSrc_id),
         .RegDst(RegDst_id),
         .Branch(Branch_id),
-        .ALUOp(ALUOp_id)
+        .ALUOp(ALUOp_id),
+        .ExtOp(ExtOp_id)
     );
 
     // Register file (reuse the existing one) - asynchronous read
@@ -107,8 +115,8 @@ module pipelined_processor(
         .readData2(reg_read2_id)
     );
 
-    // immediate ext
-    wire [31:0] imm_ext_id = {{16{id_imm[15]}}, id_imm}; // sign-extend default; adjust for ANDI/ORI
+    // immediate ext (use ExtOp from control unit: 0=sign-extend, 1=zero-extend)
+    wire [31:0] imm_ext_id = ExtOp_id ? {16'b0, id_imm} : {{16{id_imm[15]}}, id_imm};
 
     /* ID/EX pipeline register (capture decoded values + control signals)
      * Many signals will be captured here; we provide placeholders
@@ -130,6 +138,10 @@ module pipelined_processor(
     wire idex_RegDst;
     wire idex_Branch;
     wire [2:0] idex_ALUOp;
+    wire idex_Halt_out;
+
+    // indicate HALT in ID (derived from IF/ID instruction)
+    wire halt_id = (ifid_instr_out[31:26] == 6'b111111);
 
     ID_EX_reg IDEX(
         .clk(clk),
@@ -152,7 +164,8 @@ module pipelined_processor(
         .Branch_in(Branch_id),
         .ALUSrc_in(ALUSrc_id),
         .ALUOp_in(ALUOp_id),
-        // outputs
+    .Halt_in(halt_id),
+    // outputs
         .next_pc_out(idex_next_pc_out),
         .regdata1_out(idex_regdata1_out),
         .regdata2_out(idex_regdata2_out),
@@ -168,6 +181,7 @@ module pipelined_processor(
         .Branch_out(idex_Branch),
         .ALUSrc_out(idex_ALUSrc),
         .ALUOp_out(idex_ALUOp)
+        , .Halt_out(idex_Halt_out)
     );
 
     // Decide the destination register for EX stage (RegDst control)
@@ -186,10 +200,46 @@ module pipelined_processor(
     wire [31:0] alu_input_B = idex_ALUSrc ? idex_imm_out : alu_input_B_pre;
     wire [31:0] alu_result_ex;
 
-    // TODO: Instantiate forwarding unit and wire alu_input_A, alu_input_B_pre
-    // For now, wire direct: (you will replace with muxes that select forwarded values)
-    assign alu_input_A = idex_regdata1_out;
-    assign alu_input_B_pre = idex_regdata2_out;
+    // Instantiate forwarding unit and wire alu_input_A, alu_input_B_pre
+    // Forwarding selects operands from ID/EX, EX/MEM, or MEM/WB to avoid stalls
+    wire [1:0] ForwardA;
+    wire [1:0] ForwardB;
+
+    forwarding_unit FU(
+        .EX_MEM_RegWrite(exmem_RegWrite_out),
+        .EX_MEM_Rd(exmem_write_reg_out),
+        .MEM_WB_RegWrite(memwb_RegWrite_out),
+        .MEM_WB_Rd(memwb_writereg_out),
+        .ID_EX_Rs(idex_rs_out),
+        .ID_EX_Rt(idex_rt_out),
+        .ForwardA(ForwardA),
+        .ForwardB(ForwardB)
+    );
+
+    // Values to forward from MEM/WB (choose mem-read or ALU result depending on MemToReg)
+    wire [31:0] forward_from_memwb = memwb_MemToReg_out ? memwb_memread_out : memwb_aluout_out;
+
+    // Mux the forwarded values into ALU inputs
+    reg [31:0] alu_input_A_reg;
+    reg [31:0] alu_input_Bpre_reg;
+    always @(*) begin
+        // ForwardA: 00 = ID/EX.regdata1, 10 = EX/MEM.alu_result, 01 = MEM/WB
+        case (ForwardA)
+            2'b10: alu_input_A_reg = exmem_alu_result_out;
+            2'b01: alu_input_A_reg = forward_from_memwb;
+            default: alu_input_A_reg = idex_regdata1_out;
+        endcase
+
+        // ForwardB: 00 = ID/EX.regdata2, 10 = EX/MEM.alu_result, 01 = MEM/WB
+        case (ForwardB)
+            2'b10: alu_input_Bpre_reg = exmem_alu_result_out;
+            2'b01: alu_input_Bpre_reg = forward_from_memwb;
+            default: alu_input_Bpre_reg = idex_regdata2_out;
+        endcase
+    end
+
+    assign alu_input_A = alu_input_A_reg;
+    assign alu_input_B_pre = alu_input_Bpre_reg;
 
     // Use existing ALU module
     alu alu_ex(.A(alu_input_A), .B(alu_input_B), .ALU_Sel(idex_ALUOp), .ALU_Out(alu_result_ex));
@@ -202,10 +252,12 @@ module pipelined_processor(
     wire exmem_MemRead_out;
     wire exmem_MemWrite_out;
     wire exmem_MemToReg_out;
+    wire exmem_Halt_out;
 
     EX_MEM_reg EXMEM(
         .clk(clk),
         .reset(reset),
+        .Halt_in(idex_Halt_out),
         .alu_result_in(alu_result_ex),
         .write_data_in(idex_regdata2_out),
         .write_reg_in(idex_write_reg /* selected by RegDst */),
@@ -220,6 +272,7 @@ module pipelined_processor(
         .MemRead_out(exmem_MemRead_out),
         .MemWrite_out(exmem_MemWrite_out),
         .MemToReg_out(exmem_MemToReg_out)
+        , .Halt_out(exmem_Halt_out)
     );
 
     // ------------------------------------------------------------------
@@ -242,10 +295,12 @@ module pipelined_processor(
     wire [4:0] memwb_writereg_out;
     wire memwb_RegWrite_out;
     wire memwb_MemToReg_out;
+    wire memwb_Halt_out;
 
     MEM_WB_reg MEMWB(
         .clk(clk),
         .reset(reset),
+        .Halt_in(exmem_Halt_out),
         .mem_read_in(mem_read_data_mem),
         .alu_result_in(exmem_alu_result_out),
         .write_reg_in(exmem_write_reg_out),
@@ -256,6 +311,7 @@ module pipelined_processor(
         .write_reg_out(memwb_writereg_out),
         .RegWrite_out(memwb_RegWrite_out),
         .MemToReg_out(memwb_MemToReg_out)
+        , .Halt_out(memwb_Halt_out)
     );
 
     // ------------------------------------------------------------------
@@ -275,12 +331,15 @@ module pipelined_processor(
     wire stall = 1'b0; // TODO: from hazard detection unit
     wire flush_ifid = 1'b0; // TODO: assert when branch taken
 
+    // expose done when HALT reaches MEM/WB (pipeline drained / HALT at last stage)
+    assign done = memwb_Halt_out;
+
     always @(posedge clk or posedge reset) begin
         if (reset) begin
             pc <= initial_pc;
         end else begin
-            if (stall) begin
-                pc <= pc; // freeze
+            if (stall || halt_if) begin
+                pc <= pc; // freeze on hazard stall or HALT fetched
             end else if (branch_taken_ex) begin
                 pc <= branch_target_ex;
             end else begin
@@ -290,6 +349,217 @@ module pipelined_processor(
     end
 
 endmodule
+
+
+module alu ( input [31:0] A, input [31:0] B, input [3:0] ALU_Sel, output reg [31:0] ALU_Out );
+    parameter ADD = 4'b0000; // 32
+    parameter MUL = 4'b0001; // 24
+    parameter AND = 4'b0010; // 36
+    parameter OR  = 4'b0011; // 37
+    parameter XOR = 4'b0100; // 38
+    parameter NOR = 4'b0101; // 39
+    parameter SLL = 4'b0110; // 0
+    parameter SRL = 4'b0111; // 2
+    parameter SUB = 4'b1000; // 34
+    always @(*) begin
+        case (ALU_Sel)
+            4'b0000: ALU_Out = A + B;          // Addition
+            4'b0001: ALU_Out = (A * B);        // Multiplication
+            4'b0010: ALU_Out = A & B;          // Bitwise AND
+            4'b0011: ALU_Out = A | B;          // Bitwise OR
+            4'b0100: ALU_Out = A ^ B;          // Bitwise XOR
+            4'b0101: ALU_Out = ~(A | B);       // Bitwise NOR
+            4'b0110: ALU_Out = A << B[4:0];    // Logical left shift
+            4'b0111: ALU_Out = A >> B[4:0];    // Logical right shift
+            4'b1000: ALU_Out = A - B;         // Subtraction
+            4'b1001: ALU_Out = (A == B) ? 32'b1 : 32'b0; // Equality check
+            default: ALU_Out = 32'b0;        // Default case set to zero
+        endcase
+    end
+endmodule
+// Synchronous register file: async read, sync write on posedge clk
+module registerFile (
+    input  wire        clk,
+    input  wire        writeEnable,
+    input  wire [4:0]  writeReg,
+    input  wire [31:0] writeData,
+    input  wire [4:0]  readReg1,
+    input  wire [4:0]  readReg2,
+    output wire [31:0] readData1,
+    output wire [31:0] readData2
+);
+    reg [31:0] registers [0:31];
+    integer i;
+
+    initial begin
+        for (i = 0; i < 32; i = i + 1)
+            registers[i] = 32'd0;
+    end
+
+    // synchronous write on clk
+    always @(posedge clk) begin
+        if (writeEnable && (writeReg != 5'd0))
+            registers[writeReg] <= writeData;
+        registers[0] <= 32'd0; // ensure $zero stays zero
+    end
+
+    // asynchronous read
+    assign readData1 = registers[readReg1];
+    assign readData2 = registers[readReg2];
+
+endmodule
+
+
+// Simple data memory: synchronous write on clk, combinational read
+module memoryFile (
+    input  wire        clk,
+    input  wire [31:0] addr,        // byte address expected, but we use word-aligned indexing
+    input  wire        writeEnable,
+    input  wire [31:0] writeData,
+    output wire [31:0] readData
+);
+    reg [31:0] mem [0:255];
+    integer i;
+    initial begin
+        for (i=0; i<256; i=i+1) mem[i] = 32'd0;
+    end
+
+    // synchronous write
+    always @(posedge clk) begin
+        if (writeEnable)
+            mem[addr[7:0] >> 2] <= writeData; // word index: assume addr aligned
+    end
+
+    // combinational read
+    assign readData = mem[addr[7:0] >> 2];
+endmodule
+
+module programMem ( input [31:0] pc, output [31:0] instruction);
+    reg [31:0] instructions [127:0];
+    reg [31:0] instruction_reg;
+    /* Test 1
+        addi $t0, $0, 4
+        addi $t1, $0, 15
+        addi $t2, $0, 100
+        addi $s1, $0, 8
+        sw $t0, 0($s1)
+        sw $t1, 8($s1)
+        sw $t2, -4($s1)
+        halt
+    */
+    /* Test 2
+        addi $t0, $0, 8
+        addi $t1, $0, 15
+        sw $t1, 0($t0)
+        add $t2, $t1, $t0
+        sub $t3, $t1, $t0
+        mul $s1, $t2, $t3
+        addi $t0, $t0, 4
+        lw $s2, ‐4($t0)
+        sub $s2, $s1, $s2
+        sll $s2, $s1, 2
+        sw $s2, 0($t0)
+        halt
+    */
+    /* Test 3
+        addi $a0, $0, 6
+        jal factorial
+        sw $v0, 0($0)
+        halt
+factorial: addi $sp, $sp, ‐8
+        sw $a0, 4($sp)
+        sw $ra, 0($sp)
+        addi $t0, $0, 2
+        slt $t0, $a0, $t0
+        beq $t0, $0, else
+        addi $v0, $0, 1
+        addi $sp, $sp, 8
+        jr $ra
+        else: addi $a0, $a0, ‐1
+        jal factorial
+        lw $ra, 0($sp)
+        lw $a0, 4($sp)
+        addi $sp, $sp, 8
+        mul $v0, $a0, $v0
+        jr $ra
+    */
+    /*
+        addi $t0, $0, 8
+        addi $t1, $0, 15
+        sw $t1, 0($t0)
+        lw $t2, 0($t0)
+        add $t3, $t1, $t2
+        beq $t3, $t2, label
+        sub $t4, $t3, $t1
+        label: add $s0, $t4, $t3
+        halt
+    */
+    assign instruction = instruction_reg;
+
+    initial begin
+        instruction_reg = 0;
+         // Test 1
+        instructions[0] = 32'b001000_00000_01000_0000_0000_0000_0100; // ADDI
+        instructions[1] = 32'b001000_00000_01001_0000_0000_0000_1111; // ADDI
+        instructions[2] = 32'b001000_00000_01010_0000_0000_0001_0100; // ADDI
+        instructions[3] = 32'b001000_00000_10001_0000_0000_0000_1000; // ADDI
+        instructions[4] = 32'b101011_10001_01000_0000_0000_0000_0000; // SW
+        instructions[5] = 32'b101011_10001_01001_0000_0000_0000_1000; // SW
+        instructions[6] = 32'b101011_10001_01010_1111_1111_1111_1100; // SW
+        instructions[7] = 32'b111111_00000_00000_0000_0000_0000_0000; // HALT
+
+        // Test 2
+        instructions[8] = 32'b001000_00000_01000_0000_0000_0000_1000; // ADDI
+        instructions[9] = 32'b001000_00000_01001_0000_0000_0000_1111; // ADDI
+        instructions[10] = 32'b101011_01000_01001_0000_0000_0000_0000; // SW
+        instructions[11] = 32'b000000_01001_01000_01010_00000_100000; // ADD
+        instructions[12] = 32'b000000_01001_01000_01011_00000_100010; // SUB
+        instructions[13] = 32'b000000_01010_01011_10001_00000_000010; // MUL
+        instructions[14] = 32'b001000_00000_01000_0000_0000_0000_0100; // ADDI
+        instructions[15] = 32'b100011_01000_10010_1111_1111_1111_1100; // LW
+        instructions[16] = 32'b000000_10001_10010_10010_00000_100010; // SUB
+        instructions[17] = 32'b000000_10001_00000_10010_00000_000000; // SLL
+        instructions[18] = 32'b101011_01000_10010_0000_0000_0000_0000; // SW
+        instructions[19] = 32'b111111_00000_00000_0000_0000_0000_0000; // HALT
+
+        // Test 3
+        instructions[20] = 32'b001000_00000_00100_0000_0000_0000_0110; // ADDI
+        instructions[21] = 32'b000011_00000_00000_0000_0000_0001_0100; // JAL
+        instructions[22] = 32'b101011_00010_00010_0000_0000_0000_0000; // SW
+        instructions[23] = 32'b111111_00000_00000_0000_0000_0000_0000; // HALT
+        instructions[24] = 32'b001000_11101_11101_1111_1111_1111_1000; // ADDI -- Factorial function starts here
+        instructions[25] = 32'b101011_11101_00100_0000_0000_0000_0100; // SW
+        instructions[26] = 32'b101011_11101_11111_0000_0000_0000_0000; // SW
+        instructions[27] = 32'b001000_00000_01000_0000_0000_0000_0010; // ADDI
+        instructions[28] = 32'b000000_00100_01000_01000_00000_101010; // SLT
+        instructions[29] = 32'b000100_01000_00000_0000_0000_0000_0011; // BEQ
+        instructions[30] = 32'b001000_00000_00010_0000_0000_0000_0001; // ADDI
+        instructions[31] = 32'b001000_00000_00010_0000_0000_0000_0001; // ADDI
+        instructions[32] = 32'b001000_00010_11111_0000_0000_0000_1000; // ADDI
+        instructions[33] = 32'b000011_00000_00000_0000_0000_0001_0100; // JAL
+        instructions[34] = 32'b100011_11101_11111_0000_0000_0000_0000; // LW
+        instructions[35] = 32'b100011_11101_00100_0000_0000_0000_0100; // LW
+        instructions[36] = 32'b001000_11101_11101_0000_0000_0000_1000; // ADDI
+        instructions[37] = 32'b000000_00100_11111_00010_00000_000010; // MUL
+        instructions[38] = 32'b111111_00000_00000_0000_0000_0000_0000; // HALT
+
+        // Test 4
+        instructions[39] = 32'b001000_00000_01000_0000_0000_0000_1000; // ADDI
+        instructions[40] = 32'b001000_00000_01001_0000_0000_0000_1111; // ADDI
+        instructions[41] = 32'b101011_01000_01001_0000_0000_0000_0000; // SW
+        instructions[42] = 32'b100011_01000_01010_0000_0000_0000_0000; // LW
+        instructions[43] = 32'b000000_01001_01010_01011_00000_100000; // ADD
+        instructions[44] = 32'b000100_01011_01010_0000_0000_0000_0010; // BEQ
+        instructions[45] = 32'b000000_01011_01001_01100_00000_100010; // SUB
+        instructions[46] = 32'b000000_01100_01011_10000_00000_100000; // ADD
+        instructions[47] = 32'b111111_00000_00000_0000_0000_0000_0000; // HALT
+    end
+    always @(*) begin
+        instruction_reg = instructions[pc]; // this works
+    end
+    
+endmodule
+
 
 /* ------------------------------------------------------------------
  * Pipeline register modules: implement these to capture signals across
@@ -365,6 +635,7 @@ module ID_EX_reg(
     input wire clk,
     input wire reset,
     input wire stall,
+    input wire Halt_in,
     // data inputs
     input wire [31:0] next_pc_in,
     input wire [31:0] regdata1_in,
@@ -398,6 +669,7 @@ module ID_EX_reg(
     output reg Branch_out,
     output reg ALUSrc_out,
     output reg [2:0] ALUOp_out
+    , output reg Halt_out
 );
     always @(posedge clk or posedge reset) begin
         if (reset) begin
@@ -416,6 +688,7 @@ module ID_EX_reg(
             Branch_out <= 1'b0;
             ALUSrc_out <= 1'b0;
             ALUOp_out <= 3'b000;
+            Halt_out <= 1'b0;
         end else if (stall) begin
             // insert bubble: zero control signals, keep others or freeze as design requires
             RegWrite_out <= 1'b0;
@@ -427,6 +700,7 @@ module ID_EX_reg(
             ALUSrc_out <= 1'b0;
             ALUOp_out <= 3'b000;
             // Optionally freeze data fields or pass through previous values depending on hazard design
+            Halt_out <= 1'b0;
         end else begin
             next_pc_out <= next_pc_in;
             regdata1_out <= regdata1_in;
@@ -443,6 +717,7 @@ module ID_EX_reg(
             Branch_out <= Branch_in;
             ALUSrc_out <= ALUSrc_in;
             ALUOp_out <= ALUOp_in;
+            Halt_out <= Halt_in;
         end
     end
 endmodule
@@ -469,6 +744,7 @@ endmodule
 module EX_MEM_reg(
     input wire clk,
     input wire reset,
+    input wire Halt_in,
     input wire [31:0] alu_result_in,
     input wire [31:0] write_data_in,
     input wire [4:0] write_reg_in,
@@ -483,6 +759,7 @@ module EX_MEM_reg(
     output reg MemRead_out,
     output reg MemWrite_out,
     output reg MemToReg_out
+    , output reg Halt_out
 );
     always @(posedge clk or posedge reset) begin
         if (reset) begin
@@ -493,6 +770,7 @@ module EX_MEM_reg(
             MemRead_out <= 1'b0;
             MemWrite_out <= 1'b0;
             MemToReg_out <= 1'b0;
+            Halt_out <= 1'b0;
         end else begin
             alu_result_out <= alu_result_in;
             write_data_out <= write_data_in;
@@ -501,6 +779,7 @@ module EX_MEM_reg(
             MemRead_out <= MemRead_in;
             MemWrite_out <= MemWrite_in;
             MemToReg_out <= MemToReg_in;
+            Halt_out <= Halt_in;
         end
     end
 endmodule
@@ -526,6 +805,7 @@ endmodule
 module MEM_WB_reg(
     input wire clk,
     input wire reset,
+    input wire Halt_in,
     input wire [31:0] mem_read_in,
     input wire [31:0] alu_result_in,
     input wire [4:0] write_reg_in,
@@ -536,6 +816,7 @@ module MEM_WB_reg(
     output reg [4:0] write_reg_out,
     output reg RegWrite_out,
     output reg MemToReg_out
+    , output reg Halt_out
 );
     always @(posedge clk or posedge reset) begin
         if (reset) begin
@@ -544,12 +825,14 @@ module MEM_WB_reg(
             write_reg_out <= 5'b0;
             RegWrite_out <= 1'b0;
             MemToReg_out <= 1'b0;
+            Halt_out <= 1'b0;
         end else begin
             mem_read_out <= mem_read_in;
             alu_result_out <= alu_result_in;
             write_reg_out <= write_reg_in;
             RegWrite_out <= RegWrite_in;
             MemToReg_out <= MemToReg_in;
+            Halt_out <= Halt_in;
         end
     end
 endmodule
@@ -567,7 +850,8 @@ module control_unit(
     output reg ALUSrc,
     output reg RegDst,
     output reg Branch,
-    output reg [2:0] ALUOp
+    output reg [3:0] ALUOp,
+    output reg ExtOp
 );
     always @(*) begin
         // default values
@@ -578,7 +862,8 @@ module control_unit(
         ALUSrc   = 1'b0;
         RegDst   = 1'b0;
         Branch   = 1'b0;
-        ALUOp    = 3'b000; // default to ADD
+        ALUOp    = 4'b1111; // default to Invalid
+        ExtOp    = 1'b0;   // default: sign-extend
 
         case (opcode)
             6'b000000: begin // R-type
@@ -587,21 +872,23 @@ module control_unit(
                 RegDst = 1'b1;
                 // determine ALUOp by funct
                 case (funct)
-                    6'b100000: ALUOp = 3'b000; // ADD (32)
-                    6'b011000: ALUOp = 3'b001; // MUL (24)
-                    6'b100100: ALUOp = 3'b010; // AND (36)
-                    6'b100101: ALUOp = 3'b011; // OR  (37)
-                    6'b100111: ALUOp = 3'b101; // NOR (39)
-                    6'b000000: ALUOp = 3'b110; // SLL (0)
-                    6'b000010: ALUOp = 3'b111; // SRL (2)
-                    default:   ALUOp = 3'b000;
+                    6'b100000: ALUOp = 4'b0000; // ADD (32)
+                    6'b011000: ALUOp = 4'b0001; // MUL (24)
+                    6'b100100: ALUOp = 4'b0010; // AND (36)
+                    6'b100101: ALUOp = 4'b0011; // OR  (37)
+                    6'b100111: ALUOp = 4'b0101; // NOR (39)
+                    6'b000000: ALUOp = 4'b0110; // SLL (0)
+                    6'b000010: ALUOp = 4'b0111; // SRL (2)
+                    6'b100010: ALUOp = 4'b1000; // SUB (34)
+                    default:   ALUOp = 4'b1111;
                 endcase
             end
             6'b001000: begin // ADDI (8)
                 RegWrite = 1'b1;
                 ALUSrc = 1'b1;
                 RegDst = 1'b0;
-                ALUOp = 3'b000;
+                ALUOp = 4'b0000;
+                ExtOp = 1'b0; // sign-extend for ADDI
             end
             6'b100011: begin // LW (35)
                 RegWrite = 1'b1;
@@ -609,29 +896,31 @@ module control_unit(
                 MemToReg = 1'b1;
                 ALUSrc = 1'b1;
                 RegDst = 1'b0;
-                ALUOp = 3'b000;
+                ALUOp = 4'b0000;
             end
             6'b101011: begin // SW (43)
                 MemWrite = 1'b1;
                 ALUSrc = 1'b1;
-                ALUOp = 3'b000;
+                ALUOp = 4'b0000;
             end
             6'b000100: begin // BEQ (4)
                 Branch = 1'b1;
                 ALUSrc = 1'b0;
-                ALUOp = 3'b000; // compare via ALU (assume zero test)
+                ALUOp =  4`b1001; // compare via ALU (assume zero test)
             end
             6'b001100: begin // ANDI (12)
                 RegWrite = 1'b1;
                 ALUSrc = 1'b1;
                 RegDst = 1'b0;
-                ALUOp = 3'b010;
+                ALUOp = 4'b0010;
+                ExtOp = 1'b1; // zero-extend for ANDI
             end
             6'b001101: begin // ORI (13)
                 RegWrite = 1'b1;
                 ALUSrc = 1'b1;
                 RegDst = 1'b0;
-                ALUOp = 3'b011;
+                ALUOp = 4'b0011;
+                ExtOp = 1'b1; // zero-extend for ORI
             end
             default: begin
                 // keep defaults (no-op)
@@ -650,12 +939,31 @@ module forwarding_unit(
     input wire [4:0] MEM_WB_Rd,
     input wire [4:0] ID_EX_Rs,
     input wire [4:0] ID_EX_Rt,
-    output wire [1:0] ForwardA,
-    output wire [1:0] ForwardB
+    output reg [1:0] ForwardA,
+    output reg [1:0] ForwardB
 );
-    // TODO: implement forwarding logic and set ForwardA/ForwardB values
-    assign ForwardA = 2'b00;
-    assign ForwardB = 2'b00;
+    // Forwarding policy (standard):
+    // - ForwardA/B = 2'b00 : use ID/EX register value
+    // - ForwardA/B = 2'b10 : use EX/MEM.alu_result
+    // - ForwardA/B = 2'b01 : use MEM/WB (alu result or mem read depending on MemToReg)
+    always @(*) begin
+        // defaults
+        ForwardA = 2'b00;
+        ForwardB = 2'b00;
+
+        // EX hazard (highest priority)
+        if (EX_MEM_RegWrite && (EX_MEM_Rd != 5'b0) && (EX_MEM_Rd == ID_EX_Rs)) begin
+            ForwardA = 2'b10;
+        end else if (MEM_WB_RegWrite && (MEM_WB_Rd != 5'b0) && (MEM_WB_Rd == ID_EX_Rs)) begin
+            ForwardA = 2'b01;
+        end
+
+        if (EX_MEM_RegWrite && (EX_MEM_Rd != 5'b0) && (EX_MEM_Rd == ID_EX_Rt)) begin
+            ForwardB = 2'b10;
+        end else if (MEM_WB_RegWrite && (MEM_WB_Rd != 5'b0) && (MEM_WB_Rd == ID_EX_Rt)) begin
+            ForwardB = 2'b01;
+        end
+    end
 endmodule
 
 // ------------------------------------------------------------------
