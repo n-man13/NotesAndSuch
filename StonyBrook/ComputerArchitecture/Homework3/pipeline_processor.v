@@ -1026,17 +1026,15 @@ module pipeline_processor_tb;
         $dumpfile("hw_pipeline.vcd");
         $dumpvars(0, pipeline_processor_tb);
 
-        // Apply reset for a couple of cycles
         reset = 1;
-        #12;           // hold reset for slightly more than one clock edge
+        #12;           // hold reset
         reset = 0;
-        // Let the simulation run; the testbench will finish when DUT.done is asserted
-        // Safety timeout in case done never asserts
+
         #5000;
         $finish;
     end
 
-    // Watch for done (HALT propagated to MEM/WB) and finish immediately
+    // Watch for done and finish immediately
     always @(posedge clk) begin
         if (done) begin
             #1 $finish;
