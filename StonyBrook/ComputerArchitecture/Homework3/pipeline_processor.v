@@ -39,8 +39,8 @@ module pipelined_processor(
     IF_ID_reg IFID(
         .clk(clk),
         .reset(reset),
-        .stall(1'b0),         // TODO: connect to hazard unit
-        .flush(1'b0),         // TODO: assert on branch taken
+        .stall(stall),         // TODO: connect to hazard unit
+        .flush(flush_ifid),         // TODO: assert on branch taken
         .instr_in(instr_if),
         .next_pc_in(next_pc_if),
         .instr_out(ifid_instr_out),
@@ -68,8 +68,6 @@ module pipelined_processor(
     wire [4:0] id_rd     = ifid_instr_out[15:11];
     wire [15:0] id_imm   = ifid_instr_out[15:0];
 
-    // TODO: instantiate a Control unit to generate the control signals
-    // For now we make a control bus placeholder
     wire RegWrite_id;    // write enable to regfile (to be stored in ID/EX)
     wire MemRead_id;     // load
     wire MemWrite_id;    // store
@@ -77,9 +75,12 @@ module pipelined_processor(
     wire ALUSrc_id;      // ALU second operand is immediate
     wire RegDst_id;      // choose rd (R-type) vs rt (I-type) as destination
     wire Branch_id;      // branch signal (BEQ/BNE)
-    wire [2:0] ALUOp_id; // ALU operation selection (width as needed)
-    // ExtOp: 0 = sign-extend (default), 1 = zero-extend (for ANDI/ORI)
-    wire ExtOp_id;
+    wire [3:0] ALUOp_id; // ALU operation selection (4-bit to match ALU)
+    wire ExtOp_id; // ExtOp: 0 = sign-extend (default), 1 = zero-extend (for ANDI/ORI)
+    
+    // Hazard and flush control signals
+    wire stall;          // from hazard detection unit
+    wire flush_ifid;     // asserted on branch-taken
 
     // instantiate control unit
     control_unit CU(
@@ -137,7 +138,7 @@ module pipelined_processor(
     wire idex_ALUSrc;
     wire idex_RegDst;
     wire idex_Branch;
-    wire [2:0] idex_ALUOp;
+    wire [3:0] idex_ALUOp;
     wire idex_Halt_out;
 
     // indicate HALT in ID (derived from IF/ID instruction)
@@ -146,7 +147,7 @@ module pipelined_processor(
     ID_EX_reg IDEX(
         .clk(clk),
         .reset(reset),
-        .stall(1'b0), // TODO: connect hazard detection stall
+        .stall(stall), // TODO: connect hazard detection stall
         // inputs
         .next_pc_in(ifid_next_pc_out),
         .regdata1_in(reg_read1_id),
@@ -214,6 +215,15 @@ module pipelined_processor(
         .ID_EX_Rt(idex_rt_out),
         .ForwardA(ForwardA),
         .ForwardB(ForwardB)
+    );
+
+    // Hazard detection unit for load-use hazards
+    hazard_unit HZ(
+        .ID_EX_MemRead(idex_MemRead),
+        .ID_EX_Rt(idex_rt_out),
+        .IF_ID_Rs(ifid_instr_out[25:21]),
+        .IF_ID_Rt(ifid_instr_out[20:16]),
+        .stall(stall)
     );
 
     // Values to forward from MEM/WB (choose mem-read or ALU result depending on MemToReg)
@@ -455,7 +465,7 @@ module programMem ( input [31:0] pc, output [31:0] instruction);
         sub $t3, $t1, $t0
         mul $s1, $t2, $t3
         addi $t0, $t0, 4
-        lw $s2, ‐4($t0)
+    lw $s2, -4($t0)
         sub $s2, $s1, $s2
         sll $s2, $s1, 2
         sw $s2, 0($t0)
@@ -466,7 +476,7 @@ module programMem ( input [31:0] pc, output [31:0] instruction);
         jal factorial
         sw $v0, 0($0)
         halt
-factorial: addi $sp, $sp, ‐8
+factorial: addi $sp, $sp, -8
         sw $a0, 4($sp)
         sw $ra, 0($sp)
         addi $t0, $0, 2
@@ -475,7 +485,7 @@ factorial: addi $sp, $sp, ‐8
         addi $v0, $0, 1
         addi $sp, $sp, 8
         jr $ra
-        else: addi $a0, $a0, ‐1
+    else: addi $a0, $a0, -1
         jal factorial
         lw $ra, 0($sp)
         lw $a0, 4($sp)
@@ -623,7 +633,7 @@ endmodule
  * Behavior summary:
  * - On reset: clears all data and control outputs (NOP in pipeline).
  * - On stall: control signals are typically zeroed (bubble) while data fields
- *   can be held or also frozen depending on hazard design — this module
+ *   can be held or also frozen depending on hazard design - this module
  *   currently zeros control signals on stall to inject a bubble.
  * - Normal operation: copies ID inputs to outputs on the rising edge of clk.
  *
@@ -652,7 +662,7 @@ module ID_EX_reg(
     input wire RegDst_in,
     input wire Branch_in,
     input wire ALUSrc_in,
-    input wire [2:0] ALUOp_in,
+    input wire [3:0] ALUOp_in,
     // outputs
     output reg [31:0] next_pc_out,
     output reg [31:0] regdata1_out,
@@ -668,8 +678,8 @@ module ID_EX_reg(
     output reg RegDst_out,
     output reg Branch_out,
     output reg ALUSrc_out,
-    output reg [2:0] ALUOp_out
-    , output reg Halt_out
+    output reg [3:0] ALUOp_out, 
+    output reg Halt_out
 );
     always @(posedge clk or posedge reset) begin
         if (reset) begin
@@ -687,7 +697,7 @@ module ID_EX_reg(
             RegDst_out <= 1'b0;
             Branch_out <= 1'b0;
             ALUSrc_out <= 1'b0;
-            ALUOp_out <= 3'b000;
+            ALUOp_out <= 4'b0000;
             Halt_out <= 1'b0;
         end else if (stall) begin
             // insert bubble: zero control signals, keep others or freeze as design requires
@@ -698,7 +708,7 @@ module ID_EX_reg(
             RegDst_out <= 1'b0;
             Branch_out <= 1'b0;
             ALUSrc_out <= 1'b0;
-            ALUOp_out <= 3'b000;
+            ALUOp_out <= 4'b0000;
             // Optionally freeze data fields or pass through previous values depending on hazard design
             Halt_out <= 1'b0;
         end else begin
@@ -906,7 +916,7 @@ module control_unit(
             6'b000100: begin // BEQ (4)
                 Branch = 1'b1;
                 ALUSrc = 1'b0;
-                ALUOp =  4`b1001; // compare via ALU (assume zero test)
+                ALUOp =  4'b1001; // compare via ALU (assume zero test)
             end
             6'b001100: begin // ANDI (12)
                 RegWrite = 1'b1;
@@ -976,23 +986,27 @@ module hazard_unit(
     input wire [4:0] IF_ID_Rt,
     output wire stall
 );
-    // TODO: set stall = 1 when a load-use hazard is detected
-    assign stall = 1'b0;
+    // Step 1: Check if instruction in ID/EX is a load
+    wire is_load = ID_EX_MemRead;
+    
+    // Step 2: Check if load's destination register isn't $zero
+    wire valid_dest = (ID_EX_Rt != 5'b0);
+    
+    // Step 3: Check if either source register matches the load's destination
+    wire rs_match = (ID_EX_Rt == IF_ID_Rs);  // first source register match
+    wire rt_match = (ID_EX_Rt == IF_ID_Rt);  // second source register match
+    wire reg_hazard = rs_match || rt_match;   // either match is a hazard
+    
+    // Final stall condition: must be a load, valid destination, and register hazard
+    assign stall = is_load && valid_dest && reg_hazard;
+
 endmodule
-
-`timescale 1ns / 1ps
-
-// Simple testbench for the pipelined_processor skeleton
-// - toggles clock
-// - pulses reset at start
-// - instantiates pipelined_processor with initial_pc = 0
-// - creates a VCD waveform file (hw_pipeline.vcd)
 
 module pipeline_processor_tb;
     reg clk;
     reg reset;
 
-    // Instantiate the processor under test
+    
     wire done;
     pipelined_processor DUT(
         .clk(clk),
@@ -1001,7 +1015,6 @@ module pipeline_processor_tb;
         .done(done)
     );
 
-    // Clock generator: 10 time unit period (toggle every 5)
     initial begin
         clk = 1;
         forever begin
@@ -1010,7 +1023,6 @@ module pipeline_processor_tb;
     end
 
     initial begin
-        // VCD dump for waveform viewing
         $dumpfile("hw_pipeline.vcd");
         $dumpvars(0, pipeline_processor_tb);
 
