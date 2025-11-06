@@ -371,6 +371,7 @@ module alu ( input [31:0] A, input [31:0] B, input [3:0] ALU_Sel, output reg [31
     parameter SLL = 4'b0110; // 0
     parameter SRL = 4'b0111; // 2
     parameter SUB = 4'b1000; // 34
+    parameter SLT = 4'b1010; // 42
     always @(*) begin
         case (ALU_Sel)
             4'b0000: ALU_Out = A + B;          // Addition
@@ -382,6 +383,7 @@ module alu ( input [31:0] A, input [31:0] B, input [3:0] ALU_Sel, output reg [31
             4'b0110: ALU_Out = A << B[4:0];    // Logical left shift
             4'b0111: ALU_Out = A >> B[4:0];    // Logical right shift
             4'b1000: ALU_Out = A - B;         // Subtraction
+            4'b1010: ALU_Out = (A < B) ? 32'b1 : 32'b0; // SLT
             4'b1001: ALU_Out = (A == B) ? 32'b1 : 32'b0; // Equality check
             default: ALU_Out = 32'b0;        // Default case set to zero
         endcase
@@ -910,6 +912,7 @@ module control_unit(
                     6'b000000: ALUOp = 4'b0110; // SLL (0)
                     6'b000010: ALUOp = 4'b0111; // SRL (2)
                     6'b100010: ALUOp = 4'b1000; // SUB (34)
+                    6'b101010: ALUOp = 4'b1010; // SLT (42)
                     default:   ALUOp = 4'b1111;
                 endcase
             end
