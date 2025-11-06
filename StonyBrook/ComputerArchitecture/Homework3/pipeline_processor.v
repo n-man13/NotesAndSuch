@@ -493,7 +493,7 @@ factorial: addi $sp, $sp, -8
         mul $v0, $a0, $v0
         jr $ra
     */
-    /*
+    /* Test 4
         addi $t0, $0, 8
         addi $t1, $0, 15
         sw $t1, 0($t0)
@@ -502,6 +502,16 @@ factorial: addi $sp, $sp, -8
         beq $t3, $t2, label
         sub $t4, $t3, $t1
         label: add $s0, $t4, $t3
+        halt
+    */
+    /* Test 5
+        addi $t0, $0, 4
+        addi $t1, $0, 5
+        add $t2, $t0, $t1
+        sub $t3, $t2, $t1
+        and $t4, $t3, $t2
+        or $t5, $t4, $t0
+        sw $t5, 0($t0)
         halt
     */
     assign instruction = instruction_reg;
@@ -561,8 +571,18 @@ factorial: addi $sp, $sp, -8
         instructions[43] = 32'b000000_01001_01010_01011_00000_100000; // ADD
         instructions[44] = 32'b000100_01011_01010_0000_0000_0000_0010; // BEQ
         instructions[45] = 32'b000000_01011_01001_01100_00000_100010; // SUB
-        instructions[46] = 32'b000000_01100_01011_10000_00000_100000; // ADD
+        instructions[46] = 32'b000000_01100_01011_10000_00000_100000; // ADD -- label
         instructions[47] = 32'b111111_00000_00000_0000_0000_0000_0000; // HALT
+
+        // Test 5
+        instructions[48] = 32'b001000_00000_01000_0000_0000_0000_0100; // ADDI
+        instructions[49] = 32'b001000_00000_01001_0000_0000_0000_0101; // ADDI
+        instructions[50] = 32'b000000_01000_01001_01010_00000_100000; // ADD
+        instructions[51] = 32'b000000_01010_01001_01011_00000_100010; // SUB
+        instructions[52] = 32'b000000_01011_01010_01100_00000_100100; // AND
+        instructions[53] = 32'b000000_01100_01000_01101_00000_100101; // OR
+        instructions[54] = 32'b101011_01000_01101_0000_0000_0000_0000; // SW
+        instructions[55] = 32'b111111_00000_00000_0000_0000_0000_0000; // HALT
     end
     always @(*) begin
         instruction_reg = instructions[pc]; // this works
