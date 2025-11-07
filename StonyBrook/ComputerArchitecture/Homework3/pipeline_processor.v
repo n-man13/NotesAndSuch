@@ -118,6 +118,11 @@ module pipelined_processor(
 
     // immediate ext (use ExtOp from control unit: 0=sign-extend, 1=zero-extend)
     wire [31:0] imm_ext_id = ExtOp_id ? {16'b0, id_imm} : {{16{id_imm[15]}}, id_imm};
+    
+    // Shift amount extraction for SLL/SRL (bits [10:6])
+    wire is_shift_id = (id_opcode == 6'b000000) && ((id_funct == 6'b000000) || (id_funct == 6'b000010));
+    wire [31:0] shamt_ext_id = {27'b0, ifid_instr_out[10:6]};
+    wire [31:0] imm_or_shamt = is_shift_id ? shamt_ext_id : imm_ext_id;
 
     /* ID/EX pipeline register (capture decoded values + control signals)
      * Many signals will be captured here; we provide placeholders
@@ -154,6 +159,9 @@ module pipelined_processor(
     // JAL detection in ID stage and compute target (programMem uses word-indexed PC)
     wire is_jal = (id_opcode == 6'b000011);
     wire [31:0] jal_target = {6'b0, ifid_instr_out[25:0]};
+    // JR detection in ID stage (R-type with funct=001000)
+    wire is_jr = (id_opcode == 6'b000000) && (id_funct == 6'b001000);
+    wire [31:0] jr_target = reg_read1_id;
 
     ID_EX_reg IDEX(
         .clk(clk),
@@ -163,7 +171,7 @@ module pipelined_processor(
         .next_pc_in(ifid_next_pc_out),
         .regdata1_in(reg_read1_id),
         .regdata2_in(reg_read2_id),
-        .imm_in(imm_ext_id),
+        .imm_in(imm_or_shamt),
         .rs_in(id_rs),
         .rt_in(id_rt),
         .rd_in(id_rd),
@@ -214,6 +222,9 @@ module pipelined_processor(
     wire [31:0] alu_input_A;
     wire [31:0] alu_input_B_pre;
     wire [31:0] alu_input_B = idex_ALUSrc ? idex_imm_out : alu_input_B_pre;
+    // For shift instructions, ALU A should be rt (the value to shift), not rs
+    wire is_shift_ex = (idex_ALUOp == 4'b0110) || (idex_ALUOp == 4'b0111);
+    wire [31:0] alu_input_A_final = is_shift_ex ? alu_input_B_pre : alu_input_A;
     wire [31:0] alu_result_ex;
 
     // Instantiate forwarding unit and wire alu_input_A, alu_input_B_pre
@@ -267,7 +278,12 @@ module pipelined_processor(
     assign alu_input_B_pre = alu_input_Bpre_reg;
 
     // Use existing ALU module
-    alu alu_ex(.A(alu_input_A), .B(alu_input_B), .ALU_Sel(idex_ALUOp), .ALU_Out(alu_result_ex));
+    alu alu_ex(.A(alu_input_A_final), .B(alu_input_B), .ALU_Sel(idex_ALUOp), .ALU_Out(alu_result_ex));
+
+    // Branch logic in EX stage
+    wire branch_decision = (alu_result_ex == 32'b0); // BEQ: branch if ALU result is zero
+    wire branch_taken = idex_Branch & branch_decision;
+    wire [31:0] branch_target = idex_next_pc_out + idex_imm_out; // PC+1 already in next_pc, add offset
 
     // EX/MEM pipeline register
     wire [31:0] exmem_alu_result_out;
@@ -358,12 +374,12 @@ module pipelined_processor(
     // ------------------------------------------------------------------
     // PC update logic (handles stall and branch/flush)
     // ------------------------------------------------------------------
-    // TODO: branch decision should be computed in EX and provided here
-    wire branch_taken_ex = 1'b0;       // TODO: from EX stage
-    wire [31:0] branch_target_ex = 32'b0; // TODO: from EX stage
+    // Branch signals from EX stage
+    wire branch_taken_ex = branch_taken;
+    wire [31:0] branch_target_ex = branch_target;
     // stall comes from hazard detection unit (instantiated earlier)
-    // flush IF/ID when a branch is taken in EX or when a JAL is taken in ID
-    assign flush_ifid = branch_taken_ex | is_jal;
+    // flush IF/ID when a branch is taken in EX or when a JAL/JR is taken in ID
+    assign flush_ifid = branch_taken_ex | is_jal | is_jr;
 
     // expose done when HALT reaches MEM/WB (pipeline drained / HALT at last stage)
     assign done = memwb_Halt_out;
@@ -378,6 +394,8 @@ module pipelined_processor(
                 pc <= branch_target_ex;
             end else if (is_jal) begin
                 pc <= jal_target;
+            end else if (is_jr) begin
+                pc <= jr_target;
             end else if (stall) begin
                 pc <= pc; // freeze on hazard stall
             end else begin
@@ -563,58 +581,59 @@ factorial: addi $sp, $sp, -8
         instructions[10] = 32'b101011_01000_01001_0000_0000_0000_0000; // SW
         instructions[11] = 32'b000000_01001_01000_01010_00000_100000; // ADD
         instructions[12] = 32'b000000_01001_01000_01011_00000_100010; // SUB
-        instructions[13] = 32'b000000_01010_01011_10001_00000_000010; // MUL
+        instructions[13] = 32'b000000_01010_01011_10001_00000_011000; // MUL
         instructions[14] = 32'b001000_00000_01000_0000_0000_0000_0100; // ADDI
         instructions[15] = 32'b100011_01000_10010_1111_1111_1111_1100; // LW
         instructions[16] = 32'b000000_10001_10010_10010_00000_100010; // SUB
-        instructions[17] = 32'b000000_10001_00000_10010_00000_000000; // SLL
+        instructions[17] = 32'b000000_00000_10001_10010_00010_000000; // SLL
         instructions[18] = 32'b101011_01000_10010_0000_0000_0000_0000; // SW
         instructions[19] = 32'b111111_00000_00000_0000_0000_0000_0000; // HALT
 
         // Test 3
         instructions[20] = 32'b001000_00000_00100_0000_0000_0000_0110; // ADDI
-        instructions[21] = 32'b000011_00000_00000_0000_0000_0001_0100; // JAL
+        instructions[21] = 32'b000011_00000_00000_0000_0000_0001_1000; // JAL to factorial
         instructions[22] = 32'b101011_00010_00010_0000_0000_0000_0000; // SW
         instructions[23] = 32'b111111_00000_00000_0000_0000_0000_0000; // HALT
-        instructions[24] = 32'b001000_11101_11101_1111_1111_1111_1000; // ADDI -- Factorial function starts here
+        instructions[24] = 32'b001000_11101_11101_1111_1111_1111_1000; // ADDI - Factorial 
         instructions[25] = 32'b101011_11101_00100_0000_0000_0000_0100; // SW
         instructions[26] = 32'b101011_11101_11111_0000_0000_0000_0000; // SW
         instructions[27] = 32'b001000_00000_01000_0000_0000_0000_0010; // ADDI
         instructions[28] = 32'b000000_00100_01000_01000_00000_101010; // SLT
         instructions[29] = 32'b000100_01000_00000_0000_0000_0000_0011; // BEQ
         instructions[30] = 32'b001000_00000_00010_0000_0000_0000_0001; // ADDI
-        instructions[31] = 32'b001000_00000_00010_0000_0000_0000_0001; // ADDI
-        instructions[32] = 32'b001000_00010_11111_0000_0000_0000_1000; // ADDI
-        instructions[33] = 32'b000011_00000_00000_0000_0000_0001_0100; // JAL
-        instructions[34] = 32'b100011_11101_11111_0000_0000_0000_0000; // LW
-        instructions[35] = 32'b100011_11101_00100_0000_0000_0000_0100; // LW
-        instructions[36] = 32'b001000_11101_11101_0000_0000_0000_1000; // ADDI
-        instructions[37] = 32'b000000_00100_11111_00010_00000_000010; // MUL
-        instructions[38] = 32'b111111_00000_00000_0000_0000_0000_0000; // HALT
+        instructions[31] = 32'b001000_11101_11101_0000_0000_0000_1000; // ADDI
+        instructions[32] = 32'b000000_11111_00000_00000_00000_001000; // JR $ra
+        instructions[33] = 32'b001000_00100_00100_1111_1111_1111_1111; // ADDI - else
+        instructions[34] = 32'b000011_00000_00000_0000_0000_0001_1000; // JAL to factorial
+        instructions[35] = 32'b100011_11101_11111_0000_0000_0000_0000; // LW 
+        instructions[36] = 32'b100011_11101_00100_0000_0000_0000_0100; // LW 
+        instructions[37] = 32'b001000_11101_11101_0000_0000_0000_1000; // ADDI
+        instructions[38] = 32'b000000_00100_00010_00010_00000_011000; // MUL
+        instructions[39] = 32'b000000_11111_00000_00000_00000_001000; // JR
 
         // Test 4
-        instructions[39] = 32'b001000_00000_01000_0000_0000_0000_1000; // ADDI
-        instructions[40] = 32'b001000_00000_01001_0000_0000_0000_1111; // ADDI
-        instructions[41] = 32'b101011_01000_01001_0000_0000_0000_0000; // SW
-        instructions[42] = 32'b100011_01000_01010_0000_0000_0000_0000; // LW
-        instructions[43] = 32'b000000_01001_01010_01011_00000_100000; // ADD
-        instructions[44] = 32'b000100_01011_01010_0000_0000_0000_0010; // BEQ
-        instructions[45] = 32'b000000_01011_01001_01100_00000_100010; // SUB
-        instructions[46] = 32'b000000_01100_01011_10000_00000_100000; // ADD -- label
-        instructions[47] = 32'b111111_00000_00000_0000_0000_0000_0000; // HALT
+        instructions[40] = 32'b001000_00000_01000_0000_0000_0000_1000; // ADDI $t0, $0, 8
+        instructions[41] = 32'b001000_00000_01001_0000_0000_0000_1111; // ADDI $t1, $0, 15
+        instructions[42] = 32'b101011_01000_01001_0000_0000_0000_0000; // SW $t1, 0($t0)
+        instructions[43] = 32'b100011_01000_01010_0000_0000_0000_0000; // LW $t2, 0($t0)
+        instructions[44] = 32'b000000_01001_01010_01011_00000_100000; // ADD $t3, $t1, $t2
+        instructions[45] = 32'b000100_01011_01010_0000_0000_0000_0010; // BEQ $t3, $t2, label (+2)
+        instructions[46] = 32'b000000_01011_01001_01100_00000_100010; // SUB $t4, $t3, $t1
+        instructions[47] = 32'b000000_01100_01011_10000_00000_100000; // ADD $s0, $t4, $t3 (label)
+        instructions[48] = 32'b111111_00000_00000_0000_0000_0000_0000; // HALT
 
         // Test 5
-        instructions[48] = 32'b001000_00000_01000_0000_0000_0000_0100; // ADDI
-        instructions[49] = 32'b001000_00000_01001_0000_0000_0000_0101; // ADDI
-        instructions[50] = 32'b000000_01000_01001_01010_00000_100000; // ADD
-        instructions[51] = 32'b000000_01010_01001_01011_00000_100010; // SUB
-        instructions[52] = 32'b000000_01011_01010_01100_00000_100100; // AND
-        instructions[53] = 32'b000000_01100_01000_01101_00000_100101; // OR
-        instructions[54] = 32'b101011_01000_01101_0000_0000_0000_0000; // SW
-        instructions[55] = 32'b111111_00000_00000_0000_0000_0000_0000; // HALT
+        instructions[49] = 32'b001000_00000_01000_0000_0000_0000_0100; // ADDI
+        instructions[50] = 32'b001000_00000_01001_0000_0000_0000_0101; // ADDI
+        instructions[51] = 32'b000000_01000_01001_01010_00000_100000; // ADD
+        instructions[52] = 32'b000000_01010_01001_01011_00000_100010; // SUB
+        instructions[53] = 32'b000000_01011_01010_01100_00000_100100; // AND
+        instructions[54] = 32'b000000_01100_01000_01101_00000_100101; // OR
+        instructions[55] = 32'b101011_01000_01101_0000_0000_0000_0000; // SW
+        instructions[56] = 32'b111111_00000_00000_0000_0000_0000_0000; // HALT
     end
     always @(*) begin
-        instruction_reg = instructions[pc]; // this works
+        instruction_reg = instructions[pc];
     end
     
 endmodule
@@ -961,8 +980,8 @@ module control_unit(
                     6'b100100: ALUOp = 4'b0010; // AND (36)
                     6'b100101: ALUOp = 4'b0011; // OR  (37)
                     6'b100111: ALUOp = 4'b0101; // NOR (39)
-                    6'b000000: ALUOp = 4'b0110; // SLL (0)
-                    6'b000010: ALUOp = 4'b0111; // SRL (2)
+                    6'b000000: begin ALUOp = 4'b0110; ALUSrc = 1'b1; end // SLL (0)
+                    6'b000010: begin ALUOp = 4'b0111; ALUSrc = 1'b1; end // SRL (2)
                     6'b100010: ALUOp = 4'b1000; // SUB (34)
                     6'b101010: ALUOp = 4'b1010; // SLT (42)
                     default:   ALUOp = 4'b1111;
@@ -1086,7 +1105,7 @@ module pipeline_processor_tb;
     pipelined_processor DUT(
         .clk(clk),
         .reset(reset),
-        .initial_pc(20),
+        .initial_pc(49),
         .done(done)
     );
 
@@ -1102,7 +1121,7 @@ module pipeline_processor_tb;
         $dumpvars(0, pipeline_processor_tb);
 
         reset = 1;
-        #12;           // hold reset
+        #9;
         reset = 0;
 
         #5000;
