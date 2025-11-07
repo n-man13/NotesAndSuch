@@ -270,7 +270,7 @@ module pipelined_processor(
         .Halt_in(idex_Halt_out),
         .alu_result_in(alu_result_ex),
         .write_data_in(idex_regdata2_out),
-        .write_reg_in(idex_write_reg /* selected by RegDst */),
+        .write_reg_in(idex_write_reg),
         .RegWrite_in(idex_RegWrite),
         .MemRead_in(idex_MemRead),
         .MemWrite_in(idex_MemWrite),
