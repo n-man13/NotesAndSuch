@@ -1105,7 +1105,7 @@ module pipeline_processor_tb;
     pipelined_processor DUT(
         .clk(clk),
         .reset(reset),
-        .initial_pc(49),
+        .initial_pc(40),
         .done(done)
     );
 
