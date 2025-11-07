@@ -353,7 +353,7 @@ module pipelined_processor(
             end else if (branch_taken_ex) begin
                 pc <= branch_target_ex;
             end else begin
-                pc <= pc + 1; // basic increment
+                pc <= pc + 1;
             end
         end
     end
@@ -415,7 +415,6 @@ module registerFile (
         registers[0] <= 32'd0; // ensure $zero stays zero
     end
 
-    // asynchronous read
     assign readData1 = registers[readReg1];
     assign readData2 = registers[readReg2];
 
@@ -487,7 +486,7 @@ factorial: addi $sp, $sp, -8
         addi $v0, $0, 1
         addi $sp, $sp, 8
         jr $ra
-    else: addi $a0, $a0, -1
+  else: addi $a0, $a0, -1
         jal factorial
         lw $ra, 0($sp)
         lw $a0, 4($sp)
@@ -503,7 +502,7 @@ factorial: addi $sp, $sp, -8
         add $t3, $t1, $t2
         beq $t3, $t2, label
         sub $t4, $t3, $t1
-        label: add $s0, $t4, $t3
+ label: add $s0, $t4, $t3
         halt
     */
     /* Test 5
@@ -731,7 +730,6 @@ module ID_EX_reg(
             Branch_out <= 1'b0;
             ALUSrc_out <= 1'b0;
             ALUOp_out <= 4'b0000;
-            // Optionally freeze data fields or pass through previous values depending on hazard design
             Halt_out <= 1'b0;
         end else begin
             next_pc_out <= next_pc_in;
