@@ -8,63 +8,20 @@
         "type": "tabs",
         "children": [
           {
-            "id": "f6d4e213b81b2b42",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "LIMU-BERT.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "LIMU-BERT"
-            }
-          },
-          {
-            "id": "4cf2f911cacd15a2",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "mmWave Radar Basics.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "mmWave Radar Basics"
-            }
-          },
-          {
-            "id": "d633c81b9ae27d31",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "CrossHAR.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "CrossHAR"
-            }
-          },
-          {
             "id": "fa0029880b78149f",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Localization.md",
+                "file": "GPS.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Localization"
+              "title": "GPS"
             }
           }
-        ],
-        "currentTab": 3
+        ]
       }
     ],
     "direction": "vertical"
@@ -226,8 +183,9 @@
   },
   "active": "fa0029880b78149f",
   "lastOpenFiles": [
-    "CrossHAR.md",
     "Localization.md",
+    "GPS.md",
+    "CrossHAR.md",
     "mmWave Radar Basics.md",
     "LIMU-BERT.md",
     "Class 12.md",
@@ -250,7 +208,6 @@
     "Class 6.md",
     "Class 7.md",
     "Class 9.md",
-    "Inertial Measurement Unit.md",
-    "Gyroscope.md"
+    "Inertial Measurement Unit.md"
   ]
 }
