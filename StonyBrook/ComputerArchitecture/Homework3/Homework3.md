@@ -9,10 +9,23 @@ Implement a five-stage pipeline following the canonical MIPS design with the fol
 You may reuse and adapt your modules from the single-cycle processor (ALU, Control Unit, Register File, Memory, etc.), but modify the datapath and control logic to support pipelined execution.
 
 ## Implementation
-Here is the image we went through in class with finalized pipeline control
-![alt text](./images/PipelinedProcessor.png)
-I used this pretty extensively in the beginning, and then broke away from this midway.
 
+### Pipeline Design Overview
+I started with the standard 5-stage pipeline design we covered in class (shown below) as my foundation. This diagram was really helpful for understanding the basic datapath and where pipeline registers needed to go.
+
+![alt text](./images/PipelinedProcessor.png)
+
+However, I made several modifications as I worked through the implementation:
+
+**Key Additions:**
+- **JAL/JR Support:** Added logic to detect jump instructions in the ID stage and calculate jump targets. JAL writes the return address to $ra, while JR reads from a register to determine where to jump.
+- **Shift Instruction Handling:** SLL/SRL needed special treatment since the shift amount comes from the instruction's shamt field (bits 10:6) rather than from a register. I passed this through the immediate field and swapped the ALU inputs for shift operations.
+- **Branch Logic:** Implemented branch decision making in the EX stage where the ALU result is checked against zero for BEQ instructions. The branch target is calculated as PC+1+offset.
+
+## Pipeline Hazard Handling:
+- **Forwarding Unit:** Detects when data is needed from EX/MEM or MEM/WB stages and forwards it to avoid unnecessary stalls
+- **Hazard Detection Unit:** Catches load-use hazards where an instruction immediately uses data being loaded from memory, inserting a 1-cycle stall
+- **Pipeline Flushing:** When branches, jumps (JAL), or jump-registers (JR) are taken, the IF/ID register is flushed to prevent wrong instructions from executing
 
 
 ## Hazard Detection Comparison
