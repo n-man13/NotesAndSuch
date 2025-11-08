@@ -9,6 +9,8 @@ module pipelined_processor(
     input wire clk,
     input wire reset,
     input wire [31:0] initial_pc,
+    input wire enable_forwarding,      // 1 = forwarding enabled, 0 = disabled (more stalls)
+    input wire enable_hazard_detection, // 1 = stalls on hazards, 0 = no stalls (may produce wrong results)
     output wire done
 );
 
@@ -233,6 +235,7 @@ module pipelined_processor(
     wire [1:0] ForwardB;
 
     forwarding_unit FU(
+        .enable_forwarding(enable_forwarding),
         .EX_MEM_RegWrite(exmem_RegWrite_out),
         .EX_MEM_Rd(exmem_write_reg_out),
         .MEM_WB_RegWrite(memwb_RegWrite_out),
@@ -243,10 +246,16 @@ module pipelined_processor(
         .ForwardB(ForwardB)
     );
 
-    // Hazard detection unit for load-use hazards
+    // Hazard detection unit for load-use hazards (and all RAW when forwarding disabled)
     hazard_unit HZ(
+        .enable_hazard_detection(enable_hazard_detection),
+        .enable_forwarding(enable_forwarding),
         .ID_EX_MemRead(idex_MemRead),
         .ID_EX_Rt(idex_rt_out),
+        .ID_EX_RegWrite(idex_RegWrite),
+        .ID_EX_Rd(idex_write_reg),
+        .EX_MEM_RegWrite(exmem_RegWrite_out),
+        .EX_MEM_Rd(exmem_write_reg_out),
         .IF_ID_Rs(ifid_instr_out[25:21]),
         .IF_ID_Rt(ifid_instr_out[20:16]),
         .stall(stall)
@@ -302,7 +311,7 @@ module pipelined_processor(
         .JAL_in(idex_JAL_out),
         .link_in(idex_link_out),
         .alu_result_in(alu_result_ex),
-        .write_data_in(idex_regdata2_out),
+        .write_data_in(alu_input_B_pre),  // Use forwarded value for store data
         .write_reg_in(idex_write_reg),
         .RegWrite_in(idex_RegWrite),
         .MemRead_in(idex_MemRead),
@@ -1034,9 +1043,10 @@ module control_unit(
 endmodule
 
 // ------------------------------------------------------------------
-// Forwarding unit stub - implement logic to set ForwardA/ForwardB
+// Forwarding unit - set ForwardA/ForwardB based on RAW hazards
 // ------------------------------------------------------------------
 module forwarding_unit(
+    input wire enable_forwarding,
     input wire EX_MEM_RegWrite,
     input wire [4:0] EX_MEM_Rd,
     input wire MEM_WB_RegWrite,
@@ -1055,44 +1065,71 @@ module forwarding_unit(
         ForwardA = 2'b00;
         ForwardB = 2'b00;
 
-        // EX hazard (highest priority)
-        if (EX_MEM_RegWrite && (EX_MEM_Rd != 5'b0) && (EX_MEM_Rd == ID_EX_Rs)) begin
-            ForwardA = 2'b10;
-        end else if (MEM_WB_RegWrite && (MEM_WB_Rd != 5'b0) && (MEM_WB_Rd == ID_EX_Rs)) begin
-            ForwardA = 2'b01;
-        end
+        if (enable_forwarding) begin
+            // EX hazard (highest priority)
+            if (EX_MEM_RegWrite && (EX_MEM_Rd != 5'b0) && (EX_MEM_Rd == ID_EX_Rs)) begin
+                ForwardA = 2'b10;
+            end else if (MEM_WB_RegWrite && (MEM_WB_Rd != 5'b0) && (MEM_WB_Rd == ID_EX_Rs)) begin
+                ForwardA = 2'b01;
+            end
 
-        if (EX_MEM_RegWrite && (EX_MEM_Rd != 5'b0) && (EX_MEM_Rd == ID_EX_Rt)) begin
-            ForwardB = 2'b10;
-        end else if (MEM_WB_RegWrite && (MEM_WB_Rd != 5'b0) && (MEM_WB_Rd == ID_EX_Rt)) begin
-            ForwardB = 2'b01;
+            if (EX_MEM_RegWrite && (EX_MEM_Rd != 5'b0) && (EX_MEM_Rd == ID_EX_Rt)) begin
+                ForwardB = 2'b10;
+            end else if (MEM_WB_RegWrite && (MEM_WB_Rd != 5'b0) && (MEM_WB_Rd == ID_EX_Rt)) begin
+                ForwardB = 2'b01;
+            end
         end
+        // When forwarding disabled, always use 2'b00 (no forwarding, rely on stalls)
     end
 endmodule
 
 // ------------------------------------------------------------------
-// Hazard detection unit stub - detect load-use hazards and assert stall
+// Hazard detection unit - detect load-use and RAW hazards, assert stall
 // ------------------------------------------------------------------
 module hazard_unit(
+    input wire enable_hazard_detection,
+    input wire enable_forwarding,
     input wire ID_EX_MemRead,
     input wire [4:0] ID_EX_Rt,
+    input wire ID_EX_RegWrite,
+    input wire [4:0] ID_EX_Rd,
+    input wire EX_MEM_RegWrite,
+    input wire [4:0] EX_MEM_Rd,
     input wire [4:0] IF_ID_Rs,
     input wire [4:0] IF_ID_Rt,
-    output wire stall
+    output reg stall
 );
-    // Step 1: Check if instruction in ID/EX is a load
+    // Load-use hazard (always need to stall, even with forwarding)
     wire is_load = ID_EX_MemRead;
+    wire load_dest_valid = (ID_EX_Rt != 5'b0);
+    wire load_rs_match = (ID_EX_Rt == IF_ID_Rs);
+    wire load_rt_match = (ID_EX_Rt == IF_ID_Rt);
+    wire load_use_hazard = is_load && load_dest_valid && (load_rs_match || load_rt_match);
     
-    // Step 2: Check if load's destination register isn't $zero
-    wire valid_dest = (ID_EX_Rt != 5'b0);
+    // RAW hazard from ID/EX (only stall when forwarding is disabled)
+    wire idex_dest_valid = (ID_EX_Rd != 5'b0);
+    wire idex_rs_match = (ID_EX_Rd == IF_ID_Rs);
+    wire idex_rt_match = (ID_EX_Rd == IF_ID_Rt);
+    wire idex_raw_hazard = ID_EX_RegWrite && idex_dest_valid && (idex_rs_match || idex_rt_match);
     
-    // Step 3: Check if either source register matches the load's destination
-    wire rs_match = (ID_EX_Rt == IF_ID_Rs);  // first source register match
-    wire rt_match = (ID_EX_Rt == IF_ID_Rt);  // second source register match
-    wire reg_hazard = rs_match || rt_match;   // either match is a hazard
+    // RAW hazard from EX/MEM (only stall when forwarding is disabled)
+    wire exmem_dest_valid = (EX_MEM_Rd != 5'b0);
+    wire exmem_rs_match = (EX_MEM_Rd == IF_ID_Rs);
+    wire exmem_rt_match = (EX_MEM_Rd == IF_ID_Rt);
+    wire exmem_raw_hazard = EX_MEM_RegWrite && exmem_dest_valid && (exmem_rs_match || exmem_rt_match);
     
-    // Final stall condition: must be a load, valid destination, and register hazard
-    assign stall = is_load && valid_dest && reg_hazard;
+    always @(*) begin
+        if (!enable_hazard_detection) begin
+            // Hazard detection disabled: never stall (may produce incorrect results!)
+            stall = 1'b0;
+        end else if (enable_forwarding) begin
+            // With forwarding: only stall on load-use hazards
+            stall = load_use_hazard;
+        end else begin
+            // Without forwarding: stall on all RAW hazards
+            stall = load_use_hazard || idex_raw_hazard || exmem_raw_hazard;
+        end
+    end
 
 endmodule
 
@@ -1106,6 +1143,8 @@ module pipeline_processor_tb;
         .clk(clk),
         .reset(reset),
         .initial_pc(40),
+        .enable_forwarding(1'b1), // enable forwarding
+        .enable_hazard_detection(1'b1), // enable hazard detection
         .done(done)
     );
 
