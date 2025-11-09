@@ -6,8 +6,8 @@ module pipelined_processor(
     input wire clk,
     input wire reset,
     input wire [31:0] initial_pc,
-    input wire enable_forwarding,      // 1 = forwarding enabled, 0 = disabled (more stalls)
-    input wire enable_hazard_detection, // 1 = stalls on hazards, 0 = no stalls (may produce wrong results)
+    input wire enable_forwarding,      // 1 = forwarding enabled, 0 = disabled
+    input wire enable_hazard_detection, // 1 = stalls on hazards, 0 = no stalls
     output wire done
 );
 
@@ -19,7 +19,7 @@ module pipelined_processor(
     programMem prog_mem(.pc(pc), .instruction(instr_if));
     assign next_pc_if = pc + 1;
 
-    // IF/ID pipeline register
+    // IF/ID register
     wire [31:0] ifid_instr_out;
     wire [31:0] ifid_next_pc_out;
 
@@ -36,7 +36,7 @@ module pipelined_processor(
 
     wire halt_if = (instr_if[31:26] == 6'b111111);
 
-    // ID stage: decode, register file read, control generation
+    // ID
     wire [5:0] id_opcode = ifid_instr_out[31:26];
     wire [5:0] id_funct  = ifid_instr_out[5:0];
     wire [4:0] id_rs     = ifid_instr_out[25:21];
@@ -44,13 +44,13 @@ module pipelined_processor(
     wire [4:0] id_rd     = ifid_instr_out[15:11];
     wire [15:0] id_imm   = ifid_instr_out[15:0];
 
-    wire RegWrite_id;    // write enable to regfile (to be stored in ID/EX)
+    wire RegWrite_id;    // write enable to regfile
     wire MemRead_id;     // load
     wire MemWrite_id;    // store
-    wire MemToReg_id;    // choose mem data for WB
-    wire ALUSrc_id;      // ALU second operand is immediate
-    wire RegDst_id;      // choose rd (R-type) vs rt (I-type) as destination
-    wire Branch_id;      // branch signal (BEQ/BNE)
+    wire MemToReg_id;    // choose data for WB
+    wire ALUSrc_id;      // ALU
+    wire RegDst_id;      // R-type vs I-type
+    wire Branch_id;      // branch signal
     wire [3:0] ALUOp_id;
     wire ExtOp_id;
     
@@ -93,7 +93,7 @@ module pipelined_processor(
     wire [31:0] shamt_ext_id = {27'b0, ifid_instr_out[10:6]};
     wire [31:0] imm_or_shamt = is_shift_id ? shamt_ext_id : imm_ext_id;
 
-    // ID/EX pipeline register
+    // ID/EX register
     wire [31:0] idex_next_pc_out;
     wire [31:0] idex_regdata1_out;
     wire [31:0] idex_regdata2_out;
@@ -102,7 +102,7 @@ module pipelined_processor(
     wire [4:0]  idex_rt_out;
     wire [4:0]  idex_rd_out;
 
-    // control signals in pipeline (ID/EX)
+    // control signals (ID/EX)
     wire idex_RegWrite;
     wire idex_MemRead;
     wire idex_MemWrite;
@@ -170,7 +170,7 @@ module pipelined_processor(
 
     wire [4:0] idex_write_reg = idex_RegDst ? idex_rd_out : idex_rt_out;
 
-    // EX stage: ALU, branch target calculation, forwarding muxes
+    // EX: ALU, branch target calculation, forwarding muxes
     wire [31:0] alu_input_A;
     wire [31:0] alu_input_B_pre;
     wire [31:0] alu_input_B = idex_ALUSrc ? idex_imm_out : alu_input_B_pre;
@@ -233,7 +233,7 @@ module pipelined_processor(
     wire branch_taken = idex_Branch & branch_decision;
     wire [31:0] branch_target = idex_next_pc_out + idex_imm_out;
 
-    // EX/MEM pipeline register
+    // EX/MEM register
     wire [31:0] exmem_alu_result_out;
     wire [31:0] exmem_write_data_out;
     wire [4:0]  exmem_write_reg_out;
@@ -268,7 +268,7 @@ module pipelined_processor(
         , .link_out(exmem_link_out)
     );
 
-    // MEM stage: data memory access
+    // MEM access
     wire [31:0] mem_read_data_mem;
     memoryFile data_mem(
         .clk(clk),
@@ -278,7 +278,7 @@ module pipelined_processor(
         .readData(mem_read_data_mem)
     );
 
-    // MEM/WB pipeline register
+    // MEM/WB register
     wire [31:0] memwb_memread_out;
     wire [31:0] memwb_aluout_out;
     wire [4:0] memwb_writereg_out;
@@ -307,7 +307,7 @@ module pipelined_processor(
         , .link_out(memwb_link_out)
     );
 
-    // WB stage: writeback selection
+    // WB selection
     assign writeback_data_wb = memwb_JAL_out ? memwb_link_out : (memwb_MemToReg_out ? memwb_memread_out : memwb_aluout_out);
     assign writeback_reg_wb  = memwb_JAL_out ? 5'd31 : memwb_writereg_out;
     assign writeback_enable_wb = memwb_RegWrite_out | memwb_JAL_out;
@@ -370,7 +370,7 @@ module alu ( input [31:0] A, input [31:0] B, input [3:0] ALU_Sel, output reg [31
         endcase
     end
 endmodule
-// Register file with asynchronous read, synchronous write
+// Register file
 module registerFile (
     input  wire        clk,
     input  wire        writeEnable,
@@ -401,7 +401,7 @@ module registerFile (
 endmodule
 
 
-// Data memory with synchronous write, combinational read
+// Data memory
 module memoryFile (
     input  wire        clk,
     input  wire [31:0] addr,
@@ -571,7 +571,7 @@ factorial: addi $sp, $sp, -8
 endmodule
 
 
-// IF/ID pipeline register
+// IF/ID register
 module IF_ID_reg(
     input wire clk,
     input wire reset,
@@ -599,7 +599,7 @@ module IF_ID_reg(
     end
 endmodule
 
-// ID/EX pipeline register
+// ID/EX register
 module ID_EX_reg(
     input wire clk,
     input wire reset,
@@ -699,7 +699,7 @@ module ID_EX_reg(
     end
 endmodule
 
-// EX/MEM pipeline register
+// EX/MEM register
 module EX_MEM_reg(
     input wire clk,
     input wire reset,
@@ -719,10 +719,10 @@ module EX_MEM_reg(
     output reg RegWrite_out,
     output reg MemRead_out,
     output reg MemWrite_out,
-    output reg MemToReg_out
-    , output reg Halt_out
-    , output reg JAL_out
-    , output reg [31:0] link_out
+    output reg MemToReg_out, 
+    output reg Halt_out, 
+    output reg JAL_out, 
+    output reg [31:0] link_out
 );
     always @(posedge clk or posedge reset) begin
         if (reset) begin
@@ -751,7 +751,7 @@ module EX_MEM_reg(
     end
 endmodule
 
-// MEM/WB pipeline register
+// MEM/WB register
 module MEM_WB_reg(
     input wire clk,
     input wire reset,
@@ -767,10 +767,10 @@ module MEM_WB_reg(
     output reg [31:0] alu_result_out,
     output reg [4:0] write_reg_out,
     output reg RegWrite_out,
-    output reg MemToReg_out
-    , output reg Halt_out
-    , output reg JAL_out
-    , output reg [31:0] link_out
+    output reg MemToReg_out, 
+    output reg Halt_out, 
+    output reg JAL_out, 
+    output reg [31:0] link_out
 );
     always @(posedge clk or posedge reset) begin
         if (reset) begin
@@ -795,7 +795,7 @@ module MEM_WB_reg(
     end
 endmodule
 
-// Control unit
+// Control signals
 module control_unit(
     input wire [5:0] opcode,
     input wire [5:0] funct,
@@ -883,7 +883,7 @@ module control_unit(
     end
 endmodule
 
-// Forwarding unit
+// Forwarding
 module forwarding_unit(
     input wire enable_forwarding,
     input wire EX_MEM_RegWrite,
