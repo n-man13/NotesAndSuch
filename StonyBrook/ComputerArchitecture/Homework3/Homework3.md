@@ -22,25 +22,14 @@ However, I made several modifications as I worked through the implementation:
 - **Shift Instruction Handling:** SLL/SRL needed special treatment since the shift amount comes from the instruction's shamt field (bits 10:6) rather than from a register. I passed this through the immediate field and swapped the ALU inputs for shift operations.
 - **Branch Logic:** Implemented branch decision making in the EX stage where the ALU result is checked against zero for BEQ instructions. The branch target is calculated as PC+1+offset.
 
-## Pipeline Hazard Handling:
+## Pipeline Hazard Handling
 - **Forwarding Unit:** Detects when data is needed from EX/MEM or MEM/WB stages and forwards it to avoid unnecessary stalls
 - **Hazard Detection Unit:** Catches load-use hazards where an instruction immediately uses data being loaded from memory, inserting a 1-cycle stall
 - **Pipeline Flushing:** When branches, jumps (JAL), or jump-registers (JR) are taken, the IF/ID register is flushed to prevent wrong instructions from executing
 
-
 ## Hazard Detection Comparison
 
-### Pipeline Behavior
-- **With hazard detection:** The hazard unit detects when an instruction needs data that hasn't been written back yet and inserts stalls to wait for it
-- **Without hazard detection:** Instructions just keep going without waiting, even if they need data from a previous instruction
-
-### Handling Data Hazards
-- **With hazard detection:** When a read after write hazard is detected, the pipeline inserts a bubble to give the data time to become available
-- **Without hazard detection:** Read after write hazards aren't caught, so instructions end up reading old/stale values from registers
-
-### Performance Impact
-- **With hazard detection:** Slower because of all the stall cycles inserted between dependent instructions
-- **Without hazard detection:** Runs faster since there are no stalls, but the results are wrong
+With hazard detection enabled, the pipeline inserts stalls when RAW hazards are detected, ensuring correct results at the cost of performance. Without hazard detection, instructions execute without waiting, leading to faster execution but incorrect results when dependencies exist.
 
 ### Test 4 Results
 
@@ -55,3 +44,30 @@ However, I made several modifications as I worked through the implementation:
 | Mem[8] | 15 | **0** |
 
 As you can see, when hazard detection is enabled, all register values match what we expect from the program. Without hazard detection, $t2, $t3, $t4, $s0, and Mem[8] end up with incorrect values because instructions read registers before the correct data was written to them.
+
+
+# Task 2: Implement Data Forwarding
+Enhance your pipelined MIPS processor with data forwarding to minimize stalls caused by data
+hazards. Implement EX–EX, MEM–EX, and MEM–MEM forwarding paths as appropriate.
+Modify your control logic to enable forwarding selectively and prevent incorrect data
+propagation. Retain your hazard detection unit for cases where forwarding cannot resolve the
+hazard (e.g., load-use).
+
+## Implementation
+
+Data forwarding resolves most RAW hazards without stalling by bypassing results directly from pipeline registers to the EX stage. The implementation includes:
+
+1. **Forwarding Unit**: Compares source registers (ID/EX) with destination registers (EX/MEM, MEM/WB) and generates ForwardA/ForwardB control signals
+2. **Forwarding Muxes**: Two 3-to-1 muxes select ALU inputs from ID/EX registers, EX/MEM results, or MEM/WB results
+3. **Store Data Forwarding**: SW instructions use the forwarded value for correct store data
+
+With forwarding enabled, the pipeline only stalls on load-use hazards. Without forwarding, every RAW hazard requires 1-2 stall cycles, roughly doubling execution time.
+
+
+### Forwarding Performance Comparison
+| Configuration | Stall Behavior | Cycles | Correctness |
+|---------------|---------------|--------|-------------|
+| Forwarding ON, Hazard Detection ON | Minimal stalls (load-use only) | ~X | ✓ Correct |
+| Forwarding OFF, Hazard Detection ON | Frequent stalls (all RAW) | ~2X | ✓ Correct |
+| Forwarding ON, Hazard Detection OFF | No stalls | ~X-5 | ✗ Incorrect |
+| Forwarding OFF, Hazard Detection OFF | No stalls | ~X-5 | ✗ Very Incorrect |

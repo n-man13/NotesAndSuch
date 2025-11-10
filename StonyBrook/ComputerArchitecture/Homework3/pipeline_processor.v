@@ -1,66 +1,42 @@
 `timescale 1ns / 1ps
 
-// pipeline_processor.v
-// Skeleton for converting the single-cycle processor to a 5-stage pipelined processor.
-// Purpose: provide clear pipeline registers, module boundaries, and stubs for forwarding/hazard units.
-// Fill in TODOs to complete the implementation.
+// 5-stage pipelined MIPS processor with forwarding and hazard detection
 
 module pipelined_processor(
     input wire clk,
     input wire reset,
     input wire [31:0] initial_pc,
+    input wire enable_forwarding,      // 1 = forwarding enabled, 0 = disabled
+    input wire enable_hazard_detection, // 1 = stalls on hazards, 0 = no stalls
     output wire done
 );
 
-    // ------------------------------------------------------------------
-    // Basic PC / IF outputs
-    // ------------------------------------------------------------------
+    // IF stage
     reg [31:0] pc;
-    wire [31:0] instr_if;      // instruction read from instruction memory (IF)
-    wire [31:0] next_pc_if;   // pc + 1 computed in IF
+    wire [31:0] instr_if;
+    wire [31:0] next_pc_if;
 
-    // Hook to existing programMem (combinational read)
     programMem prog_mem(.pc(pc), .instruction(instr_if));
-
-    // compute next_pc_if in IF (word-addressed PC like your existing design)
-    // next_pc_if represents the PC of the following instruction (pc + 1)
     assign next_pc_if = pc + 1;
 
-    /* ------------------------------------------------------------------
-     * IF/ID pipeline register
-     * ------------------------------------------------------------------
-     * ifid_next_pc_out carries the "next PC" value produced in IF (next_pc_if).
-     * This value is useful for jump-and-link (JAL) and other PC-relative
-     * operations.
-     */
+    // IF/ID register
     wire [31:0] ifid_instr_out;
     wire [31:0] ifid_next_pc_out;
 
     IF_ID_reg IFID(
         .clk(clk),
         .reset(reset),
-        .stall(stall),         // TODO: connect to hazard unit
-        .flush(flush_ifid),         // TODO: assert on branch taken
+        .stall(stall),
+        .flush(flush_ifid),
         .instr_in(instr_if),
         .next_pc_in(next_pc_if),
         .instr_out(ifid_instr_out),
         .next_pc_out(ifid_next_pc_out)
     );
 
-    // detect HALT as soon as instruction memory outputs it (IF stage)
     wire halt_if = (instr_if[31:26] == 6'b111111);
 
-
-    /* ------------------------------------------------------------------
-     * ID stage: decode, register file read, control generation
-     * ------------------------------------------------------------------
-     * Notes:
-     * - Register file reads occur here (combinational/asynchronous reads).
-     * - The Control unit should generate the control signals that travel in
-     *   the ID/EX pipeline register. Fill in the Control unit and hook the
-     *   signals into the ID_EX_reg instance below.
-     */
-    // decode fields
+    // ID
     wire [5:0] id_opcode = ifid_instr_out[31:26];
     wire [5:0] id_funct  = ifid_instr_out[5:0];
     wire [4:0] id_rs     = ifid_instr_out[25:21];
@@ -68,21 +44,18 @@ module pipelined_processor(
     wire [4:0] id_rd     = ifid_instr_out[15:11];
     wire [15:0] id_imm   = ifid_instr_out[15:0];
 
-    wire RegWrite_id;    // write enable to regfile (to be stored in ID/EX)
+    wire RegWrite_id;    // write enable to regfile
     wire MemRead_id;     // load
     wire MemWrite_id;    // store
-    wire MemToReg_id;    // choose mem data for WB
-    wire ALUSrc_id;      // ALU second operand is immediate
-    wire RegDst_id;      // choose rd (R-type) vs rt (I-type) as destination
-    wire Branch_id;      // branch signal (BEQ/BNE)
-    wire [3:0] ALUOp_id; // ALU operation selection (4-bit to match ALU)
-    wire ExtOp_id; // ExtOp: 0 = sign-extend (default), 1 = zero-extend (for ANDI/ORI)
+    wire MemToReg_id;    // choose data for WB
+    wire ALUSrc_id;      // ALU
+    wire RegDst_id;      // R-type vs I-type
+    wire Branch_id;      // branch signal
+    wire [3:0] ALUOp_id;
+    wire ExtOp_id;
     
-    // Hazard and flush control signals
-    wire stall;          // from hazard detection unit
-    wire flush_ifid;     // asserted on branch-taken
-
-    // instantiate control unit
+    wire stall;
+    wire flush_ifid;
     control_unit CU(
         .opcode(id_opcode),
         .funct(id_funct),
@@ -97,14 +70,11 @@ module pipelined_processor(
         .ExtOp(ExtOp_id)
     );
 
-    // Register file (reuse the existing one) - asynchronous read
     wire [31:0] reg_read1_id;
     wire [31:0] reg_read2_id;
     wire [31:0] writeback_data_wb;
     wire [4:0] writeback_reg_wb;
     wire writeback_enable_wb;
-
-    // Connect register file: writes will come from WB stage
     registerFile regFile(
         .clk(clk),
         .writeEnable(writeback_enable_wb),
@@ -116,17 +86,14 @@ module pipelined_processor(
         .readData2(reg_read2_id)
     );
 
-    // immediate ext (use ExtOp from control unit: 0=sign-extend, 1=zero-extend)
     wire [31:0] imm_ext_id = ExtOp_id ? {16'b0, id_imm} : {{16{id_imm[15]}}, id_imm};
     
-    // Shift amount extraction for SLL/SRL (bits [10:6])
+    // For shift instructions, use shamt field instead of immediate
     wire is_shift_id = (id_opcode == 6'b000000) && ((id_funct == 6'b000000) || (id_funct == 6'b000010));
     wire [31:0] shamt_ext_id = {27'b0, ifid_instr_out[10:6]};
     wire [31:0] imm_or_shamt = is_shift_id ? shamt_ext_id : imm_ext_id;
 
-    /* ID/EX pipeline register (capture decoded values + control signals)
-     * Many signals will be captured here; we provide placeholders
-     */
+    // ID/EX register
     wire [31:0] idex_next_pc_out;
     wire [31:0] idex_regdata1_out;
     wire [31:0] idex_regdata2_out;
@@ -135,7 +102,7 @@ module pipelined_processor(
     wire [4:0]  idex_rt_out;
     wire [4:0]  idex_rd_out;
 
-    // control signals in pipeline (ID/EX)
+    // control signals (ID/EX)
     wire idex_RegWrite;
     wire idex_MemRead;
     wire idex_MemWrite;
@@ -146,7 +113,6 @@ module pipelined_processor(
     wire [3:0] idex_ALUOp;
     wire idex_Halt_out;
 
-    // JAL/link pipeline signals (declare widths explicitly to avoid implicit 1-bit wires)
     wire idex_JAL_out;
     wire [31:0] idex_link_out;
     wire exmem_JAL_out;
@@ -154,20 +120,16 @@ module pipelined_processor(
     wire memwb_JAL_out;
     wire [31:0] memwb_link_out;
 
-    // indicate HALT in ID (derived from IF/ID instruction)
     wire halt_id = (ifid_instr_out[31:26] == 6'b111111);
-    // JAL detection in ID stage and compute target (programMem uses word-indexed PC)
     wire is_jal = (id_opcode == 6'b000011);
     wire [31:0] jal_target = {6'b0, ifid_instr_out[25:0]};
-    // JR detection in ID stage (R-type with funct=001000)
     wire is_jr = (id_opcode == 6'b000000) && (id_funct == 6'b001000);
     wire [31:0] jr_target = reg_read1_id;
 
     ID_EX_reg IDEX(
         .clk(clk),
         .reset(reset),
-        .stall(stall), // TODO: connect hazard detection stall
-        // inputs
+        .stall(stall),
         .next_pc_in(ifid_next_pc_out),
         .regdata1_in(reg_read1_id),
         .regdata2_in(reg_read2_id),
@@ -175,7 +137,6 @@ module pipelined_processor(
         .rs_in(id_rs),
         .rt_in(id_rt),
         .rd_in(id_rd),
-        // control inputs (TODO: wire these from Control unit)
         .RegWrite_in(RegWrite_id | is_jal),
         .MemRead_in(MemRead_id),
         .MemWrite_in(MemWrite_id),
@@ -186,8 +147,7 @@ module pipelined_processor(
         .ALUOp_in(ALUOp_id),
         .JAL_in(is_jal),
         .link_in(ifid_next_pc_out),
-    .Halt_in(halt_id),
-    // outputs
+        .Halt_in(halt_id),
         .next_pc_out(idex_next_pc_out),
         .regdata1_out(idex_regdata1_out),
         .regdata2_out(idex_regdata2_out),
@@ -208,31 +168,21 @@ module pipelined_processor(
         , .link_out(idex_link_out)
     );
 
-    // Decide the destination register for EX stage (RegDst control)
     wire [4:0] idex_write_reg = idex_RegDst ? idex_rd_out : idex_rt_out;
 
-    // ------------------------------------------------------------------
-    // EX stage: ALU, branch target calculation, forwarding muxes
-    // ------------------------------------------------------------------
-    // Notes:
-    // - Forwarding muxes should select operands from ID/EX, EX/MEM, or MEM/WB
-    //   as determined by the forwarding_unit outputs.  For now the ALU uses
-    //   the direct ID/EX register values; replace these with muxed signals.
-    // ALU inputs with forwarding (placeholder signals)
+    // EX: ALU, branch target calculation, forwarding muxes
     wire [31:0] alu_input_A;
     wire [31:0] alu_input_B_pre;
     wire [31:0] alu_input_B = idex_ALUSrc ? idex_imm_out : alu_input_B_pre;
-    // For shift instructions, ALU A should be rt (the value to shift), not rs
     wire is_shift_ex = (idex_ALUOp == 4'b0110) || (idex_ALUOp == 4'b0111);
     wire [31:0] alu_input_A_final = is_shift_ex ? alu_input_B_pre : alu_input_A;
     wire [31:0] alu_result_ex;
 
-    // Instantiate forwarding unit and wire alu_input_A, alu_input_B_pre
-    // Forwarding selects operands from ID/EX, EX/MEM, or MEM/WB to avoid stalls
     wire [1:0] ForwardA;
     wire [1:0] ForwardB;
 
     forwarding_unit FU(
+        .enable_forwarding(enable_forwarding),
         .EX_MEM_RegWrite(exmem_RegWrite_out),
         .EX_MEM_Rd(exmem_write_reg_out),
         .MEM_WB_RegWrite(memwb_RegWrite_out),
@@ -243,30 +193,30 @@ module pipelined_processor(
         .ForwardB(ForwardB)
     );
 
-    // Hazard detection unit for load-use hazards
     hazard_unit HZ(
+        .enable_hazard_detection(enable_hazard_detection),
+        .enable_forwarding(enable_forwarding),
         .ID_EX_MemRead(idex_MemRead),
         .ID_EX_Rt(idex_rt_out),
+        .ID_EX_RegWrite(idex_RegWrite),
+        .ID_EX_Rd(idex_write_reg),
+        .EX_MEM_RegWrite(exmem_RegWrite_out),
+        .EX_MEM_Rd(exmem_write_reg_out),
         .IF_ID_Rs(ifid_instr_out[25:21]),
         .IF_ID_Rt(ifid_instr_out[20:16]),
         .stall(stall)
     );
 
-    // Values to forward from MEM/WB (choose mem-read or ALU result depending on MemToReg)
     wire [31:0] forward_from_memwb = memwb_MemToReg_out ? memwb_memread_out : memwb_aluout_out;
-
-    // Mux the forwarded values into ALU inputs
     reg [31:0] alu_input_A_reg;
     reg [31:0] alu_input_Bpre_reg;
     always @(*) begin
-        // ForwardA: 00 = ID/EX.regdata1, 10 = EX/MEM.alu_result, 01 = MEM/WB
         case (ForwardA)
             2'b10: alu_input_A_reg = exmem_alu_result_out;
             2'b01: alu_input_A_reg = forward_from_memwb;
             default: alu_input_A_reg = idex_regdata1_out;
         endcase
 
-        // ForwardB: 00 = ID/EX.regdata2, 10 = EX/MEM.alu_result, 01 = MEM/WB
         case (ForwardB)
             2'b10: alu_input_Bpre_reg = exmem_alu_result_out;
             2'b01: alu_input_Bpre_reg = forward_from_memwb;
@@ -277,15 +227,13 @@ module pipelined_processor(
     assign alu_input_A = alu_input_A_reg;
     assign alu_input_B_pre = alu_input_Bpre_reg;
 
-    // Use existing ALU module
     alu alu_ex(.A(alu_input_A_final), .B(alu_input_B), .ALU_Sel(idex_ALUOp), .ALU_Out(alu_result_ex));
 
-    // Branch logic in EX stage
-    wire branch_decision = (alu_result_ex == 32'b0); // BEQ: branch if ALU result is zero
+    wire branch_decision = (alu_result_ex == 32'b0);
     wire branch_taken = idex_Branch & branch_decision;
-    wire [31:0] branch_target = idex_next_pc_out + idex_imm_out; // PC+1 already in next_pc, add offset
+    wire [31:0] branch_target = idex_next_pc_out + idex_imm_out;
 
-    // EX/MEM pipeline register
+    // EX/MEM register
     wire [31:0] exmem_alu_result_out;
     wire [31:0] exmem_write_data_out;
     wire [4:0]  exmem_write_reg_out;
@@ -302,7 +250,7 @@ module pipelined_processor(
         .JAL_in(idex_JAL_out),
         .link_in(idex_link_out),
         .alu_result_in(alu_result_ex),
-        .write_data_in(idex_regdata2_out),
+        .write_data_in(alu_input_B_pre),
         .write_reg_in(idex_write_reg),
         .RegWrite_in(idex_RegWrite),
         .MemRead_in(idex_MemRead),
@@ -320,12 +268,8 @@ module pipelined_processor(
         , .link_out(exmem_link_out)
     );
 
-    // ------------------------------------------------------------------
-    // MEM stage: data memory access
-    // ------------------------------------------------------------------
+    // MEM access
     wire [31:0] mem_read_data_mem;
-
-    // Hook to existing memoryFile (synchronous write, combinational read)
     memoryFile data_mem(
         .clk(clk),
         .addr(exmem_alu_result_out),
@@ -334,7 +278,7 @@ module pipelined_processor(
         .readData(mem_read_data_mem)
     );
 
-    // MEM/WB pipeline register
+    // MEM/WB register
     wire [31:0] memwb_memread_out;
     wire [31:0] memwb_aluout_out;
     wire [4:0] memwb_writereg_out;
@@ -363,25 +307,16 @@ module pipelined_processor(
         , .link_out(memwb_link_out)
     );
 
-    // ------------------------------------------------------------------
-    // WB stage: writeback selection
-    // ------------------------------------------------------------------
-    // choose between memory data and alu result
+    // WB selection
     assign writeback_data_wb = memwb_JAL_out ? memwb_link_out : (memwb_MemToReg_out ? memwb_memread_out : memwb_aluout_out);
     assign writeback_reg_wb  = memwb_JAL_out ? 5'd31 : memwb_writereg_out;
     assign writeback_enable_wb = memwb_RegWrite_out | memwb_JAL_out;
 
-    // ------------------------------------------------------------------
-    // PC update logic (handles stall and branch/flush)
-    // ------------------------------------------------------------------
-    // Branch signals from EX stage
+    // PC update logic
     wire branch_taken_ex = branch_taken;
     wire [31:0] branch_target_ex = branch_target;
-    // stall comes from hazard detection unit (instantiated earlier)
-    // flush IF/ID when a branch is taken in EX or when a JAL/JR is taken in ID
     assign flush_ifid = branch_taken_ex | is_jal | is_jr;
 
-    // expose done when HALT reaches MEM/WB (pipeline drained / HALT at last stage)
     assign done = memwb_Halt_out;
 
     always @(posedge clk or posedge reset) begin
@@ -389,7 +324,7 @@ module pipelined_processor(
             pc <= initial_pc;
         end else begin
             if (halt_if) begin
-                pc <= pc; // freeze on HALT fetched
+                pc <= pc;
             end else if (branch_taken_ex) begin
                 pc <= branch_target_ex;
             end else if (is_jal) begin
@@ -397,7 +332,7 @@ module pipelined_processor(
             end else if (is_jr) begin
                 pc <= jr_target;
             end else if (stall) begin
-                pc <= pc; // freeze on hazard stall
+                pc <= pc;
             end else begin
                 pc <= pc + 1;
             end
@@ -435,7 +370,7 @@ module alu ( input [31:0] A, input [31:0] B, input [3:0] ALU_Sel, output reg [31
         endcase
     end
 endmodule
-// Synchronous register file: async read, sync write on posedge clk
+// Register file
 module registerFile (
     input  wire        clk,
     input  wire        writeEnable,
@@ -454,11 +389,10 @@ module registerFile (
             registers[i] = 32'd0;
     end
 
-    // synchronous write on clk
     always @(posedge clk) begin
         if (writeEnable && (writeReg != 5'd0))
             registers[writeReg] <= writeData;
-        registers[0] <= 32'd0; // ensure $zero stays zero
+        registers[0] <= 32'd0;
     end
 
     assign readData1 = registers[readReg1];
@@ -467,10 +401,10 @@ module registerFile (
 endmodule
 
 
-// Simple data memory: synchronous write on clk, combinational read
+// Data memory
 module memoryFile (
     input  wire        clk,
-    input  wire [31:0] addr,        // byte address expected, but we use word-aligned indexing
+    input  wire [31:0] addr,
     input  wire        writeEnable,
     input  wire [31:0] writeData,
     output wire [31:0] readData
@@ -481,13 +415,11 @@ module memoryFile (
         for (i=0; i<256; i=i+1) mem[i] = 32'd0;
     end
 
-    // synchronous write
     always @(posedge clk) begin
         if (writeEnable)
-            mem[addr[7:0] >> 2] <= writeData; // word index: assume addr aligned
+            mem[addr[7:0] >> 2] <= writeData;
     end
 
-    // combinational read
     assign readData = mem[addr[7:0] >> 2];
 endmodule
 
@@ -639,26 +571,7 @@ factorial: addi $sp, $sp, -8
 endmodule
 
 
-/* ------------------------------------------------------------------
- * Pipeline register modules: implement these to capture signals across
- * clock edges. They include stall and flush behavior where needed.
- * ------------------------------------------------------------------ */
-
-/* IF/ID pipeline register
- *
- * Purpose:
- * - Latch the instruction fetched in IF along with the "next PC" value so
- *   that the ID stage has a stable instruction and PC value to operate on.
- * - Supports stall and flush semantics: when a stall is asserted the IF/ID
- *   contents may be held (freeze); when a flush is asserted the register is
- *   cleared to a NOP (commonly implemented by writing zeroed instruction).
- *
- * Behavior summary:
- * - On reset: clear outputs to represent a NOP.
- * - On stall: retain current outputs (freeze fetch stage progress).
- * - On flush: insert a bubble by setting outputs to NOP.
- * - Normal operation: capture instr_in and next_pc_in at the rising edge of clk.
- */
+// IF/ID register
 module IF_ID_reg(
     input wire clk,
     input wire reset,
@@ -671,14 +584,13 @@ module IF_ID_reg(
 );
     always @(posedge clk or posedge reset) begin
         if (reset) begin
-            instr_out <= 32'b0; // treat 0 as NOP
+            instr_out <= 32'b0;
             next_pc_out <= 32'b0;
         end else if (stall) begin
-            // keep current values
             instr_out <= instr_out;
             next_pc_out <= next_pc_out;
         end else if (flush) begin
-            instr_out <= 32'b0; // injected bubble
+            instr_out <= 32'b0;
             next_pc_out <= 32'b0;
         end else begin
             instr_out <= instr_in;
@@ -687,28 +599,7 @@ module IF_ID_reg(
     end
 endmodule
 
-/* ID/EX pipeline register
- *
- * Purpose:
- * - Capture and hold decoded instruction information (operands, immediate,
- *   destination register fields) and the control signals generated during ID
- *   so the EX stage can operate on a stable set of inputs for one clock cycle.
- * - Provide stall and bubble (flush) support: when a hazard is detected the
- *   hazard unit can assert `stall` to freeze or insert a bubble into the EX
- *   stage. A common bubble implementation clears control signals so the EX
- *   stage performs no state-changing operations this cycle.
- *
- * Behavior summary:
- * - On reset: clears all data and control outputs (NOP in pipeline).
- * - On stall: control signals are typically zeroed (bubble) while data fields
- *   can be held or also frozen depending on hazard design - this module
- *   currently zeros control signals on stall to inject a bubble.
- * - Normal operation: copies ID inputs to outputs on the rising edge of clk.
- *
- * Signals carried (examples): next_pc, readData1, readData2, sign-extended
- * immediate, rs/rt/rd fields, and control signals such as RegWrite, MemRead,
- * MemWrite, MemToReg, ALUSrc, ALUOp (these travel to EX and beyond).
- */
+// ID/EX register
 module ID_EX_reg(
     input wire clk,
     input wire reset,
@@ -774,7 +665,6 @@ module ID_EX_reg(
             JAL_out <= 1'b0;
             link_out <= 32'b0;
         end else if (stall) begin
-            // insert bubble: zero control signals, keep others or freeze as design requires
             RegWrite_out <= 1'b0;
             MemRead_out <= 1'b0;
             MemWrite_out <= 1'b0;
@@ -809,25 +699,7 @@ module ID_EX_reg(
     end
 endmodule
 
-/* EX/MEM pipeline register
- *
- * Purpose:
- * - Transfer ALU results, store-data (register value to write to memory),
- *   destination register index, and control signals from the EX stage to the
- *   MEM stage. This isolates the MEM stage from changes occurring in EX on the
- *   next cycle.
- *
- * Signals carried:
- * - alu_result: computed address or ALU result used for loads/stores and
- *   arithmetic results forwarded to later stages.
- * - write_data: register value to be written to data memory on stores.
- * - write_reg: destination register index for the WB stage.
- * - control signals: RegWrite, MemRead, MemWrite, MemToReg.
- *
- * Behavior summary:
- * - On reset: outputs cleared.
- * - Normal operation: copies inputs to outputs on rising clk edge.
- */
+// EX/MEM register
 module EX_MEM_reg(
     input wire clk,
     input wire reset,
@@ -847,10 +719,10 @@ module EX_MEM_reg(
     output reg RegWrite_out,
     output reg MemRead_out,
     output reg MemWrite_out,
-    output reg MemToReg_out
-    , output reg Halt_out
-    , output reg JAL_out
-    , output reg [31:0] link_out
+    output reg MemToReg_out, 
+    output reg Halt_out, 
+    output reg JAL_out, 
+    output reg [31:0] link_out
 );
     always @(posedge clk or posedge reset) begin
         if (reset) begin
@@ -879,24 +751,7 @@ module EX_MEM_reg(
     end
 endmodule
 
-/* MEM/WB pipeline register
- *
- * Purpose:
- * - Pass the data loaded from memory (for loads), the ALU result (for
- *   arithmetic instructions), the destination register index, and the control
- *   signals from the MEM stage to the WB stage where register writes occur.
- *
- * Signals carried:
- * - mem_read: data read from data memory (valid when MemToReg is asserted).
- * - alu_result: passthrough of ALU result for instructions that write back
- *   ALU results instead of memory data.
- * - write_reg: destination register for the write-back stage.
- * - control signals: RegWrite, MemToReg.
- *
- * Behavior summary:
- * - On reset: outputs cleared.
- * - Normal operation: capture inputs on rising clk and present them to WB.
- */
+// MEM/WB register
 module MEM_WB_reg(
     input wire clk,
     input wire reset,
@@ -912,10 +767,10 @@ module MEM_WB_reg(
     output reg [31:0] alu_result_out,
     output reg [4:0] write_reg_out,
     output reg RegWrite_out,
-    output reg MemToReg_out
-    , output reg Halt_out
-    , output reg JAL_out
-    , output reg [31:0] link_out
+    output reg MemToReg_out, 
+    output reg Halt_out, 
+    output reg JAL_out, 
+    output reg [31:0] link_out
 );
     always @(posedge clk or posedge reset) begin
         if (reset) begin
@@ -940,9 +795,7 @@ module MEM_WB_reg(
     end
 endmodule
 
-// ------------------------------------------------------------------
-// Control unit: generate control signals from opcode (and funct for R-type)
-// ------------------------------------------------------------------
+// Control signals
 module control_unit(
     input wire [5:0] opcode,
     input wire [5:0] funct,
@@ -957,7 +810,6 @@ module control_unit(
     output reg ExtOp
 );
     always @(*) begin
-        // default values
         RegWrite = 1'b0;
         MemRead  = 1'b0;
         MemWrite = 1'b0;
@@ -965,15 +817,14 @@ module control_unit(
         ALUSrc   = 1'b0;
         RegDst   = 1'b0;
         Branch   = 1'b0;
-        ALUOp    = 4'b1111; // default to Invalid
-        ExtOp    = 1'b0;   // default: sign-extend
+        ALUOp    = 4'b1111;
+        ExtOp    = 1'b0;
 
         case (opcode)
-            6'b000000: begin // R-type
+            6'b000000: begin
                 RegWrite = 1'b1;
                 ALUSrc = 1'b0;
                 RegDst = 1'b1;
-                // determine ALUOp by funct
                 case (funct)
                     6'b100000: ALUOp = 4'b0000; // ADD (32)
                     6'b011000: ALUOp = 4'b0001; // MUL (24)
@@ -992,9 +843,9 @@ module control_unit(
                 ALUSrc = 1'b1;
                 RegDst = 1'b0;
                 ALUOp = 4'b0000;
-                ExtOp = 1'b0; // sign-extend for ADDI
+                ExtOp = 1'b0;
             end
-            6'b100011: begin // LW (35)
+            6'b100011: begin
                 RegWrite = 1'b1;
                 MemRead = 1'b1;
                 MemToReg = 1'b1;
@@ -1002,41 +853,39 @@ module control_unit(
                 RegDst = 1'b0;
                 ALUOp = 4'b0000;
             end
-            6'b101011: begin // SW (43)
+            6'b101011: begin
                 MemWrite = 1'b1;
                 ALUSrc = 1'b1;
                 ALUOp = 4'b0000;
             end
-            6'b000100: begin // BEQ (4)
+            6'b000100: begin
                 Branch = 1'b1;
                 ALUSrc = 1'b0;
-                ALUOp =  4'b1001; // compare via ALU (assume zero test)
+                ALUOp =  4'b1001;
             end
-            6'b001100: begin // ANDI (12)
+            6'b001100: begin
                 RegWrite = 1'b1;
                 ALUSrc = 1'b1;
                 RegDst = 1'b0;
                 ALUOp = 4'b0010;
-                ExtOp = 1'b1; // zero-extend for ANDI
+                ExtOp = 1'b1;
             end
-            6'b001101: begin // ORI (13)
+            6'b001101: begin
                 RegWrite = 1'b1;
                 ALUSrc = 1'b1;
                 RegDst = 1'b0;
                 ALUOp = 4'b0011;
-                ExtOp = 1'b1; // zero-extend for ORI
+                ExtOp = 1'b1;
             end
             default: begin
-                // keep defaults (no-op)
             end
         endcase
     end
 endmodule
 
-// ------------------------------------------------------------------
-// Forwarding unit stub - implement logic to set ForwardA/ForwardB
-// ------------------------------------------------------------------
+// Forwarding
 module forwarding_unit(
+    input wire enable_forwarding,
     input wire EX_MEM_RegWrite,
     input wire [4:0] EX_MEM_Rd,
     input wire MEM_WB_RegWrite,
@@ -1046,53 +895,65 @@ module forwarding_unit(
     output reg [1:0] ForwardA,
     output reg [1:0] ForwardB
 );
-    // Forwarding policy (standard):
-    // - ForwardA/B = 2'b00 : use ID/EX register value
-    // - ForwardA/B = 2'b10 : use EX/MEM.alu_result
-    // - ForwardA/B = 2'b01 : use MEM/WB (alu result or mem read depending on MemToReg)
     always @(*) begin
-        // defaults
         ForwardA = 2'b00;
         ForwardB = 2'b00;
 
-        // EX hazard (highest priority)
-        if (EX_MEM_RegWrite && (EX_MEM_Rd != 5'b0) && (EX_MEM_Rd == ID_EX_Rs)) begin
-            ForwardA = 2'b10;
-        end else if (MEM_WB_RegWrite && (MEM_WB_Rd != 5'b0) && (MEM_WB_Rd == ID_EX_Rs)) begin
-            ForwardA = 2'b01;
-        end
+        if (enable_forwarding) begin
+            if (EX_MEM_RegWrite && (EX_MEM_Rd != 5'b0) && (EX_MEM_Rd == ID_EX_Rs)) begin
+                ForwardA = 2'b10;
+            end else if (MEM_WB_RegWrite && (MEM_WB_Rd != 5'b0) && (MEM_WB_Rd == ID_EX_Rs)) begin
+                ForwardA = 2'b01;
+            end
 
-        if (EX_MEM_RegWrite && (EX_MEM_Rd != 5'b0) && (EX_MEM_Rd == ID_EX_Rt)) begin
-            ForwardB = 2'b10;
-        end else if (MEM_WB_RegWrite && (MEM_WB_Rd != 5'b0) && (MEM_WB_Rd == ID_EX_Rt)) begin
-            ForwardB = 2'b01;
+            if (EX_MEM_RegWrite && (EX_MEM_Rd != 5'b0) && (EX_MEM_Rd == ID_EX_Rt)) begin
+                ForwardB = 2'b10;
+            end else if (MEM_WB_RegWrite && (MEM_WB_Rd != 5'b0) && (MEM_WB_Rd == ID_EX_Rt)) begin
+                ForwardB = 2'b01;
+            end
         end
     end
 endmodule
 
-// ------------------------------------------------------------------
-// Hazard detection unit stub - detect load-use hazards and assert stall
-// ------------------------------------------------------------------
+// Hazard detection unit
 module hazard_unit(
+    input wire enable_hazard_detection,
+    input wire enable_forwarding,
     input wire ID_EX_MemRead,
     input wire [4:0] ID_EX_Rt,
+    input wire ID_EX_RegWrite,
+    input wire [4:0] ID_EX_Rd,
+    input wire EX_MEM_RegWrite,
+    input wire [4:0] EX_MEM_Rd,
     input wire [4:0] IF_ID_Rs,
     input wire [4:0] IF_ID_Rt,
-    output wire stall
+    output reg stall
 );
-    // Step 1: Check if instruction in ID/EX is a load
     wire is_load = ID_EX_MemRead;
+    wire load_dest_valid = (ID_EX_Rt != 5'b0);
+    wire load_rs_match = (ID_EX_Rt == IF_ID_Rs);
+    wire load_rt_match = (ID_EX_Rt == IF_ID_Rt);
+    wire load_use_hazard = is_load && load_dest_valid && (load_rs_match || load_rt_match);
     
-    // Step 2: Check if load's destination register isn't $zero
-    wire valid_dest = (ID_EX_Rt != 5'b0);
+    wire idex_dest_valid = (ID_EX_Rd != 5'b0);
+    wire idex_rs_match = (ID_EX_Rd == IF_ID_Rs);
+    wire idex_rt_match = (ID_EX_Rd == IF_ID_Rt);
+    wire idex_raw_hazard = ID_EX_RegWrite && idex_dest_valid && (idex_rs_match || idex_rt_match);
     
-    // Step 3: Check if either source register matches the load's destination
-    wire rs_match = (ID_EX_Rt == IF_ID_Rs);  // first source register match
-    wire rt_match = (ID_EX_Rt == IF_ID_Rt);  // second source register match
-    wire reg_hazard = rs_match || rt_match;   // either match is a hazard
+    wire exmem_dest_valid = (EX_MEM_Rd != 5'b0);
+    wire exmem_rs_match = (EX_MEM_Rd == IF_ID_Rs);
+    wire exmem_rt_match = (EX_MEM_Rd == IF_ID_Rt);
+    wire exmem_raw_hazard = EX_MEM_RegWrite && exmem_dest_valid && (exmem_rs_match || exmem_rt_match);
     
-    // Final stall condition: must be a load, valid destination, and register hazard
-    assign stall = is_load && valid_dest && reg_hazard;
+    always @(*) begin
+        if (!enable_hazard_detection) begin
+            stall = 1'b0;
+        end else if (enable_forwarding) begin
+            stall = load_use_hazard;
+        end else begin
+            stall = load_use_hazard || idex_raw_hazard || exmem_raw_hazard;
+        end
+    end
 
 endmodule
 
@@ -1106,6 +967,8 @@ module pipeline_processor_tb;
         .clk(clk),
         .reset(reset),
         .initial_pc(40),
+        .enable_forwarding(1'b1), // enable forwarding
+        .enable_hazard_detection(1'b1), // enable hazard detection
         .done(done)
     );
 
