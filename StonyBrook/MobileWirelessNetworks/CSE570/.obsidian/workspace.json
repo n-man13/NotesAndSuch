@@ -20,8 +20,51 @@
               "icon": "lucide-file",
               "title": "GPS"
             }
+          },
+          {
+            "id": "399643ae21345f51",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "RADAR.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "RADAR"
+            }
+          },
+          {
+            "id": "57f8817f0b1c57e1",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "SpotFi.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "SpotFi"
+            }
+          },
+          {
+            "id": "c4e4bc02a0eda6af",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "SpotFi.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "SpotFi"
+            }
           }
-        ]
+        ],
+        "currentTab": 3
       }
     ],
     "direction": "vertical"
@@ -181,10 +224,14 @@
       "bases:Create new base": false
     }
   },
-  "active": "fa0029880b78149f",
+  "active": "c4e4bc02a0eda6af",
   "lastOpenFiles": [
-    "Localization.md",
+    "AccessWear.md",
+    "MUSE.md",
+    "SpotFi.md",
+    "RADAR.md",
     "GPS.md",
+    "Localization.md",
     "CrossHAR.md",
     "mmWave Radar Basics.md",
     "LIMU-BERT.md",
@@ -201,13 +248,9 @@
     "Class 10.md",
     "Acoustic Ranging and Tracking.md",
     "Applied ML.md",
-    "MUSE.md",
     "Read a Paper.md",
     "Sensor Fusion.md",
     "Signal.md",
-    "Class 6.md",
-    "Class 7.md",
-    "Class 9.md",
-    "Inertial Measurement Unit.md"
+    "Class 6.md"
   ]
 }
