@@ -130,7 +130,7 @@ AND                IF   ID   EX  MEM   WB
 ```
 Instruction Sequence:
 1. LW    $t0, 0($s0)     # $t0 = Mem[$s0]
-2. ADD   $t1, $t0, $s1   # $t1 = $t0 + $s1  (needs $t0 from LW)
+2. ADD   $t1, $t0, $s1   # $t1 = $t0 + $s1
 3. SUB   $t2, $s2, $s3   # $t2 = $s2 - $s3
 
 Cycle:    1    2    3    4    5    6    7    8
