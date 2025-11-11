@@ -1,0 +1,13 @@
+gTTS==2.5.4
+keyboard==0.13.5
+mutagen==1.47.0
+obs_websocket_py==1.0
+openai==1.97.1
+PyAudio==0.2.14
+PyAutoGUI==0.9.54
+pydub==0.25.1
+pygame==2.6.1
+rich==14.1.0
+soundfile==0.12.1
+tiktoken==0.9.0
+twitchio==2.10.0
