@@ -125,7 +125,7 @@ class BitsBot(commands.Bot):
         return bits_amount
     
     async def event_message(self, message):
-        await bot.process_message(message)
+        await self.process_message(message)
 
     async def process_message(self, message: Message):
         username = message.author.name
@@ -166,7 +166,7 @@ class AllMessagesBot(commands.Bot):
         return False
     
     async def event_message(self, message):
-        await bot.process_message(message)
+        await self.process_message(message)
 
     async def process_message(self, message: Message):
         global TOTAL_BANNED_USERS
@@ -211,17 +211,25 @@ class AllMessagesBot(commands.Bot):
             print(f"TOTAL BANS:[red]{TOTAL_BANNED_USERS}[/red] chatters.")
         
                 
-def startBot():
-    global bot
+def startBitsBot():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    bot = AllMessagesBot()
-    bot.run()
+    bits_bot = BitsBot()
+    bits_bot.run()
+
+def startAllMessagesBot():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    all_messages_bot = AllMessagesBot()
+    all_messages_bot.run()
 
 if __name__=='__main__':
     
-    bot_thread = threading.Thread(target=startBot)
-    bot_thread.start()
+    bits_bot_thread = threading.Thread(target=startBitsBot)
+    all_messages_bot_thread = threading.Thread(target=startAllMessagesBot)
+    
+    bits_bot_thread.start()
+    all_messages_bot_thread.start()
 
     while True:
         time.sleep(600)
