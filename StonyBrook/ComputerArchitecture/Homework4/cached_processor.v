@@ -867,6 +867,7 @@ module memoryFile (
     assign readData = mem[addr[15:2]];
 endmodule
 
+// Program memory - 512 bytes (128 words)
 module programMem ( input [31:0] pc, output [31:0] instruction);
     reg [31:0] instructions [127:0];
     reg [31:0] instruction_reg;
