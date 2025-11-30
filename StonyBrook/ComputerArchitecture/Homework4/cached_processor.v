@@ -501,18 +501,17 @@ module cache_controller(
     reg [2:0] state;
     reg [2:0] wb_counter;
     reg [2:0] alloc_counter;
-    reg was_read;  // Remember if original request was read or write
-    reg hit_way;   // Which way had the hit (0 or 1)
-    reg victim_way; // Which way to evict (determined by LRU)
+    reg was_read;  
+    reg hit_way;   
+    reg victim_way; 
     
-    // Captured address components (stable during multi-cycle operations)
+    
     reg [TAG_BITS-1:0] saved_tag;
     reg [INDEX_BITS-1:0] saved_index;
     reg [2:0] saved_word_offset;
     reg saved_cpu_read;
     reg saved_cpu_write;
     
-    // Check for cache hit in both ways (using saved address components)
     wire way0_hit = valid_bit[saved_index][0] && (tag_field[saved_index][0] == saved_tag);
     wire way1_hit = valid_bit[saved_index][1] && (tag_field[saved_index][1] == saved_tag);
     wire cache_hit = way0_hit || way1_hit;
@@ -548,7 +547,6 @@ module cache_controller(
                     mem_read_en <= 1'b0;
                     
                     if (cpu_read || cpu_write) begin
-                        // Capture address components and operation type for stable reference during multi-cycle operations
                         saved_tag <= addr_tag;
                         saved_index <= addr_index;
                         saved_word_offset <= addr_word_offset;
@@ -562,7 +560,6 @@ module cache_controller(
                 
                 COMPARE_TAG: begin
                     if (cache_hit) begin
-                        // Determine which way hit
                         hit_way <= way0_hit ? 1'b0 : 1'b1;
                         
                         if (saved_cpu_read) begin
@@ -570,26 +567,21 @@ module cache_controller(
                                                       : data_block[saved_index][1][saved_word_offset];
                             cache_stall <= 1'b0;
                             state <= IDLE;
-                            // Update LRU: the way that just hit becomes MRU (not LRU)
                             lru_bit[saved_index] <= way0_hit ? 1'b1 : 1'b0;
                         end else if (saved_cpu_write) begin
                             state <= WRITE_HIT;
                         end
                     end else begin
-                        // Cache miss - determine victim way using LRU
                         was_read <= saved_cpu_read;
                         
-                        // Check if there's an invalid way (cold miss)
                         if (!valid_bit[saved_index][0]) begin
                             victim_way <= 1'b0;
                         end else if (!valid_bit[saved_index][1]) begin
                             victim_way <= 1'b1;
                         end else begin
-                            // Both ways valid, use LRU
                             victim_way <= lru_bit[saved_index];
                         end
                         
-                        // Check if victim is dirty
                         if ((valid_bit[saved_index][lru_bit[saved_index]] && 
                              dirty_bit[saved_index][lru_bit[saved_index]]) ||
                             (!valid_bit[saved_index][0] && valid_bit[saved_index][1] && dirty_bit[saved_index][1]) ||
@@ -608,7 +600,6 @@ module cache_controller(
                     dirty_bit[saved_index][hit_way] <= 1'b1;
                     cache_stall <= 1'b0;
                     state <= IDLE;
-                    // Update LRU: the way that just hit becomes MRU
                     lru_bit[saved_index] <= hit_way ? 1'b0 : 1'b1;
                 end
                 
@@ -645,10 +636,8 @@ module cache_controller(
                         mem_read_en <= 1'b0;
                         alloc_counter <= 3'b0;
                         
-                        // Update LRU: the newly allocated way becomes MRU
                         lru_bit[saved_index] <= victim_way ? 1'b0 : 1'b1;
                         
-                        // Use saved request type, not current cpu_read/cpu_write
                         if (was_read) begin
                             cpu_read_data <= data_block[saved_index][victim_way][saved_word_offset];
                             cache_stall <= 1'b0;
@@ -966,6 +955,20 @@ factorial: addi $sp, $sp, -8
             addi $t0, $t0, 4
             addi $t1, $t1, -1
             bne $t1, $0, loop2
+        halt
+    */
+    /* Test 8
+        addi $t0, $0, 0
+        addi $t1, $0, 8192
+        addi $t2, $0, 32
+        loop3: lw $t3, 0($t0)
+            nop
+            nop
+            lw $t4, 0($t1)
+            nop
+            nop
+            addi $t2, $t2, -1
+            bne $t2, $0, loop3
         halt
     */
 
@@ -1514,7 +1517,7 @@ module pipeline_processor_tb;
     pipelined_processor DUT(
         .clk(clk),
         .reset(reset),
-        .initial_pc(73),
+        .initial_pc(57),
         .enable_forwarding(1'b1), // enable forwarding
         .enable_hazard_detection(1'b1), // enable hazard detection
         .done(done)
