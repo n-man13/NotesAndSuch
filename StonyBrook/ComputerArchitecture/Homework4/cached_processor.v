@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-// 5-stage pipelined MIPS processor with forwarding and hazard detection
+// 5-stage pipelined MIPS processor with forwarding and hazard detection with an 8kB cache
 
 module pipelined_processor(
     input wire clk,
@@ -1064,10 +1064,7 @@ factorial: addi $sp, $sp, -8
         instructions[71] = 32'b000101_01001_00000_1111_1111_1111_1010; // BNE $t1, $0, loop2 (-6)
         instructions[72] = 32'b111111_00000_00000_0000_0000_0000_0000; // HALT
 
-        // Test 8: Conflict test - accesses address 0 and 8192 (0x2000) which conflict in direct-mapped
-        // Both addresses have index=0 (bits 5-12 are all 0) but different tags
-        // Direct-mapped: will thrash, evicting and reloading same cache line repeatedly (many misses)
-        // 2-way: both blocks fit in same set (index 0) using different ways (few misses)
+        // Test 8
         instructions[73] = 32'b001000_00000_01000_0000_0000_0000_0000; // ADDI $t0, $0, 0
         instructions[74] = 32'b001000_00000_01001_0010_0000_0000_0000; // ADDI $t1, $0, 8192 (0x2000)
         instructions[75] = 32'b001000_00000_01010_0000_0000_0010_0000; // ADDI $t2, $0, 32 (loop counter)
@@ -1123,7 +1120,7 @@ module ID_EX_reg(
     input wire stall,
     input wire flush,
     input wire Halt_in,
-    // data inputs
+    
     input wire [31:0] next_pc_in,
     input wire [31:0] regdata1_in,
     input wire [31:0] regdata2_in,
@@ -1131,7 +1128,7 @@ module ID_EX_reg(
     input wire [4:0] rs_in,
     input wire [4:0] rt_in,
     input wire [4:0] rd_in,
-    // control inputs
+    
     input wire RegWrite_in,
     input wire MemRead_in,
     input wire MemWrite_in,
@@ -1143,7 +1140,7 @@ module ID_EX_reg(
     input wire [3:0] ALUOp_in,
     input wire JAL_in,
     input wire [31:0] link_in,
-    // outputs
+
     output reg [31:0] next_pc_out,
     output reg [31:0] regdata1_out,
     output reg [31:0] regdata2_out,
@@ -1390,7 +1387,7 @@ module control_unit(
                 ALUOp = 4'b0000;
                 ExtOp = 1'b0;
             end
-            6'b100011: begin
+            6'b100011: begin // LW (35)
                 RegWrite = 1'b1;
                 MemRead = 1'b1;
                 MemToReg = 1'b1;
@@ -1398,7 +1395,7 @@ module control_unit(
                 RegDst = 1'b0;
                 ALUOp = 4'b0000;
             end
-            6'b101011: begin
+            6'b101011: begin // SW (43)
                 MemWrite = 1'b1;
                 ALUSrc = 1'b1;
                 ALUOp = 4'b0000;
@@ -1415,14 +1412,14 @@ module control_unit(
                 ALUSrc = 1'b0;
                 ALUOp =  4'b1001;
             end
-            6'b001100: begin
+            6'b001100: begin // ANDI (12)
                 RegWrite = 1'b1;
                 ALUSrc = 1'b1;
                 RegDst = 1'b0;
                 ALUOp = 4'b0010;
                 ExtOp = 1'b1;
             end
-            6'b001101: begin
+            6'b001101: begin // ORI (13)
                 RegWrite = 1'b1;
                 ALUSrc = 1'b1;
                 RegDst = 1'b0;
