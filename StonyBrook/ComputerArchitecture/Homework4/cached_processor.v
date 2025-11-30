@@ -845,7 +845,7 @@ endmodule
 */
 // ===== END DIRECT-MAPPED CACHE =====
 
-// Data memory
+// Data memory - 64KB (16384 words)
 module memoryFile (
     input  wire        clk,
     input  wire [31:0] addr,
@@ -853,18 +853,18 @@ module memoryFile (
     input  wire [31:0] writeData,
     output wire [31:0] readData
 );
-    reg [31:0] mem [0:255];
+    reg [31:0] mem [0:16383];
     integer i;
     initial begin
-        for (i=0; i<256; i=i+1) mem[i] = 32'd0;
+        for (i=0; i<16384; i=i+1) mem[i] = 32'd0;
     end
 
     always @(posedge clk) begin
         if (writeEnable)
-            mem[addr[7:0] >> 2] <= writeData;
+            mem[addr[15:2]] <= writeData;
     end
 
-    assign readData = mem[addr[7:0] >> 2];
+    assign readData = mem[addr[15:2]];
 endmodule
 
 module programMem ( input [31:0] pc, output [31:0] instruction);
@@ -1517,7 +1517,7 @@ module pipeline_processor_tb;
     pipelined_processor DUT(
         .clk(clk),
         .reset(reset),
-        .initial_pc(57),
+        .initial_pc(73),
         .enable_forwarding(1'b1), // enable forwarding
         .enable_hazard_detection(1'b1), // enable hazard detection
         .done(done)
