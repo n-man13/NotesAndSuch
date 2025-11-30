@@ -853,7 +853,7 @@ module memoryFile (
     input  wire [31:0] writeData,
     output wire [31:0] readData
 );
-    reg [31:0] mem [0:16383];
+    reg [31:0] mem [16383:0];
     integer i;
     initial begin
         for (i=0; i<16384; i=i+1) mem[i] = 32'd0;
