@@ -1,0 +1,21 @@
+# Twitch Configuration
+# Get your oauth token from https://twitchapps.com/tmi/
+# Format: oauth:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+OAUTH_TOKEN=oauth:YOUR_TOKEN_HERE
+BOT_USERNAME=your_bot_username
+CHANNEL=your_channel_name
+
+# Timer Configuration
+# Random time range to add per subscription (in seconds)
+# Random value between MIN and MAX (inclusive)
+MIN_SECONDS_ADD=300
+MAX_SECONDS_ADD=600
+# Initial timer value in minutes
+INITIAL_MINUTES=60
+
+# Channel Point Redemption Configuration
+# UUID of the custom reward (Check your Twitch logs or use a tool to find the ID)
+REWARD_ID=00000000-0000-0000-0000-000000000000
+# Random time range for redemption (in seconds)
+MIN_SECONDS_REDEEM=60
+MAX_SECONDS_REDEEM=120

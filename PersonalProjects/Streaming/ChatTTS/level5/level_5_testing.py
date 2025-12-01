@@ -13,7 +13,8 @@ from rich import print
 from twitchio.ext import commands
 from twitchio import *
 
-TWITCH_MOD_OAUTH_TOKEN = os.getenv('az4o1u32ujubayzf4bnota5brjkaxg')  # Replace with your Twitch OAuth token
+# refresh token: 3vs04hx305n0dd9xbgihe2tpntobfjgsn48a2ccw8racuhlb28
+TWITCH_MOD_OAUTH_TOKEN = "clbzlqmdikq11bpzhu1dbd37onz79n" #os.getenv('az4o1u32ujubayzf4bnota5brjkaxg')  # Replace with your Twitch OAuth token
 
 class BitsBot(commands.Bot):
 
@@ -226,10 +227,10 @@ def startAllMessagesBot():
 if __name__=='__main__':
     
     bits_bot_thread = threading.Thread(target=startBitsBot)
-    all_messages_bot_thread = threading.Thread(target=startAllMessagesBot)
+    #all_messages_bot_thread = threading.Thread(target=startAllMessagesBot)
     
     bits_bot_thread.start()
-    all_messages_bot_thread.start()
+    #all_messages_bot_thread.start()
 
     while True:
         time.sleep(600)
