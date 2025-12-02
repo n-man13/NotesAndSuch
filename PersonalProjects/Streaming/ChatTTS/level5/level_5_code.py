@@ -21,7 +21,7 @@ from click_manager import click_at_position
 from website_manager import open_website
 from google_tts import text_to_speech
 audio_manager = AudioManager()
-chatgpt_manager = OpenAiManager()
+# chatgpt_manager = OpenAiManager()
 obs_manager = OBSWebsocketsManager()
 ############################################################
 
