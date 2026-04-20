@@ -125,12 +125,26 @@ This guide expands core theoretical and practical concepts for VR development. E
 ---
 
 ## Projections (Perspective & Orthographic)
-- Perspective projection maps frustum to clip space; after homogeneous divide $x,y$ get perspective.
-- Common perspective projection matrix (LHCS, column-major):
-    - With $f=1/\\tan(\\mathrm{fov}/2)$ and aspect $a$, near $n$, far $f$: $$M_{proj}=\\begin{bmatrix}\\dfrac{f}{a}&0&0&0\\\\0&f&0&0\\\\0&0&\\dfrac{far}{far-near}&-\\dfrac{far\\cdot near}{far-near}\\\\0&0&1&0\\end{bmatrix}$$
-    - After multiplication, perform perspective divide by $w$ to go to NDC, then map to viewport.
-- Orthographic: linear mapping; preserves parallel lines (no perspective divide).
-- Clipping occurs in clip space then NDC; only triangles intersecting the canonical cube $[-1,1]^3$ survive.
+- Perspective projection: maps the view-space frustum to clip space so that after the homogeneous divide $x,y$ exhibit perspective foreshortening.
+    - Parameters: vertical field-of-view `fov`, aspect `a` (width/height), near `n`, far `f`.
+    - Focal scale: $s = 1/\tan(\mathrm{fov}/2)$.
+    - Common (LHCS, column-major) example matrix (conventions vary by API):
+        $$M_{proj}=\begin{bmatrix}\dfrac{s}{a}&0&0&0\\0&s&0&0\\0&0&\dfrac{far}{far-near}&-\dfrac{far\cdot near}{far-near}\\0&0&1&0\end{bmatrix}$$
+    - Pipeline notes:
+        - Clip-space: $v_{clip}=M_{proj}\,v_{view}$ (homogeneous).
+        - Perspective divide: $v_{ndc}=v_{clip}/v_{clip}.w$ to produce NDC coordinates.
+        - Viewport transform: $x_{screen}=(x_{ndc}+1)/2\cdot\text{width}$, $y_{screen}=(1-y_{ndc})/2\cdot\text{height}$ (Y convention may vary).
+        - Depth: $z_{ndc}=z_{clip}/w_{clip}$. NDC z-range depends on API (OpenGL uses $[-1,1]$, DirectX uses $[0,1]$).
+        - Precision: perspective depth is non-linear (more precision near the near plane). Large `far/near` ratios cause z-fighting; mitigate by moving `near` as far out as acceptable, using higher precision depth or reverse-Z techniques.
+    - Common issues: frustum culling, clipping at the near plane, z-fighting, and API-dependent sign/scale conventions (don't rely on memorized signs; understand the pipeline).
+
+- Orthographic (parallel) projection: linear mapping of a rectangular box $[l,r]\times[b,t]\times[n,f]$ to clip space; preserves sizes and parallelism (no perspective foreshortening).
+    - Example (LHCS, column-major) mapping z to $[0,1]$:
+        $$M_{ortho}=\begin{bmatrix}\dfrac{2}{r-l}&0&0&-\dfrac{r+l}{r-l}\\0&\dfrac{2}{t-b}&0&-\dfrac{t+b}{t-b}\\0&0&\dfrac{1}{far-near}&-\dfrac{near}{far-near}\\0&0&0&1\end{bmatrix}$$
+    - Pipeline: $v_{clip}=M_{ortho}\,v_{view}$. Because $w=1$, no perspective divide is required; NDC coordinates are linear with view-space coordinates.
+    - Use cases: UI overlays, CAD/engineering views, shadow-map orthographic passes.
+
+- Clipping: clipping is performed in clip space against the canonical view volume (before the divide) so attributes interpolate correctly. After dividing by $w$, coordinates are in NDC; primitives outside the $[-1,1]^3$ cube are clipped or culled.
 
 ---
 
