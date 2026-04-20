@@ -1,0 +1,102 @@
+Diffie-Hellman
+DLG (Discrete Logarithm Problem): Given ga, find a.
+CDH (Computational Diffie-Hellman): Given ga and gb, find gab.
+DDH (Decisional Diffie-Hellman): Given ga,gb, and a value Z, decide if Z=gab or if Z is just a random group element.
+
+One Time Pad: xor message with random number of equal length. Perfect security as long as no key reuse. If key reuse, xor 2 encrypted messages and key cancels out
+
+AES-ECB: Encrypts blocks independently and leaks patterns in the data.
+
+
+AES-CBC: Provides confidentiality but no built-in integrity protection.
+
+
+AES-CTR: Turns AES into a stream cipher but does not authenticate the ciphertext.
+
+AES-GCM: Provides authenticated encryption, ensuring both confidentiality and integrity, which protects from both data disclosure and tampering.
+TLS 1.3 Protocol Exchange (1-RTT)
+The beauty of TLS 1.3 is that the Key Exchange happens at the same time as the Hello messages.
+Step 1: Client Hello
+The Client sends a single message containing:
+Protocol Version: (TLS 1.3)
+Cipher Suites: A list of supported AEAD ciphers.
+Key Share: The client guesses the server's preferred key exchange algorithm (usually ECDHE) and sends its public key share immediately.
+Step 2: Server Hello & Response
+The Server responds with:
+Server Hello: Confirms the selected Cipher Suite.
+Key Share: The server sends its own public key share.
+Server Parameters: Encrypted extensions and the Certificate.
+Finished: A MAC (Message Authentication Code) over the entire handshake to prove nothing was tampered with.
+Step 3: Client Finished
+The Client verifies the server’s certificate and the "Finished" message. It then sends its own Finished message.
+Merkle Tree Construction (Short Protocol)
+Hash the Data: Take each data block (D1​,D2​...) and hash it to create the Leaves (H1​,H2​...).
+Pair & Concatenate: Join neighboring hashes together: H1​|H2​.
+Hash the Pair: Hash that combination to create a Parent Node: H12​=Hash(H1​|H2​).
+Repeat Upward: Continue pairing and hashing parents until only one remains.
+The Root: The final single hash is the Merkle Root
+
+Weakness
+Typical Attack
+Solution
+Static Keys
+Retrospective Decryption
+Ephemeral Keys (PFS)
+No Randoms
+Replay Attack
+Sequence #s or Timestamps
+Weak Hashing
+Collision Attack
+SHA-256 or better
+Plaintext Handshake
+Eavesdropping / Sniffing
+Encrypted Handshake
+
+DNS Protocol Recap
+The "Lookup" Process
+Recursive Resolver: Your ISP’s server that does the legwork for you.
+Root Server: The first stop; points to the TLD (Top Level Domain) server (like .com).
+TLD Server: Points to the Authoritative Name Server.
+Authoritative Name Server: Holds the actual IP address record.
+Serious Flaws
+DNS was designed in the 1980s when the internet was a "neighborhood of trust." It has three massive security holes:
+1. DNS Cache Poisoning (Spoofing)
+The Flaw: DNS originally used simple Transaction IDs (TXIDs) to match requests to answers.
+The Attack: A hacker sends a fake IP address to a resolver faster than the real server can. If the TXID matches, the resolver "trusts" the fake info and saves it (caches it).
+Result: Thousands of users trying to go to bank.com are sent to a hacker's fake site.
+2. Lack of Encryption (Privacy)
+The Flaw: Standard DNS queries are sent in Plaintext (UDP Port 53).
+Why it's bad: Anyone on your Wi-Fi or your ISP can see exactly what websites you are looking up.
+The Fix: DoH (DNS over HTTPS) or DoT (DNS over TLS) encrypts these requests.
+3. DNS Amplification (DDoS)
+The Flaw: DNS uses UDP, which is "connectionless" (no handshake).
+The Attack: A hacker sends a tiny request to a DNS server but spoofs the return address to be the Victim's IP. The DNS server sends a massive response to the victim.
+Result: A small amount of hacker bandwidth can "amplify" into a flood that knocks a victim offline.
+DNSSEC (DNS Security Extensions) adds Digital Signatures to DNS records.
+It uses a Chain of Trust (similar to a Merkle Tree concept) to prove that the DNS record actually came from the real owner and wasn't tampered with.
+Note for test: DNSSEC provides Integrity and Authentication, but it does NOT provide Privacy (it’s still plaintext!).
+
+
+
+
+
+
+
+MAC:
+Feature
+Message Authentication Code (MAC)
+Digital Signature
+Key Type
+Symmetric (Shared Secret)
+Asymmetric (Public/Private Pair)
+Speed
+Very Fast
+Slower (Mathematical complexity)
+Non-Repudiation
+No
+Yes
+Primary Use
+Network packet integrity
+Legal documents / Code signing
+
+
