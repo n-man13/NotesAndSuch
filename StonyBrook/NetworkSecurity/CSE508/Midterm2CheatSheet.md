@@ -30,7 +30,7 @@ A compact reference for core concepts likely to appear on the midterm.
 
 ## Merkle Tree (construction)
 1. Hash each data block to produce leaves: $H_1, H_2, \ldots$.
-2. Pair neighboring leaves, concatenate pairs, and hash pairs to form parent nodes: e.g. $$H_{12} = H( H_1 \| H_2 )$$
+2. Pair neighboring leaves, concatenate pairs, and hash pairs to form parent nodes: e.g. $H_{12} = H( H_1 \| H_2 )$
 3. Repeat upward until a single root hash remains — the Merkle root.
 
 ---
