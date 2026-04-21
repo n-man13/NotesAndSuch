@@ -1,0 +1,971 @@
+CSE 508
+  
+ 
+Omar Haider Chowdhury
+Empire Innovation Scholar and Associate Professor
+Department of Computer Science
+Stony Brook University������������������������������������������������������
+
+•This class will have the following modules:
+•Background: 
+•Cryptography
+•Introduction to Network and Protocols
+•Authentication
+•Access Control
+•Attacks and Defenses against protocols 
+•Essential tools for attack and defense
+•Web Security
+•Privacy and Anonymity 
+•Advanced Topics (Protocol Verification)Modules
+
+•This class will have the following modules:
+•Background: 
+•Cryptography
+•Introduction to Network and Protocols
+•Authentication
+•Access Control
+•Attacks and Defenses against protocols 
+•Essential tools for attack and defense
+•Web Security
+•Privacy and Anonymity 
+•Advanced Topics (Protocol Verification)Modules
+
+M2M Authentication
+•Password is a good mechanism to achieve user authentication
+•Although we have seen problems with password -based 
+authentication mechanism, there are approaches (e.g., two -factor 
+authentication) with which one can essentially improve the achieve 
+guarantees. 
+•Question : What mechanisms can two machines employ for 
+authentication when they have not communicated before? 
+• A relevant question to the above is that: how can we verify that we are 
+indeed communicating with the Google server?   
+
+Untrusted Network
+4
+
+Untrusted Network
+Key sharing?
+No Confidentiality & Integrity
+4
+
+Untrusted Network
+4
+
+Untrusted Network
+Public 
+ key cryptography
+5
+
+Untrusted Network
+Public 
+ key cryptography
+5
+
+Untrusted Network
+Public 
+ key cryptography
+Problem?
+5
+Secure distribution of public key
+
+Untrusted Network
+Public 
+ key cryptography
+Secure distribution of public key
+Problem?
+6
+
+Untrusted Network
+Public 
+ key cryptography
+Secure distribution of public key
+Problem?
+6
+
+M2M Authentication
+• The answer to the previous question about M2M authentication depends on the 
+assumption you make about the setting (will be made precise later) 
+• This is also applicable to many other contexts such as the following: 
+• How do I know my bootloader is not corrupted? 
+• How do I check whether someone modified my software without permission? 
+• How do I know that the DNS response I obtained is not spoofed? 
+• How do I know that the server I am communicating with is the intended server not an 
+impersonator? 
+• How do I know the software I have downloaded is authentic? 
+• How do I know the Diffie -Hellman public -key I received for Bob is indeed Bob’s? 
+
+M2M Authentication
+• The answer to the previous question about M2M authentication depends on the 
+assumption you make about the setting (will be made precise later) 
+• This is also applicable to many other contexts such as the following: 
+• How do I know my bootloader is not corrupted? 
+• How do I check whether someone modified my software without permission? 
+• How do I know that the DNS response I obtained is not spoofed? 
+• How do I know that the server I am communicating with is the intended server not an 
+impersonator? 
+• How do I know the software I have downloaded is authentic? 
+• How do I know the Diffie -Hellman public -key I received for Bob is indeed Bob’s? 
+We can use “Digital Signature” to validate the integrity of the content 
+but how do we ensure that the public verification key indeed belongs to the legitimate entity. 
+
+M2M Authentication
+• In this lecture, we will try to answer the following question: 
+• How do I verify that the public key I received indeed belongs to my intended 
+recipient?
+• Put differently, we want a verifiable binding of an “identity” (e.g., Google) and 
+its public key. 
+• Intuition : We need to rely on some individuals  who will vouch for the legitimacy 
+of the public key and identity mapping  
+• These entities are known as “ Certificate Authorities ” or CA, in short. 
+
+Certificates
+• Conceptually, a certificate is a statement of the form: “ Entity A vouches that the 
+public key K belongs to entity E ”
+• Entity A vouches for <K, E> (i.e., public key and identity) mapping/binding 
+•In this approach, you trust  <K, E> if you have received a certificate in which A 
+vouches for this binding/mapping. 
+• The idea is that if you trust  Entity A, then through a certificate from A, you will trust that 
+the public key K belongs to E. 
+• The next question is that how do we ensure that the certificate is unforgeable, 
+authentic, and integrity -protected . 
+
+Certificates
+• Conceptually, a certificate is a statement of the form: “ Entity A vouches that the 
+public key K belongs to entity E ”
+• Entity A vouches for <K, E> (i.e., public key and identity) mapping/binding 
+•In this approach, you trust  <K, E> if you have received a certificate in which A 
+vouches for this binding/mapping. 
+• The idea is that if you trust  Entity A, then through a certificate from A, you will trust that 
+the public key K belongs to E. 
+• The next question is that how do we ensure that the certificate is unforgeable, 
+authentic, and integrity -protected . 
+Digital Signatures
+
+Trusting Certificates
+• Assumption:  You know the public signature verification key of Entity A
+• Entity A will digital sign the <K, E> mapping (actually, its hash) with A’s private 
+signing key that only A knows. 
+• Conceptually, a certificate C will thus contain the following fields: 
+•The name of the issuer, 
+•The <K,E> mapping, 
+•The signature field value S = sign(SKA, H(<K,E>)),
+•During secure communication or any other application contexts, when E wants to 
+authenticate itself to you and give you assurance that K is its public key, then it 
+will give you the certificate from A, identified as C
+• Once you receive the certificate C, you will check: 
+•The name of the issuer, and 
+•verify (PKA, S) =? H(<K,E>)
+
+X.509 Public Key Infrastructure (PKI)
+Certificate Authority
+11
+
+X.509 Public Key Infrastructure (PKI)
+Certificate Authority
+11
+
+X.509 Public Key Infrastructure (PKI)
+Certificate Authority
+11
+
+X.509 Public Key Infrastructure (PKI)
+Certificate Authority
+11
+
+X.509 Public Key Infrastructure (PKI)
+Certificate Authority
+11
+
+X.509 Public Key Infrastructure (PKI)
+Certificate Authority
+11How can we obtain the CA’s public key ?
+
+The Nature of the Trust Relationship
+•We have a problem now … 
+• How do we scale the idea of trust so that it works for Internet?  
+•Trust is a binary relationship between two entities A and B: Trust(A,B) 
+• In the context of digital certificates, the trust relationship is: 
+•Reflexive : Trust (A,A) for all A 
+•Symmetric : Trust (A, B) entails Trust (B, A)
+•Transitive : Trust (A, B) and Trust (B, C) entails Trust (A, C)
+•How does this trust relationship compare to the trust in real world ?    
+
+The Nature of the Trust Relationship
+•We have a problem now … 
+• How do we scale the idea of trust so that it works for Internet?  
+•Trust is a binary relationship between two entities A and B: Trust(A,B) 
+• In the context of digital certificates, the trust relationship is: 
+•Reflexive : Trust (A,A) for all A 
+•Symmetric : Trust (A, B) entails Trust (B, A)
+•Transitive : Trust (A, B) and Trust (B, C) entails Trust (A, C)
+•How does this trust relationship compare to the trust in real world ?    
+For the scaling problem for the Internet, we rely on the Transitive nature of the binary trust 
+relationship.
+
+The Nature of the Trust Relationship
+•We have a problem now … 
+• How do we scale the idea of trust so that it works for Internet?  
+•Trust is a binary relationship between two entities A and B: Trust(A,B) 
+• In the context of digital certificates, the trust relationship is: 
+•Reflexive : Trust (A,A) for all A 
+•Symmetric : Trust (A, B) entails Trust (B, A)
+•Transitive : Trust (A, B) and Trust (B, C) entails Trust (A, C)
+•How does this trust relationship compare to the trust in real world ?    
+An instance of this general idea is X.509 Public -key Infrastructure (PKI) which can be used for 
+bootstrapping public -key distribution and authenticationFor the scaling problem for the Internet, we rely on the Transitive nature of the binary trust 
+relationship.
+
+X.509 Public Key Infrastructure (PKI)
+Root -level CA
+Intermediate -level CA
+Intermediate -level CA
+13
+
+X.509 Public Key Infrastructure (PKI)
+Root -level CA
+Intermediate -level CA
+Intermediate -level CA
+13
+
+X.509 Public Key Infrastructure (PKI)
+Root -level CA
+Intermediate -level CA
+Intermediate -level CA
+13
+
+X.509 Public Key Infrastructure (PKI)
+Root -level CA
+Intermediate -level CA
+Intermediate -level CA
+13
+
+X.509 Public Key Infrastructure (PKI)
+Root -level CA
+Intermediate -level CA
+Intermediate -level CA
+13
+
+The timeline the Trust Relationship
+•Should the trust have an expiration date? 
+• The answer is yes!! This is because: 
+• The client’s private key may be stolen 
+• The CA’s private key may be stolen. 
+•This vouch statement should have an expiration date.
+•Conceptually, a certificate C will thus contain the following fields: 
+•The name of the issuer, 
+•The <K,E> mapping, 
+•The signature field value S = sign(SKA, H(<K,E>)),
+•An expiration date  
+•Once you receive the certificate C, you will check: 
+•The name of the issuer, 
+•The expiration date , and 
+• verify (PKA, S) =? H(<K,E>)
+
+What if Bad Things Happen?
+•What if a CA got hacked? 
+• What if the Client’s private key got stolen and the Client got a CA issued 
+certificate for the corresponding public key? 
+• Expiration date is not enough because these bad things can happen before 
+expiration date
+• Expiration dictates the attack window 
+•Two approaches: 
+• Certificates with very short expiration date 
+• Revocation Mechanisms (Details later) 
+•An approach with which the CA can revoke its trust from a certificate 
+•Once you receive the certificate C, you will check: 
+•The name of the issuer, 
+•The expiration date, 
+•verify (PKA, S) =? H(<K,E>), and 
+•Check the revocation status 
+
+X.509 Usage
+IPSec
+…
+16
+
+X.509 Usage
+16
+
+X.509 Usage
+16
+ConfidentialitySSL/TLS
+
+X.509 Usage
+16
+ConfidentialitySSL/TLS
+IntegritySSL/TLS
+
+X.509 Usage
+16
+ConfidentialitySSL/TLS
+IntegritySSL/TLS
+AuthenticationX.509
+
+Types of X.509 Certificates
+•There are three ways of getting a certificate  
+•Self issued : 
+•Use openssl  to generate a new asymmetric public, private key pair 
+• Use openssl  to generate a certificate that includes your new public key 
+• Your new certificate is self -signed, i.e., signed by your own private key 
+• Browsers likely will not be able to trust your certificate 
+•Paid CA issued :
+•Pay a well -known CA to sign your certificate 
+•The CA will validate your identity and the control of the private key 
+•Browsers will likely be able to trust your certificate 
+• Free CA issued :  
+•Mostly same features as a Paid CA but less trustworthy but free 
+
+Types of X.509 Certificates
+•There are three ways of getting a certificate  
+•Self issued : 
+•Use openssl  to generate a new asymmetric public, private key pair 
+• Use openssl  to generate a certificate that includes your new public key 
+• Your new certificate is self -signed, i.e., signed by your own private key 
+• Browsers likely will not be able to trust your certificate 
+•Paid CA issued :
+•Pay a well -known CA to sign your certificate 
+•The CA will validate your identity and the control of the private key 
+•Browsers will likely be able to trust your certificate 
+• Free CA issued :  
+•Mostly same features as a Paid CA but less trustworthy but free Suppose, you need a certificate. How do you get one? 
+
+CAs in PKI
+•CAs are the roots of trust in the PKI
+•Symantec,Verisign,Thawte , Geotrust , Comodo,  GlobalSign,  Go  Daddy,  
+Digicert , Entrust,  and hundreds of others
+•Issue signed certs on behalf of  third -parties
+•How do you become a  CA?
+1.Create a self-signed root certificate
+2.Get all the major browser vendors to include your cert  with their  
+software
+3.Keep your private key secret at all  costs
+•What is the key responsibility of being a CA?
+•Verify that someone buying a cert for example.com  actually  controls  example.com
+
+Let’s encrypt: validation
+•Provisioning a DNS record under example.com,
+•Provisioning an HTTP resource under a well-known URI  
+onhttps://example.com/
+
+
+Shades of Trust
+•What differs between a DV and an EV certs ?
+•T o get a DV cert, the CA verifies that you control the given  common
+name
+•T o get an EV cert, the CA does a background check on you  and your 
+company; EV certs cost a lot more than DVcerts
+•Other than the background check, EV certs offer the same  security 
+as DVcerts
+•How does your browser tell the difference between DV and EV  certs?
+•Uses the policy number in the X.509 certificate
+•Each CA designates certain magic policy numbers to indicate  EVstatus
+•Your browser contains a hard -coded list of magic policy  numbers to 
+identify EV certs :(
+
+X.509 Certificate
+TBS Certificate Signature Algorithm Signature 
+VersionSerial 
+NumberSignature 
+AlgorithmIssuer Validity SubjectSubject 
+Public Key  
+InfoIssuer Unique 
+ID Subject 
+Unique ID ExtensionsCertificate
+To-Be-Signed by a Certificate Authority (Issuer)
+
+X.509 Certificate
+Certificate:
+Data:
+Version: 3(0x2)  Serial
+Number:
+0c:00:93:10:d2:06:db:e3:37:55:35:80:11:8d:dc:87
+Signature Algorithm: sha256WithRSAEncryption
+Issuer: C=US, O=DigiCert Inc,OU=w ww.digicert.com, CN=DigiCert SHA2
+Extended Validation Server CA
+Validity
+Subject: businessCategory=Private Organization/1.3.6.1.4.1.311.60.2.1.3=US/
+1.3.6.1.4.1.311.60.2.1.2=Delaware/serialNumber=5157550/street=548 4thStreet/
+postalCode=94107, C=US, ST=California, L=San Francisco, O=GitHub, Inc.,
+CN=github.com
+Subject Public KeyInfo:
+Public -Key: (2048 bit)  
+Modulus:Not Before:Apr  8 00:00:00 2014
+Not After :Apr 12 12:00:00 2016
+•Subject: who owns thiscert?
+•This is Github’s certificate
+•Must be served fromPublic Key Algorithm:  rsaEnc
+github.com00:b1:d4:dc:3c:af:fd:f3:4e:ed:c1:67:ad:e6:cb:
+
+X.509 Certificate
+X509v3 CRL Distribution Points:
+FullName:
+FullName:
+URI:http://cr l4.digice rt.com/sha2 -ev-server-g1.crl 
+X509v3 Certificate Policies:
+Policy: 2.16.840.1.114412.2.1
+Authority Information Access:X509v3 extensions:
+X509v3 Subject Alternative Name:  
+DNS:github.com, DNS:www.github.com
+URI:http://crl3.digicert.com/
+CPS: https://www.digicert.com/CPmSagic
+OCSP -URI:http://ocsp.digicert.co Tmhis
+
+Assumptions
+•The CA acts honestly  
+• Protect its own private signing key 
+• Do not issue a Google’s certificate to someone other than Google 
+• The root trust store in the client is integrity -protected  
+• The implementation of checking whether the chain of 
+certificates is valid should be correct  
+•The client should obtain fresh and up -to-date revocation  
+information  
+
+Assumptions
+•The CA acts honestly  
+• Protect its own private signing key 
+• Do not issue a Google’s certificate to someone other than Google 
+• The root trust store in the client is integrity -protected  
+• The implementation of checking whether the chain of 
+certificates is valid should be correct  
+•The client should obtain fresh and up -to-date revocation  
+information  
+
+Assumptions
+•The CA acts honestly  
+• Protect its own private signing key 
+• Do not issue a Google’s certificate to someone other than Google 
+• The root trust store in the client is integrity -protected  
+• The implementation of checking whether the chain of 
+certificates is valid should be correct  
+•The client should obtain fresh and up -to-date revocation  
+information  
+
+CAs, Revisited
+•A CA is essentially a trusted third party
+•Certificate signatures are attestations of authenticity for the  
+server and (optionally) theclient
+•Remember: Trust is bad and should be minimized!
+•IfaCAmistakenly (orpurposefully) signs acertificate for a
+domain and provides ittoamalicious principal,  bad things  
+happen
+•Recall: Any CA can sign a cert for anydomain
+•Not only must we trust root CAs, but also intermediate  CAs 
+that have been delegated signing authority
+
+•Clearly, the CA secret key must be protected at all costs
+•Possession of the CA secret key grants adversaries the 
+ability  to sign anydomain
+•Attractive target foradversaries
+•Signatures should only be issued after verifying the  
+identity of the requester
+•Basic verification = Domain Validation
+•Expensive verification = Extended Validation
+•Should be easy, right?CA Trustworthiness
+
+Issuedto:
+Issuedby:
+ValidfromMicrosoft Corporation
+VeriSign Commercial Software Publishers CA  
+1/29/2001 to1/30/2002
+Serialnumber is 1B51 90F7 3724 399C 9254 CD42 4637
+996A
+Issued  
+Issued
+Validfromto:Microsoft Corporation
+by:VeriSign Commercial Software Publishers CA  
+1/30/2001 to1/31/2002
+           Serial number is 750E 40FF 97F0 47ED F556 C708 4EB1 ABFD
+•In 2001,Verisign issued two executable signing certificates to  someone claiming 
+to be from Microsoft
+•Could be used to issue untrusted software updatesCA Failures
+
+Comodo
+
+30DigiNotar
+
+31TrustWave
+
+Let’s encrypt
+•Free certificate service from a non-profit organization  that 
+includes stakeholders from academia and industry
+•Very new, first certificate was issued in Sept. 2015
+•90 days lifetime
+•300 million certificates active right now 
+•Revocation integrated with CRL and OCSP
+
+Assumptions
+•The CA acts honestly  
+• Protect its own private signing key 
+• Do not issue a Google’s certificate to someone other than Google 
+• The root trust store in the client is integrity -protected  
+• The implementation of checking whether the chain of 
+certificates is valid should be correct  
+•The client should obtain fresh and up -to-date revocation  
+information  
+
+Assumptions
+•The CA acts honestly  
+• Protect its own private signing key 
+• Do not issue a Google’s certificate to someone other than Google 
+• The root trust store in the client is integrity -protected  
+• The implementation of checking whether the chain of 
+certificates is valid should be correct  
+•The client should obtain fresh and up -to-date revocation  
+information  
+
+Integrity of Root Store
+•If integrity is not guaranteed, then someone can inject a bad 
+root CA cert.
+• Implications : Man -in-the-Middle, Impersonation
+• In the context of SSL/TLS, this can break end -to-end 
+guarantee.
+• Software has been found to mess with the root store:
+•Antivirus
+•Parental control software 
+•Network middleboxes 
+
+Assumptions
+•The CA acts honestly  
+• Protect its own private signing key 
+• Do not issue a Google’s certificate to someone other than Google 
+• The root trust store in the client is integrity -protected  
+• The implementation of checking whether the chain of 
+certificates is valid should be correct  
+•The client should obtain fresh and up -to-date revocation  
+information  
+
+Assumptions
+•The CA acts honestly  
+• Protect its own private signing key 
+• Do not issue a Google’s certificate to someone other than Google 
+• The root trust store in the client is integrity -protected  
+• The implementation of checking whether the chain of 
+certificates is valid should be correct  
+•The client should obtain fresh and up -to-date revocation  
+information  
+
+SSL/TLS Verification
+36
+63
+
+SSL/TLS Verification
+X.509
+36
+64
+
+SSL/TLS Verification
+X.509
+36
+65
+
+SSL/TLS Verification
+X.509
+36
+66
+
+
+Noncompliance in X.509
+Overly 
+permissiveOverly 
+restrictive
+37
+
+Noncompliance in X.509
+Overly 
+permissiveOverly 
+restrictive
+Impersonation attack
+37
+
+Noncompliance in X.509
+Overly 
+permissiveOverly 
+restrictive
+Impersonation attack Loss of service
+37
+
+38Why Bugs?
+X.509 Certificates are represented in ASN.1 DER format
+
+38Why Bugs?
+X.509 Certificates are represented in ASN.1 DER format
+Type (T) Length (L) Value (V)
+
+38Why Bugs?
+X.509 Certificates are represented in ASN.1 DER format
+Type (T) Length (L) Value (V)
+L
+
+38Why Bugs?
+X.509 Certificates are represented in ASN.1 DER format
+Type (T) Length (L) Value (V)
+Sequence
+
+38Why Bugs?
+X.509 Certificates are represented in ASN.1 DER format
+Type (T) Length (L) Value (V)
+Sequence
+
+38Why Bugs?
+X.509 Certificates are represented in ASN.1 DER format
+Type (T) Length (L) Value (V)
+Sequence T L V
+T L V
+T L V
+T L V
+
+X.509 RFC 5280
+RFC
+5280•
+•
+•
+•
+39
+
+X.509 RFC 5280
+RFC
+5280•Describes format & structure of a certificate
+•
+•
+•
+39
+
+X.509 RFC 5280
+RFC
+5280•Describes format & structure of a certificate
+•Specifies Certificate Chain Validation Logic
+•CCVL
+•
+39
+
+X.509 RFC 5280
+RFC
+5280•Describes format & structure of a certificate
+•Specifies Certificate Chain Validation Logic
+•CCVL
+•Written using natural languages
+39
+
+X.509 RFC 5280
+RFC
+5280•
+•
+•
+•
+39
+
+X.509 RFC 5280
+RFC
+5280•
+•
+•
+•the serial  number  MUST  be a 
+positive  integer  assigned  by the CA 
+to each  certificate  ... non -
+conforming  CAs  may  issue  
+certificates  with  serial  numbers  
+that  are negative  or zero . 
+Certificate  users  SHOULD  be 
+prepared  to gracefully  handle  such  
+certificates . 
+—RFC5280“
+”
+39
+
+X.509 RFC 5280
+RFC
+5280•
+•
+•
+•
+Root -level CA 
+certificate
+End entity 
+certificate
+39
+
+X.509 RFC 5280
+RFC
+5280•
+•
+•
+•
+Root -level CA 
+certificate
+End entity 
+certificate
+39
+
+X.509 RFC 5280
+RFC
+5280•
+•
+•
+•
+Root -level CA 
+certificate
+End entity 
+certificate
+Subject Name :
+Country
+State
+Locality
+Organization
+OrganizationalU
+nit
+Common nameIssuer Name :
+Country
+State
+Locality
+Organization
+OrganizationalUnit
+Common name
+39
+
+X.509 RFC 5280
+RFC
+5280•
+•
+•
+•
+Root -level CA 
+certificate
+End entity 
+certificate
+Subject Name :
+Country
+State
+Locality
+Organization
+OrganizationalU
+nit
+Common name
+Issuer Name :
+Country
+State
+Locality
+Organization
+OrganizationalUnit
+Common name
+Validity
+Not before
+Not after
+39
+
+X.509 RFC 5280
+RFC
+5280•
+•
+•
+•
+Root -level CA 
+certificate
+End entity 
+certificate
+Subject Name :
+Country
+State
+Locality
+Organization
+OrganizationalU
+nit
+Common name
+Issuer Name :
+Country
+State
+Locality
+Organization
+OrganizationalUnit
+Common name
+Validity
+Not before
+Not after
+Extensions
+39e.g., Basic constraintpathLengthConstraints
+
+40Bugs
+
+40Bugs
+
+40Bugs
+
+40Bugs
+
+•Correct UTCTime  Year Range: 1950  to 2049  
+y =2000 +10*(c[0]-’0’)+(c[1]-’0’);c +=2;
+/* Years from ’96 through ’99 are in the 1900’s */
+if(y >=2096) {y -=100; }
+to->year +=100 *(to->year <90);
+to->year +=1900;
+if(tm.tm_year <=50){/* 1951 -2050 thing */
+tm.tm_year +=100;
+}MatrixSSL 3.7.2
+tropicSSL
+axTLS 1.4.3 
+axTLS 1.5.3
+41Bugs
+
+•Correct UTCTime  Year Range: 1950  to 2049  
+y =2000 +10*(c[0]-’0’)+(c[1]-’0’);c +=2;
+/* Years from ’96 through ’99 are in the 1900’s */
+if(y >=2096) {y -=100; }
+to->year +=100 *(to->year <90);
+to->year +=1900;
+if(tm.tm_year <=50){/* 1951 -2050 thing */
+tm.tm_year +=100;
+}MatrixSSL 3.7.2
+tropicSSL
+axTLS 1.4.3 
+axTLS 1.5.31996 to2095
+1990 to2089
+1951 to2050
+41Bugs
+
+•Lax OID ExtKeyUsage  Matching (MatrixSSL  3.7.2, wolfSSL  3.6.6)
+42Bugs
+
+•Lax OID ExtKeyUsage  Matching (MatrixSSL  3.7.2, wolfSSL  3.6.6)
+ExtKeyUsage Purposes ofusing a key
+42Object IdentifierBugs
+
+•Lax OID ExtKeyUsage  Matching (MatrixSSL  3.7.2, wolfSSL  3.6.6)
+ExtKeyUsage Purposes ofusing a key
+42Object Identifier
+a.b.c.d.e.f.g.hBugs
+
+•Lax OID ExtKeyUsage  Matching (MatrixSSL  3.7.2, wolfSSL  3.6.6)
+ExtKeyUsage Purposes ofusing a key
+42e.g., 1.3.6.1.5.5.7.3.1Object Identifier
+a.b.c.d.e.f.g.hServer 
+AuthenticationBugs
+
+•Lax OID ExtKeyUsage  Matching (MatrixSSL  3.7.2, wolfSSL  3.6.6)
+ExtKeyUsage Purposes ofusing a key
+42e.g., 1.3.6.1.5.5.7.3.1Object Identifier
+a.b.c.d.e.f.g.hServer 
+Authentication
+1.3.6.1.5.5.7.3.1Bugs
+
+•Lax OID ExtKeyUsage  Matching (MatrixSSL  3.7.2, wolfSSL  3.6.6)
+ExtKeyUsage Purposes ofusing a key
+42e.g., 1.3.6.1.5.5.7.3.1Object Identifier
+a.b.c.d.e.f.g.hServer 
+Authentication
+1.3.6.1.5.5.7.3.1 vsBugs
+
+•Lax OID ExtKeyUsage  Matching (MatrixSSL  3.7.2, wolfSSL  3.6.6)
+ExtKeyUsage Purposes ofusing a key
+42e.g., 1.3.6.1.5.5.7.3.1Object Identifier
+a.b.c.d.e.f.g.hServer 
+Authentication
+a+b+c+d+e+f+g+h =71 1.3.6.1.5.5.7.3.1 vsBugs
+
+•Lax OID ExtKeyUsage  Matching (MatrixSSL  3.7.2, wolfSSL  3.6.6)
+ExtKeyUsage Purposes ofusing a key
+42e.g., 1.3.6.1.5.5.7.3.1Object Identifier
+a.b.c.d.e.f.g.hServer 
+Authentication
+a+b+c+d+e+f+g+h =71 1.3.6.1.5.5.7.3.1 vs
+Overly Permissive    Compatibility IssuesBugs
+
+Assumptions
+•The CA acts honestly  
+• Protect its own private signing key 
+• Do not issue a Google’s certificate to someone other than Google 
+• The root trust store in the client is integrity -protected  
+• The implementation of checking whether the chain of 
+certificates is valid should be correct  
+•The client should obtain fresh and up -to-date revocation  
+information  
+
+Assumptions
+•The CA acts honestly  
+• Protect its own private signing key 
+• Do not issue a Google’s certificate to someone other than Google 
+• The root trust store in the client is integrity -protected  
+• The implementation of checking whether the chain of 
+certificates is valid should be correct  
+•The client should obtain fresh and up -to-date revocation  
+information  
+
+Revocation
+•Certificate revocations are another fundamental  mechanism for mitigating 
+secret keycompromises
+•After a secret key has been compromised, the owner is  supposed to 
+revoke thecertificate
+•CAs are responsible for hosting databases of revoked  certificates that they
+issued
+•Clients are supposed to query the revocation status of all  certificates they 
+encounter during validation and not  accept the revoked ones
+•Two revocation protocols for TLScertificates
+•1.Certificate Revocation Lists (CRLs)
+•2. Online Certificate Status Protocol  (OCSP)
+
+•CRLs are the original mechanism for announcing and  
+querying the revocation status of certificates
+•CAs compile lists of serial numbers of revoked  
+certificates
+•URL for the list is included in each cert issued by theCA
+•CRL is signed by the CA to protect integrityCRL
+
+•Clients should check the revocation status of every cert they  encounter,
+i.e,leaf, intermediate, and root certs
+•Problems
+•Latency –additional RTTs of latency are needed to check CRLs  before a page 
+willload
+•Size –CRLs can grow to be quite large (~MBs), downloads may be  slow
+•MitM attackers can block access to the CRL/OCSP URLs
+•Browsers default -accept certificates if the revocation status cannot be  checked
+•Does caching CRLs mitigate these performance problems?
+•Yes,somewhat
+•But caching CRLs for long periods is dangerous: they may be out of  dateCRL Issues
+
+•
+OCSP is the modern replacement forCRLs
+•
+API-style protocol that allows clients to query the revocation  status of one or 
+more certs
+•
+No longer necessary to download the entire CRL
+•
+CA’s host an OCSP server that clients may query
+•
+OCSP URL included in OCSP -compliant certs
+•
+Responses are signed by the CA to maintain integrity
+•
+Responses also include an expiration date to prevent replay  attacksOCSP
+
+•It allows the presenter of a certificate to bear the  resource cost 
+involved in providing OCSP responses by  appending ("stapling") a time -
+stamped OCSP response  signed bytheCAtotheinitial TLSHandshake,
+eliminating  the need for clients to contact the CA.
+•The good:
+•Clients don’t need to query revocation status at all
+•Attacker cannot prevent clients from receiving revocation  
+information
+•The bad:
+•OCSP Must -Staple is very new, not supported bymany  browsers and certsOCSP Stapling
+
+•Revocation is one of the most broken parts of the TLS  
+ecosystem
+•Many administrators fail to revoke compromised  
+certificates
+•MitM attackers can block access to the CRL/OCSP URLs
+•Browsers default -accept certificates if the revocation  status 
+cannot be checked
+•Solved by OCSP Stapling, but this extension is not well  
+deployedRevocation in Practice
+
+•Many browsers do not perform proper revocation checks
+•Chrome only does CRL/OCSP checks on EV certs, and  only on some
+platforms
+•Windows –Yes,
+•Linux and Android –No
+•Chrome uses an alternative implementation called CRLset which  is busted
+•Firefox only supports OCSP
+•But fewer than 5% of certificates use OCSP
+•Mobile browsers almost never check forrevocations
+•Adds additional latency to HTTPS connections onto already slow  mobile
+networksRevocation in Practice

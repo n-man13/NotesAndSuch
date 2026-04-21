@@ -1,0 +1,186 @@
+CSE 508  Omar Haider ChowdhuryEmpire Innovation Scholar and Associate ProfessorDepartment of Computer ScienceStony Brook University��������������������������������������������������������������������
+
+•This class will have the following modules:•Background: •Cryptography•Introduction to Network and Protocols•Authentication•Access Control•Attacks and Defenses against protocols •Essential tools for attack and defense•Web Security•Privacy and Anonymity •Advanced Topics (Protocol Verification)Modules
+
+•This class will have the following modules:•Background: •Cryptography•Introduction to Network and Protocols•Authentication•Access Control•Attacks and Defenses against protocols •Essential tools for attack and defense•Web Security•Privacy and Anonymity •Advanced Topics (Protocol Verification)Modules
+
+Acknowledgment• Professor Douglas Jacobson’s book inspired the content of the slides• Book: “Introduction to Network Security.” • The images used in this slide are directly from that book
+
+Focus of the Lecture•Introduction •Layered Architecture•Key Terminology•Protocol Functions •OSI Model •TCP/IP Model •Protocol Specification•Protocol Addresses•Protocol Headers•The Internet •Addressing •Client Server communication•Routing
+
+History
+41950s196019701980
+19902000Point-to-point network to main frames1969 ARPA NET (4 nodes)1973 TCP/IP development1973 Ethernet was proposal in a Ph.D. Dissertation1977 TCP/IP test bed1979 UUCPnet1983 TCP/IP becomes the protocol for ARPANET1986 NSFNET is started
+1995 First ISPs started1971 15 nodes in APRANET1980 ARPANET virus (accidental)1984 over 1000 hosts1987 over 10,000 hosts1988 Internet worm infects over 6,000 hosts1989 over 100,000 hosts1992 over 1,000,000 hosts1991 WWW released by CERN1996 over 10,000,000 hosts1844 First Telegraph line1861 Over 2200 telegraph offices1866 First transatlantic cable1875 First words on a telephone1880 over 30,000 phones1900 over 600,000 phones1910 over 5,000,000 phones1920 over 11,000,000 phones1968 300 baud modem18401900Unfortunately, from the very beginning of the Internet, security has been a secondary concern
+
+Modularity in the Network Architecture•The design of the network was done with modularity in mind. •Why do we want modularity? •Separation of concerns •Simplification •Manageability•Reuse •Standardization•This is akin to good practices in programming. •As a network architect, you want developers writing apps to focus on the apps’ behavior, not to worry about how to communicate over the Internet.
+
+10,000 feet view of Layered ArchitectureApplicationApplicationNetwork ServicesNetwork ServicesCommunicationsNetworkProtocolProtocol
+
+10,000 feet view of Layered ArchitectureApplicationApplicationNetwork ServicesNetwork ServicesCommunicationsNetworkProtocolProtocolLogical Channel
+
+10,000 feet view of Layered ArchitectureApplicationApplicationNetwork ServicesNetwork ServicesCommunicationsNetworkProtocolProtocolLogical ChannelPhysical ChannelsPhysical Channels
+
+10,000 feet view of Layered ArchitectureApplicationApplicationNetwork ServicesNetwork ServicesCommunicationsNetworkProtocolProtocolLogical ChannelPhysical ChannelsPhysical ChannelsApplication should work on both LAN and Wi-Fi
+
+Principle of Layered Network ArchitectureLayer NLayer N-1Layer NLayer N-1ProtocolProtocolSAP  Service Access Points
+
+Need for Layered Architecture•Brought about because of a need for standards•Layers:•Take information from above (layer N-1)•and pass information below (layer N+1)•The services are provided through the service access points (SAPs)•Layer functionality is implemented through an entity•Each layer contains one or more entities that are responsible for providing services to the N+1 layer
+
+Layered Architecture (logical & physical channels)•In order for layers to carry out functions, they need to communicate•A layer N entity may need to communicate with another layer N entity, which does not reside on the same system, to provide the service.•The layer N entity uses the layer N-1 services to communicate with the remote layer N entity.
+
+Layered Architecture (logical & physical channels)LayerALayerBSend_packetRcv_packetSend_dataRcv_dataLayerALayerBSend_packetRcv_packetSend_dataRcv_dataProtocol AProtocol B
+
+What are Protocols?•PROTOCOLS are the rules/discipline that have been defined for the layer N to layer N communication.•They represent extra information•Example: saying “hello” on the telephone is a protocol•Protocols indicate when to send data, what language to use, etc.•A layer specification defines•What protocol does it use?•What does it expect as input (SAPs)?•What functions does it provide?•Layer specifications allow multiple vendors to have the same functionality.•Example: Different ethernet card brands
+
+Protocol Data Unit (PDU)•Protocol Data Unit (PDU) is the combination of data from the higher layer and the protocol or control information.•The protocol or control information created by a layer is called the header.•Each layer adds its own headerProtocol Data Unit•Protocol Data Unit(PDU)  is the combination of data from the higher layer and the protocol or control information.•The protocol or control information created by a layer is called the header.•Each layer adds it’s own headerDataD1D2D1D2H1H1H1H1H2H2Layer 1Layer 2
+
+Layered Architecture (with PDU)LayerALayerBLayerALayerBDataDataDataDataDataData
+DataDataDataDataProtocol AProtocol BAHBHAHAHAHAH
+AHAHAHBHBHBH
+
+Key Terminology we have seen so far•The protocol defines the rules/discipline for PEER entity communication•Service Access Points (SAP) specify how the N entity communicates with the N-1 entity.•Services are provided by the N entity to the N+1 entity•Functions are provided by the entity in coordination with the peer entity.
+
+Basic Functions of a Protocol in Networking1.Segmentation and reassembly 2.Encapsulation3.Connection control4.Ordered delivery5.Flow control 6.Error control7.Multiplexing
+
+Segmentation and reassembly•Often, physical media or error control issues dictate a maximum data size.•Generically, this size is called Maximum Transmission Unit (MTU)•Therefore, the data must be divided into smaller packets (Segmentation)•And eventually put back together (Reassembly)•Reassembly instructions are included in the header
+
+Encapsulation•Encapsulation is the addition of control information to the data element in the form of a header.•Address: The address of the sender and/or receiver.•Error Detection Code: Some sort of code is often included for error detection.•Protocol Control: Additional information that is needed to implement the protocol.
+
+Connection Control•Connectionless Data Transfer•Data is transferred without prior coordination•No set path•Connection-oriented Data Transfer•A logical association, or Connection, is established between entities before any data is transferred•Example: telephone•Three phases of Connection Control•Request/connect phase •Data transfer phase •Termination phase
+
+Connection Control•Connectionless Data Transfer•Data is transferred without prior coordination•No set path•Connection-oriented Data Transfer•A logical association, or Connection, is established between entities before any data is transferred•Example: telephone•Three phases of Connection Control•Request/connect phase •Data transfer phase •Termination phaseConnection can be viewed as a communication state
+
+Ordered Delivery• Pieces arrive in the same order as sent• Not provided by connectionless protocols• Not required to be provided by Connection-oriented protocols, but it is common for most. (needed for file transfer)
+
+Flow Control•Technique for assuring that the transmitting entity does not overwhelm a receiving entity.•Flow Control is typically implemented in several layers.• Sometimes, the goal of flow control is to ensure fairness.•Flow control is found in most connection-oriented protocols.
+
+Error Control•A technique that allows a protocol to recover from lost or damaged PDUs.•Three mechanisms:•Positive acknowledgment•Retransmit after timeout•Error detection
+
+Multiplexing•Upward Multiplexing occurs when multiple higher-level connections are multiplexed on a single lower-level connection. •Example: Many applications (telnet, FTP , email) utilize TCP •Downward Multiplexing occurs when a single higher-level connection is multiplexed on multiple lower-level connections. (not as common)•Addressing is needed to support multiplexing.
+
+Multiplexing
+LayerA2LayerBLayerA3A1 Data
+Protocol B
+A3A2A1BHBHBHA2 DataA3 DataLayerA1
+A2DataA3Protocol A1Protocol A2Protocol A3DataA1
+
+Protocol Example (Lower Layer)PickupReceiver
+Bus y SignalDial ToneDial NumberCallerPhone SystemCentral Offices
+Ring the phoneCalledParty
+PickupReceiverRing toneStop ring toneCalled partysays somethingCalling partyAnsw ersEither partycan hang upEither partycan hang upDial ToneDial ToneDial NumberTime
+Conversion(see diagram below)
+
+Protocol Example (Higher Layer)HelloIs John there?Yes, this is JohnConversationGood bye, JohnGood Bye
+
+OSI Model of Network•Application•Presentation•Session•Transport•Network•Data Link•Physical
+
+Physical Layer•Responsible for the transparent transmission of bit streams across the physical interconnection of systems •Two configurations:•Point-to-point•Multipoint•Physical layer must provide the data link entities with a means to identify the end point.•Physical connection can be Full Duplex or Half Duplex•Physical connection can be either bit serial or N bit parallel•Physical layer must deliver the bits in the same order in which they were offered for transmission by the Data Link Layer.
+
+Data Link Layer•The main task is to shield the higher layers from the characteristics of the physical transmission medium. •It should provide the higher layers with a reliable transmission that is basically Error-Free, although errors may occur in the transmission on the physical connection.•Services provided should be independent of the data transmitted.•The data link layer connects two network entities in adjacent systems called Data link connections.
+
+Data Link Layer (contd.)•Each data unit from the network layer is mapped into the data link protocol data unit along with the data link protocol information and is called a Frame.•The data link layer must provide a method of recognizing the start and end of the Frame.•Frames must be presented to the network in the same order they are received.•The data link layer should also implement Flow Control to prevent data overrun.
+
+Network Layer•The primary responsibility of the network layer is to provide the transparent transfer of all data submitted by the transport layer to any transport entity anywhere in the network.•The network layer must handle the routing of data packets.•The network layer can be the highest layer in a device, such as a gateway or router.•IP protocol
+
+Transport Layer•Responsible for a reliable transparent data transfer between two session layer entities.•Transport connection is provided to the session entities independent of their location.•The transport layer must optimize resources while maintaining a guaranteed quality of service.•The session layer requests a level of service, and once the transport connection is provided with a certain quality of service, it must be maintained unless it is notified of the change.•TCP protocol (connection-oriented), UDP (connection-less)
+
+Transport Layer (Contd.)•The transport layer is only concerned with the transfer of data between session layers. It is not aware of the structure of the underlying layers or the topology.•The transport layer uses the network layer to establish a network connection from one transport entity to another.•Depending on the quality of the network, the transport layer may have to perform additional functions to offer the service.•The transport layer provides flow and error control.
+
+Session Layer•The session layer is not concerned with the network.•The session layer’s goal is to coordinate the dialog between presentation layers•The session layer must provide the establishment of a session connection and the management of the dialog on that connection.•Example: An atm maintains a constant connection with a bank (transport service). The session starts when the user logs in.
+
+Presentation Layer•The presentation layer provides the application layer with services related to the presentation of information in a form that is meaningful to the application entities.•The presentation layer provides the mechanism for the application layer to translate its data into a common format that can be translated by the peer application entity.•Marshalling and Unmarshalling•Data format M1 à Network format à Data format M2 
+
+Application Layer•The highest layer provides a means for application processes to access the OSI stack.•Provides both general services and application-specific services.•This is what the user sees and the developers interact with in most cases•Examples: telnet, ftp, web
+
+Detailed View of OSI Model of Network•Application•Presentation•Session•Transport•Network•Data Link•PhysicalUserOSsoftwarefirmwarehardware
+
+OSI 7-Layer Model and TCP/IP 4-Layer Model ApplicationPresentationSessionTransportNetworkData linkPhysicalApplicationPhysicalNetworkTransport TCPIPOSI 7-layer ModelTCP/IP 4-layer Model
+
+OSI 7-Layer Model and TCP/IP 4-Layer Model ApplicationPresentationSessionTransportNetworkData linkPhysicalApplicationPhysicalNetworkTransport TCPIPOSI 7-layer ModelTCP/IP 4-layer ModelA standard heavily inspired by telecommunicationindustry 
+
+OSI 7-Layer Model and TCP/IP 4-Layer Model ApplicationPresentationSessionTransportNetworkData linkPhysicalApplicationPhysicalNetworkTransport TCPIPOSI 7-layer ModelTCP/IP 4-layer ModelA standard heavily inspired by telecommunicationindustry V. Cerf and others proposed packet switching, which inspired TCP/IP in 1970s
+
+OSI 7-Layer Model and TCP/IP 4-Layer Model ApplicationPresentationSessionTransportNetworkData linkPhysicalApplicationPhysicalNetworkTransport TCPIPOSI 7-layer ModelTCP/IP 4-layer ModelAbandonedA standard heavily inspired by telecommunicationindustry V. Cerf and others proposed packet switching, which inspired TCP/IP in 1970s
+
+OSI 7-Layer Model and TCP/IP 4-Layer Model ApplicationPresentationSessionTransportNetworkData linkPhysicalApplicationPhysicalNetworkTransport TCPIPOSI 7-layer ModelTCP/IP 4-layer ModelAbandonedA standard heavily inspired by telecommunicationindustry V. Cerf and others proposed packet switching, which inspired TCP/IP in 1970sOur Internet uses TCP/IP
+
+TCP/IP 4-Layer Model Applic ationTCPIPPhysicalNetworkApplic ationTCPIPPhysicalNetworkIPPhysicalNetworkIPPhysicalNetworkEnd SystemEnd SystemIntermediateSystemIntermediateSystem
+
+Network Management, Monitoring, and Security•When the layered architecture was designed, little to no attention was given to network management, monitoring, and security.•These services were not considered critical when networks were small and controlled only by a few organizations. •With the growing size and complexity of networks and the Internet, the need for these services became critical•Looking through the services, it became clear that the services require access to all the layers of the network to make reasonable decisions.•Due to these observations, a new architecture had to be considered where layered and non-layered services are combined.
+
+Network Management, Monitoring, and Security
+TCP/IP 4 layer modelApplic ationTCPIPNetworkNetwork Control andManagement Applications
+
+Protocol Specifications•Open vs. Closed•Specification methods:•English descriptions (RFC)•Flow and timing diagrams•Mostly incomplete, because only shows good flows and does not consider error cases•Implementation flaws
+
+Network Standards•Services provided•Services expected•Functions provided •Protocol and packet formats •Timing and sequence of packets
+
+Need for Addressing
+LACHIDCSenderRecipientStreet Address
+Street CornerPostal System NetworkStreet Address
+
+Need for Addressing in the InternetSenderRecipientComputer AddressComputer AddressInternetRecipient ISPSender ISPUsernameApplication NameApplication NameUsername
+
+AddressesApplic ation2Applic ation1TCPUDPOtherIPTCP/IPNetworkProtocol type:Identifies which protocol is carriedin the packetTransport Protocol type:Identifies the transport layer usedGlobal Network Layer Address:Identifies the deviceHardw are Address:Identifies which device onthe physical networkApplic ation port number:Identifies the instance ofapplicationApplic ation user address :identifies items within theapplication
+
+Address Assignment•Static•Configuration•Built-in•Dynamic•Protocol discovery•User provided• Addresses can be assigned by: Central Authority;Ad-hoc; Locally
+
+Address Assignment•Static•Configuration•Built-in•Dynamic•Protocol discovery•User provided• Addresses can be assigned by: Central Authority;Ad-hoc; LocallyHardware addresses are assigned by vendors used for filtering but can be changed
+
+IP Address Assignment•Global address allocation• Address assignment•Protocol-based (DHCP)•Static•Locally controlled• Addresses can be changed
+
+Application Address Assignment•Port Number (Much less control)•Well known ports •Protocol-based discovery•Configuration based •User-input based
+
+Hostname Address Assignment•Often political and/or commercially-driven • Assignment via central authority •Protocol to find the IP address of a given name•We remember www.google.com, and not necessarily the IP address of Google
+
+Protocol Headers•Fixed packet type •Easy to parse•Limited functionality•Free-from type•Harder to parse•Easy to extend• Mainly represented in binary format
+
+Protocol Headers•Fixed:• Addresses (layer addresses and payload type)•Payload data•Control data•Header data•Options:•Extended fixed data •Optional control data •Optional payload control•Payload: Content not generally a header’s concern •Trailer: Optional field used for error control FixedTrailerOptionsPayloadFixed:Addresses (Layer addresses and payload type)Payload dataControl dataHeader dataOptions:Extended fixed dataOptional control dataOptional Payload controlPayload:  Content is not a concern of the headerTrailer:Optional field often used for error controlPacket format
+
+Users’ View of the Internet
+Internet
+
+The Internet under the hoodISPISPISPISPRegional orlocal ISPsOrganizationsor local ISPsNational, International,and large regional ISPs
+
+Addressing on the Internet
+
+
+Addressing on the Internet (more details)
+Applic ationA1on Port P1TCPIP - C1PhysicalNetworkHW1Applic ationA1on Port P2TCPIP -D1IP - R1IP - R2
+ComputerC1ComputerD1IntermediateSystemIntermediateSystemUser AUser BD1, "Hello"
+The InternetD1, P2, HelloC1, "Hello""Hello"
+D1, TCP, PayloadHW2, IP, PayloadPhysicalNetworkHW2PhysicalNetworkHW3PhysicalNetworkHW4HW2, HW1, IP, PayloadHW4, HW3,  IP, PayloadTCP, C1, PayloadC1, Payload
+
+Address Spoofing•Who can generate the address?• Spoofing is the ability to change the address• Who can “see” (sniff) the traffic? 
+
+Address Spoofing
+InternetAliceJohnComputerAComputerB
+ComputerCComputerDMaryFrom: MaryTo: John
+From: DTo: AMessage will get to JohnReturn message will go back to AliceMessage will get to JohnThe return message will get to Alice
+
+IP Addresses•In Version 4, the IP address is 32 bits • Total IP address space is 4,294,967,296• The IP address is written as a four-tuple where each tuple is in decimal and is separated by a "." (called a dot). •When talking about an address, you pronounce the word dot. So 129.186.5.102 is pronounced 129 dot 186 dot 5 dot 102
+
+Networks on the Internet
+
+
+Client-Server ModelClientAApplicationServerW1ApplicationServerW2ClientBClientCApplicationServerW3InternetFull name: server.dougj.netIP address:Listening Port: 80
+
+Client-Server ModelClient Server ModelPackets from client to serverSource IP Client’s IP addressDestination IPServer’s IP addressSource PortEphemeral portDestination PortServer’s port number (often well known)Packets from server to clientSource IP Server’s IP addressDestination IPClient’s IP addressSource PortServer’s port number (often well known)Destination PortEphemeral port
+
+Real Client-Server Model
+The InternetClientA
+ClientBWebServerW1
+WebServerW2User1User2
+User3User4Stream AStream BStream C
+Stream D
+Stream E
+
+Real Client-Server ModelStreamSource IPDestination IPSource PortDestination PortAAW1Ephemeral A180BAW1Ephemeral A280CAW1Ephemeral A380DBW1Ephemeral B180EBW2Ephemeral B280
+
+Routing•All hosts and gateways store routing tables•Each row in the route table contains:•Destination address or address range•Next hop for that destination address range•The physical interface to use for that address range. (i.e., which Ethernet card to use)Routing•All hosts and gateways store routing tables•Each row in the route table contains:–Destination address or address range–Next hop for that destination address range–The physical interface to use for that address range.  (ie: which Ethernet card to use)Example:  Destination Next Interface129.186.4.0 129.186.5.254 en0
+
+Dynamic vs Static Routing•Static:• Tables are built at system configuration time • Used in small networks or networks with only one way out •Dynamic:•Tables are modified based on network parameters • Used in larger networks with multiple paths
+
+Routing
+ComputerD1RouterR1ComputerD2ComputerD3RouterR2Network 1InternetNetwork 2DestinationNext HopNetwork 1DirectDefaultRouter R1DestinationNext HopNetwork 1DirectNetwork 2DirectDefaultRouter R2

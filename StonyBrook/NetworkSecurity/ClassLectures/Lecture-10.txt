@@ -1,0 +1,435 @@
+--- Slide 1 ---
+CSE 508
+Omar Haider Chowdhury
+Empire Innovation Scholar and Associate Professor
+Department of Computer Science
+Stony Brook University
+
+Network Security (Lecture 10- DoS)
+
+--- Slide 2 ---
+Modules
+This class will have the following modules:
+Background: 
+Cryptography
+Introduction to Network and Protocols
+Authentication
+Access Control
+Attacks and Defenses against protocols 
+Essential tools for attack and defense
+Web Security
+Privacy and Anonymity 
+Advanced Topics (Protocol Verification)
+
+--- Slide 3 ---
+Focus of this Lecture: Denial of Service (DoS)
+
+--- Slide 4 ---
+Denial of Service
+Goal: harm availability
+Strain software, hardware, or network links beyond their capacity
+Shut down a service or degrade its quality
+Not always the result of an attack
+Flash crowds, “Slashdot effect”
+Motives
+Protest/attention
+Financial gain/damage
+Revenge
+Extortion
+Evasion/diversion
+
+--- Slide 5 ---
+Characteristics of DoS
+Attack source: single vs. many
+More than a single source:  Distributed DoS (DDoS)
+Overload vs. complete shutdown
+Degradation vs. completely disabling software or equipment or destroying data
+Crash, restart, bricking, data loss, website defacement, …
+Consumed resource
+Network bandwidth, CPU, memory, sockets, disk storage, battery, human time, …
+Amplification factor: symmetric vs. asymmetric attacks
+Broadcast addresses, large protocol responses, exponential propagation, …
+Algorithmic complexity attacks
+Induce worst-case behavior by triggering corner cases when processing input
+Spoofing: hide the true source(s) of the attack
+
+
+--- Slide 6 ---
+Lower Layer DoS
+Physical layer
+Wirecutting, equipment manipulation, physical destruction
+RF jamming, signal interference
+Link Layer
+MAC flooding:  overload switch (CAM table exhaustion) or network
+ARP poisoning:  send fake ARP responses to insert erroneous MAC–IP address mappings in existing systems’ caches
+DHCP starvation
+WiFi Deauthentication
+
+
+--- Slide 8 ---
+Dynamic Host Control Protocol (DHCP)
+Application layer protocol that runs on UDP and IP
+Message 1: DHCPDISCOVER (Broadcast - 255.255.255.255)
+Source IP: 0.0.0.0
+Destination IP: 255.255.255.255
+UDP Source Port: 68
+UDP Destination Port: 67
+Includes Client’s MAC 
+Message 2: DHCPOFFER (Unicast to Client’s MAC) 
+Many servers can respond 
+Contains offered IP address
+Includes lease duration, DNS, gateway, etc. 
+Message 3: DHCPREQUEST (Broadcast) 
+Message 4: DHCPACK (Unicast to Client)
+
+--- Slide 9 ---
+Dynamic Host Control Protocol (DHCP)
+Application layer protocol that runs on UDP and IP
+Message 1: DHCPDISCOVER (Broadcast - 255.255.255.255)
+Message 2: DHCPOFFER (Unicast to Client’s MAC) 
+Message 3: DHCPREQUEST (Broadcast) 
+Client selects one offer 
+Identifies the selected server 
+Repeats the request IP Address
+Message 4: DHCPACK (Unicast to Client)
+Confirms lease of the IP address 
+Other configuration parameters (DNS, router, etc.)
+
+--- Slide 10 ---
+Dynamic Host Control Protocol (DHCP)
+Optional Messages: 
+DHCPNAK: Sent by server if the request is invalid (e.g., IP already in use).
+DHCPDECLINE: Sent by client if it finds the offered IP is already in use (e.g., via ARP check).
+DHCPRELEASE: Sent by client to server when releasing the IP voluntarily.
+DHCPINFORM: Sent by a client that already has an IP (e.g., statically assigned) but wants other config info like DNS/gateway.
+
+--- Slide 11 ---
+Dynamic Host Configuration Protocol (DHCP)
+Used by hosts to request IP configuration parameters
+IP address, gateway, DNS server, domain name, time server, …
+UDP, no authentication:  no way to validate a DHCP server’s identity
+DHCP exhaustion
+Prevent clients from receiving IPs by consuming all available addresses in the DHCP server’s pool
+DHCP relies on a client’s MAC address:  spoof it!   [tool:  DHCPwn]
+Rogue DHCP server   (may come after DHCP exhaustion)
+Provide incorrect information to clients, causing disruption
+Worse:  MitM attack
+Defenses  [example: Cisco Catalyst switches]
+DHCP snooping:  the switch blocks bogus DHCP offers (real server is assigned a trusted switch port)
+Dynamic ARP Inspection (DAI):  prevents ARP spoofing by validating IP-to-MAC address bindings (derived from DHCP snooping)
+
+--- Slide 12 ---
+Address Resolution Protocol (ARP)
+Protocol used to map IP address onto the physical layer addresses (MAC)
+1) ARP request: who has x.x.x.x?
+2) ARP response: me!
+Policy: last response in wins
+Used to forward packets on the appropriate interfaces by network devices 
+Also used for IP over other LAN technologies, e.g. IEEE 802.11
+Each host maintains a table of IP to MAC addresses
+Q: Why would you want to spoof an IP address?
+
+--- Slide 13 ---
+ARP Poisoning
+
+--- Slide 14 ---
+Deauth Attacks of WiFi Clients
+Send a spoofed deauth frame to the access point with the victim’s address (no authentication!)
+Client is disassociated from the access point
+Can also use the broadcast address to disassociate all clients at once
+Clients may then connect to an “evil twin” access point…
+Deauthentication is also sometimes used as a protection mechanism
+Prevent the operation of rogue access points
+Tools: aireplay-ng (aircrack-ng), deauth (metasploit)
+Also possible: auth attacks
+Flood with spoofed random addresses to authenticate and associate to a target access point    exhaust AP resources
+
+--- Slide 16 ---
+Network Layer DoS
+Flooding:  bombard target with network packets
+Saturate the available network bandwidth   (aka “volumetric” attacks)
+Long ICMP packets, UDP/TCP packets with garbage data, …
+IP spoofing:  conceal the attack source
+Makes it more difficult to block the attack
+Ingress and egress filtering limit its applicability, but they are not universally deployed
+Applicable only when connection establishment is not needed: ICMP,  UDP,  TCP SYN, …
+Broadcast Amplification
+Οne packet generates many more packets
+ICMP Smurf Attack (spoofed broadcast Echo request)
+IP hijacking  (will be covered in a future lecture)
+False BGP route advertisements to attract and drop traffic or cause connectivity instability
+
+--- Slide 17 ---
+Amplification Example: Smurf Attack (1990)
+Attacker sends spoofed ICMP Echo requeststo the victim’s network broadcast address
+Src IP == victim’s IP
+Victim machine is flooded with responsesfrom all internal hosts
+Initial form of amplification attack
+Mitigation
+Configure hosts to not respondto broadcast ICMP requests
+Configure routers to not forward packetsdestined to broadcast addresses
+
+ECHO Request
+Src: 10.0.0.10
+Dst: 10.0.0.255
+ECHO Response
+Src: 10.0.0.9
+Dst: 10.0.0.10
+ECHO Response
+Src: 10.0.0.8
+Dst: 10.0.0.10
+10.0.0.10
+ECHO Response
+Src: 10.0.0.7
+Dst: 10.0.0.10
+
+--- Slide 18 ---
+Transport Layer DoS
+SYN flooding
+Server-side resource exhaustion
+Source IP address can be spoofed
+Can be combined with normal flooding to also saturate the link
+Connection termination
+RST injection: terminate a victim’s established TCP connection
+Mostly used for blocking specific unwanted traffic (i.e., censorship)
+
+--- Slide 19 ---
+TCP Handshake
+
+--- Slide 20 ---
+SYN Flooding
+
+--- Slide 21 ---
+SYN Flooding
+Flood server with spoofed connection initiation requests (SYN packets)
+Saturate the max number of concurrent open sockets the server can sustain:no more connections can be accepted
+Each half-open connection consumes memory resources
+Server sends SYN/ACKs back, but ACKs never return…
+Mitigation
+Drop old half-open connections after reaching a certain threshold(e.g., in FIFO order or randomly)
+SYN cookies:  eliminate the need to store state per half-open connection
+
+
+--- Slide 22 ---
+SYN Cookies
+Always reply to SYN packets
+No need to keep per-connection state
+No need for half-open connection quota
+Send SYN/ACK with a special “cookie” seq
+Secret function of the src/dst IP, src/dst port, coarse timestamp
+Encodes the SYN queue entry state that would otherwise need to be maintained
+Stateless!
+The SYN queue entry is rebuilt based on the returned cookie value in the ACK
+
+Client
+Server
+SYN seq=x
+SYN/ACK ack=x+1 seq=cookie
+ACK ack=cookie+1 seq=x+1
+data
+
+--- Slide 23 ---
+SYN Cookie
+C -> S: Normal SYN 
+S -> C : SYN-ACK with SYN COOKIE 
+Server does not immediately allocate memory 
+It sends a special ISN called SYN COOKIE 
+ISN Encodes: a timestamp/counter, Hash/MAC of client IP, port, server IP, port, and a timestamp (using a secret key) 
+C -> S: ACK 
+Server checks the ACK’s sequence number 
+It decodes the SYN COOKIE 
+Server validates the hash and timestamp 
+If valid, it only then allocates memory and creates the connection  
+
+--- Slide 24 ---
+TCP Connection Termination
+FIN:  this side is done sending, but can still receive    “Half-closed” state
+Should be sent by each side and acknowledged by the other
+RST:  this side is done sending and receiving
+No more data will be sent or received from this side of the connection
+Program closed, abort established connection, …
+A MotS attacker can easily terminate connections by sending spoofed RSTs
+5-tuple (src/dst IP/port and protocol) must match, and seq should be in window
+More strict stacks will only accept RSTs in sequence to prevent blind TCP RST injection
+Legitimate and not so legitimate uses
+Censorship, blocking of non-standard port traffic (e.g., P2P file sharing protocols), termination of malicious or unwanted connections, …
+
+--- Slide 26 ---
+Application Layer DoS
+Connection flooding
+Reflection
+Software vulnerabilities
+Algorithmic complexity attacks
+Trigger worst-case input processing (e.g., hashtable collisions, regular expression backtracking)
+Exhaustion of server resources 
+Example: fill up an FTP server’s/cloud storage bucket’s disk space with junk files
+Spam can be considered as a DoS attack on our time…
+As well as server resources
+Focus
+
+--- Slide 27 ---
+Connection Flooding
+Saturate the server with many established connections
+Can’t use spoofing: just use bots…
+For forking servers, the whole system might freeze (process exhaustion)
+Slowloris attack: slowly send a few bytes at a time to keep many concurrent connections open
+Keep the server busy with “infinite-size” HTTP requests byperiodically sending more and more bogus HTTP headers
+Alternatives: read response slowly, POST data slowly, …
+Requires minimal bandwidth
+Source: https://www.cloudflare.com/learning/ddos/ddos-attack-tools/slowloris/
+
+
+
+--- Slide 29 ---
+HTTP/2 Rapid Reset
+HTTP/2: clients can open multiple concurrent streams on a single TCP connection, each stream corresponding to one HTTP request
+HTTP/2 Rapid Reset attack: clients can indicate to the server that a previous stream should be canceled by sending a RST_STREAM frame
+
+https://cloud.google.com/blog/products/identity-security/how-it-works-the-novel-http2-rapid-reset-ddos-attack
+
+
+--- Slide 30 ---
+Amplification and Reflection Attacks
+Abuse network services that reply to certain types of requests with much larger responses
+Attacker sends a small packet with a forged source IP address
+Server sends a large response to the victim (forged IP address)
+UDP:  connectionless protocol    easy to spoof the source IP address
+The attack is “reflected” to the victim’s IP address
+Used by many services
+NTP, DNS, SSDP, SNMP, NetBIOS, QOTD, CharGen, …
+
+
+--- Slide 32 ---
+Amplification Factors
+Christian Rossow. Amplification Hell: Revisiting Network Protocols for DDoS Abuse – NDSS’14
+
+--- Slide 33 ---
+Evil Packets
+Trigger a server-side bug to crash a process/the kernel (system restart)
+Typically, just a single packet/request
+Ping of death (1996)
+Typical ICMP Echo request (ping) packet size: 84 bytes
+Max IPv4 packet size: 65,535 bytes
+Oversized ICMP ping packets would trigger a buffer overflow
+LAND (1997)
+Spoofed TCP SYN with target IP == source IP
+TCP stack gets confused and eventually crashes
+Teardrop (1997)
+Specially crafted overlapping IP fragments would trigger an IP defragmentation bug
+
+--- Slide 35 ---
+Evil Packets/Requests/Inputs
+WinNuke (1997)
+String of out-of-band data to NetBIOS service (port 139)    Blue screen on Windows NT/95
+Internet worms (future lecture) would often crash infected hosts
+Besides the network flooding due to their rapid propagation and occasional DDoS activity
+Morris worm (1988):  internet was partitioned for several days…
+CodeRed (2001):  DoS against www.whitehouse.gov
+Blaster (2003):  DoS against windowsupdate.com,system instability causing endless reboots
+Witty (2004):  Single UDP packet, slowdisk corruption leading to crash
+Malware can even brick the system
+Erroneous firmware update, BIOS flashing, driver malfunction, data corruption, …
+
+
+--- Slide 36 ---
+Distributed DoS (DDoS)
+Any DoS attack that originates from multiple sources
+Early Internet worms were the first instances of DDoS
+These days usually launched by botnets
+Networks of compromised systems (“bots”) controlled by an attacker (“botmaster”)
+Not only PCs/servers: mobile and IoT devices equally useful (e.g., Mirai IoT botnet)
+Can be rented through online marketplaces (“booter” or “stresser” services)
+
+--- Slide 38 ---
+DDoS Traffic is Growing
+Key Drivers: 
+Extortion (Bitcoin) 
+Theft 
+Gamers 
+Fixed Gigabit and 5G 
+IoT Botnets
+
+© Craig Labovitz, 2022 – https://storage.googleapis.com/site-media-prod/meetings/NANOG85/4475/20220606_Labovitz_The_Problem_With_v1.pdf
+
+
+--- Slide 39 ---
+Launching DDoS is Becoming Cheaper
+
+--- Slide 40 ---
+Botnets are the domain source of DDoS in NA
+
+--- Slide 41 ---
+Puppetnets: Browser-based Bots
+Browsers can be indirectly misused to attack others
+JS code running in the browsers of unsuspecting visitors
+Continuously fetch images or other large files from the victim’s server
+Can masquerade as “good” bots (e.g., Googlebot, Baiduspider, other legitimate spiders) using a spoofed User-Agent
+Many injection ways
+Compromised websites
+Ad networks
+MitM/MotS attacks
+V. T. Lam, S. Antonatos, P. Akritidis, K. G. Anagnostakis. Puppetnets: Misusing Web Browsers as a Distributed Attack Infrastructure – CCS 2006
+
+--- Slide 42 ---
+Panagiotis Papadopoulos, Panagiotis Ilia, Michalis Polychronakis, Evangelos P. Markatos, Sotiris Ioannidis, Giorgos Vasiliadis. Master of Web Puppets: Abusing Web Browsers for Persistent and Stealthy Computation – NDSS 2019
+
+--- Slide 45 ---
+China’s Great Cannon - https://citizenlab.org/2015/04/chinas-great-cannon/
+
+MotS
+MitM
+March 16 and 26, 2015
+DoS targets:
+GreatFire.org
+Two related GitHub pages(anti-censorship project)
+
+
+
+
+DoS attack script injected into1.75% of the requests to Baidu’sanalytics/ad scripts(probabilistic injection)
+
+
+--- Slide 46 ---
+Energy DoS
+Strain the power source of mobile, IoT, sensor devices
+Battery exhaustion
+Consume battery by performing power-hungry operations in the background
+Computation, radio activity, …
+Denial of sleep
+Specific to energy-constrained embedded systems that wake up periodically for data transmission or other operations
+An attack can force radios to remain constantly active
+Can reduce battery life by orders of magnitude
+
+
+--- Slide 47 ---
+DoS Defenses
+No absolute solution
+Asymmetry: little effort for the attacker, big impact for the victim
+Any public service can be abused by the public
+Prank phone calls, road blockades, …
+General strategies
+Filter out bad packets
+Improve processing of incoming data
+Hunt down and shut down attacking hosts
+Increase hardware and network capacity and redundancy
+
+--- Slide 48 ---
+DoS Defenses
+Ingress/egress filtering
+Ensure that incoming/outgoing packets actually come from the networks they claim to originate from    drop spoofed packets
+Content delivery networks (CDNs) and replication
+Distribute load across many servers
+Client challenges: present a CAPTCHA when the system is under stress
+Other (mostly academic) approaches
+IP Traceback:  each router “marks” the forwarded packets with its own IP address to facilitate determining the actual origin of packets
+Overlay-based systems:  proactive defense based on secure overlay tunneling, hash-based routing, and filtering
+
+--- Slide 49 ---
+CAPTCHA
+
+--- Slide 50 ---
+BGP Flowspec [RFC 5575]
+A form of pushback filtering
+Iteratively block attacking network segments by notifying upstream routers
+Use BGP to advertise blocking rules for a given DDoS attack vector in near real-time
+More details: when we discuss BGP

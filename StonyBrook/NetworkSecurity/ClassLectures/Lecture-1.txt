@@ -1,0 +1,489 @@
+--- Slide 1 ---
+CSE 508
+Network Security (Lecture 1- Motivation and Introduction)
+Omar Haider Chowdhury
+Empire Innovation Scholar and Associate Professor
+Department of Computer Science
+Stony Brook University
+
+--- Slide 2 ---
+Acknowledgment
+Some of the slide contents you will see throughout this class are based on slides from the following individuals:
+Michalis Polychronakis (Stony Brook University)
+Zakir Durumeric (Standford University) 
+Ninghui Li (Purdue University) 
+Sze Yiu Chau (Chinese University of Hong Kong)
+Cristina Nita-Rotaru (Northeastern University)
+Doug Jacobson (Iowa State University)
+Kevin Du (Syracuse University)
+
+
+--- Slide 3 ---
+Logistics
+
+--- Slide 4 ---
+Learn how networks and their protocols can be attacked.
+ Learn how the network can be used as a stepping stone to attack computers/information software/systems 
+
+Learn defensive techniques to prevent attacks and/or limit their consequences.
+Examples: Authentication, Access control, Various crypto tools, Firewall, Intrusion Detection, and Prevention, etc.
+Man-made complex systems, software, and network will have errors, and these errors may be exploited
+
+Broad goals of this course
+
+--- Slide 5 ---
+Course
+Hardware
+OS
+Software
+Authentication
+Network Security
+Web Security
+
+--- Slide 6 ---
+This class will have the following modules:
+Background: 
+Cryptography
+Introduction to Network and Protocols
+Authentication
+Access Control
+Attacks and Defenses against protocols 
+Essential tools for attack and defense
+Web Security
+Privacy and Anonymity 
+Advanced Topics (Protocol Verification)
+Modules
+
+--- Slide 7 ---
+This course does not have a required textbook
+
+We may, however, choose to use some specific chapters of some books
+We will make these chapters available 
+
+PowerPoint/PDF lecture slides will be the main resource
+
+We may also consult recent research papers and tutorials for details  
+
+Textbook
+
+--- Slide 8 ---
+Instructor: Omar Chowdhury 
+Email: omar@cs.stonybrook.edu
+
+Office hours:   Monday (9:30 am - 11:00 am) 
+			Tuesday (5:15 pm - 6:45 pm) or email to 				arrange other time
+Location: NCS 363 (or, zoom with prior arrangements) 
+
+
+Instructor
+
+--- Slide 9 ---
+Yet to be finalized 
+
+TA office hours will be shared with you
+TAs
+
+--- Slide 10 ---
+We will use Piazza for discussion  (See Syllabus for joining information if you have not already joined)
+
+The course schedule will be finalized by Friday and will be shared with you
+
+We will use Brightspace to submit assignments and maintain the grades 
+Course Information
+Keep an eye out of Piazza announcements
+
+--- Slide 11 ---
+URL: https://piazza.com/stonybrook/spring2026/cse508
+
+Access Code: 4a67i3qqsakClass Link: https://piazza.com/stonybrook/spring2026/cse508/home
+
+
+Please Sign-up in Piazza
+
+--- Slide 12 ---
+Homework assignments – both written and programming – 40% 
+Midterm Exam 1 – 15%
+Midterm Exam 2 – 15% 
+Final Exam – 30% 
+Course Composition
+
+--- Slide 13 ---
+ Exams will be comprehensive
+ Assignments will have written, programming, or both portions 
+ Grades will be based on individual merits
+ +/- grading scheme will be used
+Grading
+
+--- Slide 14 ---
+ Please do not use any external libraries unless explicitly suggested
+ Please do not copy from the Internet or each other 
+ Please do not expect to get credit for source code that does not compile 
+ Please exercise caution when using generative AI tools (e.g., ChatGPT, Gemini, Github CoPilot)
+Programming Assignments
+
+--- Slide 15 ---
+ Unless explicitly authorized, each student will be entitled to 5 late days
+ 1 late day will enable one to push the deadline by a day 
+Late days do not apply to exams 
+ No fractional late days  
+Late Days
+
+--- Slide 16 ---
+All the turned in source and text must be yours  
+Copying will result in a zero and will be reported
+Discussions on homework/assignments is, however, highly encouraged
+ 
+ Please do not use generative AI tools unless explicitly mentioned
+
+Ask me if you are not sure whether something will be considered cheating
+Academic Integrity
+
+--- Slide 17 ---
+Discussion board of Piazza
+Email me (cc the TAs) 
+Be patient and respectful 
+Please use your Stony Brook email address 
+Include [CSE:508] in your email’s subject line 
+Come to office hours 
+Discuss with your peers
+Getting Help
+
+--- Slide 18 ---
+Motivation
+
+--- Slide 19 ---
+Impact of Security
+
+- Anthem Data Breach in Jan 2015
+Second-largest health insurer in the US
+Data of up to 80 million individuals obtained by hackers
+
+Anthem: "Cyber attackers executed a very sophisticated attack to gain unauthorized access to one of our parent company’s IT systems and have obtained personal information…  The information accessed may have included names, dates of birth, Social Security numbers, health care ID numbers, home addresses, email addresses, employment information, including income data. We have no reason to believe credit card or banking information was compromised.”
+- How did the attack happen?
+- Why should I be more scared if Anthem serves 5 million individuals instead of 80 million?
+
+
+--- Slide 20 ---
+Password breach
+RockYou  32 million user passwords 
+Yahoo 500 million user accounts 
+Adobe 3 million user accounts 
+Ashley Madison 37 million user accounts
+Uber 57 million account data breach 
+Target 41 million consumer data breach  
+143 million user data breach from Equifax
+
+--- Slide 21 ---
+Stuxnet
+Stuxnet: Windows-based Worm
+Worm: self-propagating malicious software (malware)
+Attack Siemens software that control industrial control systems (ICS) and these systems
+Used in nuclear power plants, among other factories
+First reported in June 2010, the public were only aware of it only in July 2010
+
+A digital weapon created by nation states
+Iran confirmed that nuclear program damaged by Stuxnet
+Sophisticated design, special targets, expensive to develop
+
+--- Slide 22 ---
+Nation-state Attacks
+
+--- Slide 23 ---
+Examples ..
+
+--- Slide 24 ---
+Examples ..
+
+--- Slide 25 ---
+Examples ..
+…
+
+--- Slide 26 ---
+Computer Security
+Security = Sustain desirable properties under intelligent adversaries
+Making the above precise requires defining the following two aspects precisely
+
+Desirable properties
+Understand what properties are needed.
+Intelligent adversaries
+Needs to understand/model adversaries
+Always think about adversaries.
+
+
+--- Slide 27 ---
+Security Goals
+Confidentiality (secrecy, privacy)
+- only those who are authorized to know can know
+
+Integrity (also authenticity in communication)
+- only modified by authorized parties and in permitted ways
+- do things that are expected 
+
+Availability
+- those authorized to access can get access
+
+--- Slide 28 ---
+Violations of CIA
+Anthem Data Leakage
+Confidentiality?
+Integrity?
+
+Email Phishing/Malware Attacks
+Integrity?
+Confidentiality?
+
+The Stuxnet attack compromises
+Integrity of software systems, 
+Availability of some control functionalities,
+Confidentiality of some keys to sign malware to be loaded by Windows
+
+--- Slide 29 ---
+Why attacks occur?
+Who are the attackers?
+bored teenagers, criminals, organized crime organizations, rogue (or other) states, industrial espionage, angry employees, …
+Why they do it?
+fun, 
+fame, 
+profit, …
+computer systems are where the moneys are
+Political/military objectives
+
+
+--- Slide 30 ---
+Why attacks succeed?
+Software/computer/information   systems/designs are buggy
+They are complex, dynamic, and increasingly so
+
+Users make mistakes
+
+Some Technological factors
+Inherent power of computers Von Neumann architecture: stored programs mixing code and data
+Unsafe program languages
+
+--- Slide 31 ---
+Reasons why these factors exist
+
+Economical factors
+Lack of incentives for secure software
+Security is difficult, expensive and takes time
+
+Human factors
+Lack of security training for software engineers
+Largely uneducated population
+Security often gets in the way
+
+
+--- Slide 32 ---
+Security is secondary
+What protection/security mechanisms one has in the physical world?
+
+Why the need for security mechanisms arises?
+
+Security is secondary to the interactions that make security necessary.
+
+
+--- Slide 33 ---
+Security is relative
+Is your phone secure?
+
+What does “secure” mean?
+
+Security is relative:
+to the kinds of loss one consider
+Security objectives/properties need to be stated
+to the threats/adversaries under consideration.
+Security is always under certain assumptions
+
+--- Slide 34 ---
+Why are Networks Important?
+Enable one to communicate with outside
+
+The obvious stepping-stone to launch remote attacks on different systems and software
+
+Cannot live with it (threats and vulnerabilities) and cannot live without it (utilities)  
+
+--- Slide 35 ---
+Internet (then, ARPANET) in 1969
+© 2004 Computer History Museum - http://www.computerhistory.org/internet_history/
+
+Original participants of ARPANET:
+SRI (Stanford Research Institute)
+UCSB (University of California at Santa Barbara)
+UCLA (University of California at Los Angeles)
+Utah (University of Utah)
+
+
+--- Slide 36 ---
+Internet in 1998
+© Bill Cheswick – 
+http://www.cheswick.com/ches/map/gallery/index.html
+
+
+--- Slide 37 ---
+Internet Now
+© Submarine Cable Map – https://www.submarinecablemap.com/
+
+
+--- Slide 38 ---
+Internet Users as of 2024
+
+--- Slide 39 ---
+Mobile Data Subscriptions as of 2024
+
+--- Slide 42 ---
+How does ransomware often enter the victim’s system?
+© https://informationisbeautiful.net/visualizations/worlds-biggest-data-breaches-hacks/#bysensitivity
+
+
+--- Slide 43 ---
+© https://informationisbeautiful.net/visualizations/worlds-biggest-data-breaches-hacks/#bysensitivity
+
+
+How does malware exfiltrate data out of systems?
+
+--- Slide 44 ---
+Roadmap
+
+--- Slide 45 ---
+Types of Computer Security Research
+Gained insights
+
+--- Slide 46 ---
+Reasoning about Attacker Capability
+Reasoning about attacker capability is hard
+We are taught to think and act positively
+
+--- Slide 47 ---
+Changing the Point-of-View
+Often breaking into a system or software requires 
+changing the point-of-view
+
+--- Slide 48 ---
+Roadmap
+
+--- Slide 49 ---
+Interesting aspects of Security
+Interesting
+Challenging
+Problem-solving skills
+Rewarding
+Broad and deep knowledge of Computer Science
+Huge attack surface
+State-of-knowledge changes quickly
+
+--- Slide 50 ---
+Challenges of Security
+Defense is almost always harder than attack.
+In which ways information security is more difficult than physical security?
+adversaries can come from anywhere
+computers enable large-scale automation
+adversaries can be difficult to identify
+adversaries can be difficult to punish
+potential payoff can be much higher
+In which ways information security is easier than physical security?
+
+
+--- Slide 51 ---
+Why is Security interesting? 
+The most interesting/challenging threats to security are posed by human adversaries
+Security is harder than reliability
+Information security is a self-sustaining field
+Can work both from attack perspective and from defense perspective
+Security is about benefit/cost tradeoff
+Thought often the tradeoff analysis is not explicit
+Security is not all technological
+Humans are often the weakest link
+
+--- Slide 52 ---
+Known Attacker Capabilities
+Opportunistic attacker
+Nation-state level attacker
+
+--- Slide 53 ---
+Attacks come from Network
+
+--- Slide 54 ---
+Users are the weakest link
+
+--- Slide 55 ---
+Roadmap
+
+--- Slide 56 ---
+Research Interests
+System
+Security
+Software
+Security
+Network
+Security
+Formal verification and Automated Reasoning
+My research group develops software that 
+analyzes or proves the security of 
+other systems, software, or networks.
+
+--- Slide 57 ---
+Research Interests
+
+--- Slide 58 ---
+4G LTE/5G Security and Privacy
+5.8 billion users
+807 operators
+170 countries
+A Global Standard
+Supply chain
+management
+Autonomous vehicles
+Internet of things
+Autonomous
+healthcare
+Ensuring cellular networks’ resiliency to attacks is of utmost importance for a nation’s security posture. 
+
+--- Slide 59 ---
+4G LTE/5G Security and Privacy
+59
+Attacks on cellular networks in the wild are more common than we think.
+
+--- Slide 60 ---
+4G LTE/5G Security and Privacy
+IMSI Request
+IMSI = International Mobile Subscriber Identity
+IMSI
+Signal Power  Digger
+
+--- Slide 61 ---
+Cellular Network Attacks
+Security
+Privacy
+….
+….
+
+--- Slide 62 ---
+Potency of Cellular Network Attacks
+
+--- Slide 63 ---
+Questions Our Research Answered
+
+--- Slide 64 ---
+Defensive Solution
+
+--- Slide 65 ---
+Learn to think about security when doing things
+Think about:
+Adversary model (capability of the adversary)
+Desirable properties
+Trust assumptions (what I am depending upon for the desirable property to hold against certain adversary)
+
+Learn to understand and apply security principles when designing/building/analyzing systems
+E.g., principles of least privilege, separation of duty
+
+Goal of the course
+
+--- Slide 66 ---
+ We discuss vulnerabilities and attacks
+
+ Most vulnerabilities we discuss may have been fixed
+ 
+ Some attacks may still cause harm
+
+ Do not  try these outside the context of this course
+Ethical Use of Information

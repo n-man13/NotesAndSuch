@@ -1,0 +1,197 @@
+--- Slide 1 ---
+CSE 508
+Network Security (Lecture 7 – Core Protocol DNS and its Security)
+Omar Haider Chowdhury
+Empire Innovation Scholar and Associate Professor
+Department of Computer Science
+Stony Brook University
+
+--- Slide 2 ---
+This class will have the following modules:
+Background: 
+Cryptography
+Introduction to Network and Protocols
+Authentication
+Access Control
+Attacks and Defenses against protocols 
+Essential tools for attack and defense
+Web Security
+Privacy and Anonymity 
+Advanced Topics (Protocol Verification)
+Modules
+
+--- Slide 3 ---
+This class will have the following modules:
+Background: 
+Cryptography
+Introduction to Network and Protocols
+Authentication
+Access Control
+Attacks and Defenses against protocols 
+Essential tools for attack and defense
+Web Security
+Privacy and Anonymity 
+Advanced Topics (Protocol Verification)
+Modules
+
+--- Slide 5 ---
+So far, we have only seen attacks. 
+
+--- Slide 6 ---
+So far, we have only seen attacks. 
+Our next focus will be on defenses that increase the entropy of the DNS response
+
+--- Slide 7 ---
+Source Port Randomization (Defense -1)
+Use a random source port for each out-going DNS query 
+Entropy: 16-bit (from TXID) + 11-bit (from source port) = 27-bit entropy 
+To win, the attacker has a much bigger space of possible IDs to forge a valid response 
+Limitation: When the resolver is behind a NAT device, the additional entropy provided by source port randomization is low (e.g., 2 bits) 
+
+--- Slide 8 ---
+0x20 Randomization (Defense -2)
+Domain names are case-insensitive
+www.google.com and WWW.GOOGLE.COM resolves to the same IP address 
+Randomly change some of the characters in the domain name to upper case letters 
+The expectation is that the resolver responding will copy the domain name in the response from the query 
+Limitations: 
+Attacker can query: www.123.com 
+Some of the resolvers always return domain name in all lower-case  
+Some of the resolvers use a case-sensitive matching 
+70% resolvers support 0x20 randomization 
+
+--- Slide 9 ---
+WSEC DNS (Defense -3)
+While querying root or TLD DNS servers, preprend random prefix 
+Ddsj030gojfd.www.google.com and www.google.com returns the same RRs (not IP) 
+Limitations: 
+Domain names can be maximum 255-byte length
+Attackers can query 255-byte domains 
+This is applicable to referrals not A queries 
+Some resolvers exclude long domain names as they are uncommon
+
+--- Slide 10 ---
+Randomizing Destination IP (Defense -4)
+Multiple IP addresses for a DNS server 
+Choose one randomly from that list to query 
+Limitations: 
+The set of IP addresses are small 
+They are many times predictable 
+Attack it to make it more predictable 
+
+--- Slide 11 ---
+Randomizing Destination IP (Defense -4)
+Multiple IP addresses for a DNS server 
+Choose one randomly from that list to query 
+Limitations: 
+The set of IP addresses are small 
+They are many times predictable 
+Attack it to make it more predictable 
+whoisthere.stonybrook.edu. IN A 129.49.7.250
+mewho.stonybrook.edu.      IN A 199.110.254.244
+nocnoc.stonybrook.edu.     IN A 129.49.7.3
+
+--- Slide 12 ---
+Randomizing Destination IP (Defense -4)
+Multiple IP addresses for a DNS server 
+Choose one randomly from that list to query 
+Limitations: 
+The set of IP addresses are small 
+They are many times predictable 
+Attack it to make it more predictable 
+
+--- Slide 13 ---
+Randomizing Source IP (Defense -5)
+This is called the NAT-antidote 
+This is applicable when the resolver is behind a NAT
+When NAT receives a query from the resolver, it randomly changes the source IP address to a random IP in that network 
+Limitations: 
+Extra entropy depends on the network size 
+
+--- Slide 15 ---
+Long-term Defenses
+
+--- Slide 16 ---
+Adaptive Defense
+ Attack = Received a response for a query and the TXID of the response does not match with the query’s TXID
+ Can happen in benign cases as DNS runs on top of UDP
+ 
+
+
+--- Slide 17 ---
+Sandwich Antidote (Defense -6)
+Detect attack and apply sandwich antidote 
+For querying www.google.com 
+Query 1: dfjfdkjfhksdf.google.com 
+Query 2: www.google.com [REAL QUERY]
+Query 3: jkjkjoiojohh.google.com
+ Observe whether the response arrive in-order 
+
+--- Slide 18 ---
+Sandwich Antidote (Defense -6)
+UDP packets can arrive out of order
+
+--- Slide 19 ---
+Sandwich Antidote (Defense -6)
+Attacker can try to deliver a correct response to the original (2nd) request
+After the first response has been received
+This means sandwiching only shortens the window in which the forged response can arrive
+As shown previously, one would want certain interval between sandwiched requests to obtain a higher inorder rate
+Overhead concerns: attacker sending some mismatched response would trigger 3 requests
+
+--- Slide 20 ---
+DNSSEC (Defense – 7)
+Proposed as a long-term solution 
+Uses digitally signed responses 
+Prevents cache poisoning attacks 
+Limitations: 
+ Adoption is very slow– 1% of all the .com and .net domains are secured by DNSSEC 
+ Opens door for DoS attack due to large response size 
+
+--- Slide 21 ---
+DNSSEC Adoption
+About 1% of them supports DNSSEC
+
+--- Slide 22 ---
+DNS over TCP (Defense – 8)
+Run DNS protocol on top of TCP instead of UDP 
+Limitations: 
+High latency (almost 2X) 
+Resolver throughput rate (1/10th) 
+Not all resolvers support TCP
+In our experiment with Alexa’s top 15K domains, 10% of their authoritative nameservers do not support TCP – includes Facebook 
+
+--- Slide 23 ---
+Adaptively use TCP (Defense – 9)
+Run DNS protocol on top of TCP instead of UDP only when detected attack 
+Nominum implemented it in their product Vantio CacheServe 
+Limitations: 
+Attack detection is not fine-grained – benign cases will be considered as attack 
+Same as before 
+Susceptible to the new attack we have proposed
+
+--- Slide 24 ---
+Hold-on (Defense – 10)
+Main idea:
+After receiving one matching response, keep waiting until reached some upper-bound of RTT
+By holding on, even if a successful forged response arrived, by holding on, may still receive the genuine response
+When more than one matching response can be accepted, use arrival time (expect to be close to RTT) to decide 
+
+--- Slide 25 ---
+Hold-on (Defense – 10)
+Status: Not sure. Does not seem to be widely deployed?
+However:
+> 1 matching responses means under attack?
+RTT can be estimated => not a good "trust anchor" for authentication
+1 matching response means no attack?
+Not really: packets could be dropped in transit, servers could be overwhelmed so that queries could not be processed, some servers do not respond to non-existent domains
+
+--- Slide 26 ---
+DNS over TLS/HTTPS (Defense – 11)
+ There is a proposal of using DNS over TLS or HTTPS
+ Provides security against DNS cache poisoning attack 
+Limitations: 
+ Deployment is low 
+ Overhead is high 
+
+kdig -d @1.1.1.1 +tls-ca +tls-host=one.one.one.one example.com

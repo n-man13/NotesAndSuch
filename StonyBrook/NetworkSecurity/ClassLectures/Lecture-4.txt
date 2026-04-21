@@ -1,0 +1,408 @@
+CSE 508
+  
+Omar Haider Chowdhury
+Empire Innovation Scholar and Associate Professor
+Department of Computer Science
+Stony Brook University��������������������������������������������������������������������������
+
+•This class will have the following modules:
+•Background: 
+•Cryptography
+•Introduction to Network and Protocols
+•Authentication
+•Access Control
+•Attacks and Defenses against protocols 
+•Essential tools for attack and defense
+•Web Security
+•Privacy and Anonymity 
+•Advanced Topics (Protocol Verification)Modules
+
+•This class will have the following modules:
+•Background: 
+•Cryptography
+•Introduction to Network and Protocols
+•Authentication
+•Access Control
+•Attacks and Defenses against protocols 
+•Essential tools for attack and defense
+•Web Security
+•Privacy and Anonymity 
+•Advanced Topics (Protocol Verification)Modules
+
+Review of Symmetric Key 
+Cryptography
+
+•Confidentiality: 
+•Stream cipher (uses PRNG)
+• Block ciphers with encryption modes (CBC or CTR)
+• Integrity:
+• Cryptographic hash functions 
+• Message authentication code (Keyed Hash Functions) 
+• Limitation:  Sender and Receiver must share the 
+same key
+• Needs secure channel for key distribution 
+• Impossible for two parties having no prior relationship
+• Needs many keys (i.e., n2) for n parties to communicateSymmetric Key Cryptography
+
+Public Key Cryptography
+
+Concept of Public Key Encryption
+•Each party has a pair (K, K-1) of keys : 
+•K is the public  key, and used for encryption
+•K-1 is the private  key, and used for decryption
+•Satisfies    DK-1[EK[M]] = M
+•Knowing the public -key K, it is computationally infeasible to compute 
+the private key K-1
+•How to check (K,K-1) is a pair?
+•Offers only computational security.  Secure Public Key encryption is impossible 
+when P=NP, as deriving K-1 from K is in NP.
+•The public key K may be made publicly available, e.g., in a publicly 
+available directory
+•Many can encrypt, only one can decrypt
+
+Concept of Public Key Encryption
+•Each party has a pair (K, K-1) of keys : 
+•K is the public  key, and used for encryption
+•K-1 is the private  key, and used for decryption
+•Satisfies    DK-1[EK[M]] = M
+•Knowing the public -key K, it is computationally infeasible to compute 
+the private key K-1
+•How to check (K,K-1) is a pair?
+•Offers only computational security.  Secure Public Key encryption is impossible 
+when P=NP, as deriving K-1 from K is in NP.
+•The public key K may be made publicly available, e.g., in a publicly 
+available directory
+•Many can encrypt, only one can decrypt
+Public -key systems aka asymmetric  crypto systems
+
+Early History
+•Proposed by Diffie and Hellman, documented in “ New Directions in 
+Cryptography ” (1976) 
+1.Public -key encryption schemes
+2.Key distribution systems
+•Diffie -Hellman key agreement protocol
+3.Digital signature
+•Public -key encryption was proposed in 1970 in a classified paper by James Ellis
+•The paper was made public in 1997 by the British Governmental Communications 
+Headquarters
+•The concept of digital signature is still originally due to Diffie & Hellman
+
+Public Key Encryption Algorithms
+•Most public -key encryption algorithms use either 
+modular arithmetic number theory, or elliptic curves
+•RSA
+•Based on the hardness of factoring large numbers
+•El Gamal
+•Based on the hardness of solving discrete logarithm 
+problem
+•Use the same idea as Diffie -Hellman key agreement
+
+Public Key Encryption Algorithms
+•Most public -key encryption algorithms use either 
+modular arithmetic number theory, or elliptic curves
+•RSA
+•Based on the hardness of factoring large numbers
+•El Gamal
+•Based on the hardness of solving discrete logarithm 
+problem
+•Use the same idea as Diffie -Hellman key agreement
+In the computational security model, we prove security of a scheme S in the 
+following way: 
+If Problem P is hard to solve, then S is secure
+
+Preliminary: Modular Arithmetic
+
+Diffie -Hellman Key Agreement
+–Not a Public Key Encryption system 
+–It can allow A and B to agree on a shared secret in a public 
+channel (against passive, i.e., eavesdropping only adversaries )
+Setup : p prime and g generator of Zp*, p and g public.
+K = (gb mod p)a = gab mod p 
+ ga mod p  
+gb mod p  
+K = (ga mod p)b = gab mod p
+Pick random, secret a
+Compute and send ga mod pPick random, secret b
+Compute and send gb mod p
+
+Preliminary: Group, Generator
+
+Preliminary: Group, Generator ( contd )
+
+Diffie -Hellman Example
+•Example: Let p=11, g=2, then
+     A chooses 4, B chooses 3, then shared secret is (23)4  =  (24)3  
+=  212  =  4  (mod 11)
+     Adversaries sees 23=8 and 24=5, needs to solve one of 2x=8 
+and 2y=5 to figure out the shared secret.a 1 234 5 6 7 8 9 10 11
+ga 2 4816 32 64 128 256 512 1024 2048
+ga mod p 2 485 10 9 7 3 6 1 2
+
+DH and Hard Problems
+•Discrete Log (DLG) Problem : Given <g, h, p>, computes 
+a such that ga = h mod p.
+•Computational Diffie Hellman (CDH) Problem : Given 
+<g, ga mod p,  gb mod p>  (without a, b) compute gab 
+mod p.
+•Decision Diffie Hellman (DDH) Problem : distinguish 
+(ga,gb,gab) from ( ga,gb,gc), where a,b,c are randomly 
+and independently chosen
+
+DH and Hard Problems
+•Discrete Log (DLG) Problem : Given <g, h, p>, computes 
+a such that ga = h mod p.
+•Computational Diffie Hellman (CDH) Problem : Given 
+<g, ga mod p,  gb mod p>  (without a, b) compute gab 
+mod p.
+•Decision Diffie Hellman (DDH) Problem : distinguish 
+(ga,gb,gab) from ( ga,gb,gc), where a,b,c are randomly 
+and independently chosen
+1. If one can solve the DL problem, then one can solve the CDH 
+problem.  
+2. If one can solve CDH, then one can solve DDH.
+
+Assumptions
+•DDH Assumption : DDH is hard to solve .
+•CDH Assumption : CDH is hard to solve .
+•DLG Assumption :  DLG is hard to solve .
+•DDH is assumed difficult to solve for large p in classical computers  
+(e.g., at least 1024 bits).
+•Warning :
+•New progress in 2013 can solve discrete log for p values with some properties.  
+No immediate attack against practical setting yet.
+•Look out when you need to use/implement public key crypto
+•May want to consider Elliptic Curve -based algorithms, require shorter keys 
+than discrete log (for 128 -bit security require 256 -bit key size)
+• Attacks on the use of DH in TLS: https://weakdh.org/
+
+ElGamal  Encryption
+•Public key <g, p, h=ga mod p>
+•Private key is a
+•To encrypt : 
+•Chooses random b, computes C=[ gb mod p, gab * M mod p].
+•Idea: for each M, sender and receiver establish a shared secret gab via 
+the DH protocol.  The value gab hides the message M by multiplying it.
+•To decrypt  C=[c1,c2], computes M where 
+•((c1a mod p) * M) mod p = c2.
+•To find M for x * M mod p = c2, compute z s.t. x*z mod p =1, and then M = C2*z 
+mod p
+•CDH assumption ensures M cannot be fully recovered
+•IND-CPA security requires DDH
+•Multiplicatively homomorphic
+
+Homomorphic Encryption
+
+Homomorphic Encryption
+E(m1) ∎ E(m2) = E(m1⨀ m2) [e.g., ⨀ ∈ {+,-,*,/}]
+
+Homomorphic Encryption
+Multiplicatively homomorphic:  
+E(m1) ∎ E(m2) = E(m1 ∗ m2)
+Additively homomorphic:  
+E(m1) ∎ E(m2) = E(m1 + m2)
+Fully homomorphic:  
+E(m1) ∎ E(m2) = E(m1 ⨀ m2) [⨀ can be any operations]E(m1) ∎ E(m2) = E(m1⨀ m2) [e.g., ⨀ ∈ {+,-,*,/}]
+
+Homomorphic Encryption
+Multiplicatively homomorphic:  
+E(m1) ∎ E(m2) = E(m1 ∗ m2)
+Additively homomorphic:  
+E(m1) ∎ E(m2) = E(m1 + m2)
+Fully homomorphic:  
+E(m1) ∎ E(m2) = E(m1 ⨀ m2) [⨀ can be any operations]E(m1) ∎ E(m2) = E(m1⨀ m2) [e.g., ⨀ ∈ {+,-,*,/}]
+Prove El -Gamal Public Key Encryption is multiplicatively 
+homomorphic
+
+RSA Algorithm
+•Invented in 1978 by Ron Rivest, Adi Shamir and Leonard 
+Adleman
+•Published as R L Rivest, A Shamir, L Adleman, " On Digital 
+Signatures and Public Key Cryptosystems ", Communications of the 
+ACM, vol 21 no 2, pp120 -126, Feb 1978 
+•Security relies on the difficulty of factoring large composite 
+numbers 
+•Essentially the same algorithm was discovered in 1973 by 
+Clifford Cocks, who works for the British intelligence
+•Multiplicatively homomorphic
+
+Euler’s Totient/Phi Function
+
+RSA Public -Key Cryptosystem
+Key generation:
+1. Select 2 large prime numbers of about the same size, p and 
+q
+Typically, each p, q has between 512 and 2048 bits
+2. Compute n = pq, and (n) = (q -1)(p-1)
+3. Select e,  1<e< (n), s.t. gcd(e, (n)) = 1
+Typically, e=3 or e=65537
+4. Compute  d, 1< d< (n) s.t.  ed  1 mod (n)
+Knowing (n), d easy to compute. 
+Public key:  (e, n)
+Private key:  d
+
+RSA Public -Key Cryptosystem
+Encryption:
+Given a message M such that 0 < M < n   (or, M  Zn− 
+{0}), to encrypt use the public key (e, n) to  
+compute C = Me mod n   where  C  Zn− {0}
+Decryption:
+Given a ciphertext C, use the private key (d) to  
+compute Cd mod n  = (Me mod n)d mod n = Med mod n = 
+M
+
+RSA Example
+•p = 11, q = 7, n = 77, (n) = 60  
+•d = 13, e = 37   (ed = 481;  ed mod 60 = 1)
+•Let M = 15.  Then C  Me mod n
+•C  1537 (mod 77) = 71
+•M  Cd mod n
+•M  7113 (mod 77) = 15
+
+RSA Example
+•Parameters:
+•p = 3, q = 5, n= pq = 15
+•(n) = ?
+•Let e = 3, what is d?
+•Given M=2, what is C?
+•How to decrypt?
+
+RSA Security and Hard Problems
+Plaintext: MC = Me mod (n=pq)
+Ciphertext: C
+Cd mod n
+1.Factoring Problem : Given n= pq, compute p,q
+2.Finding RSA Private Key : Given ( n,e), compute d s.t. ed = 1 (mod 
+(n)).
+•Given ( d,e) such that ed = 1 (mod (n)), there is a clever 
+randomized algorithm to factor n efficiently.
+•Implication : Cannot share the modulus n among multiple 
+users
+3.RSA Problem : From ( n,e) and C, compute M s.t. C = Me 
+•Aka computing the e’th root of C.
+•Can be solved if n can be factored
+
+RSA Security and Factoring
+•Security depends on the difficulty of factoring n
+•Factor n  compute (n)  compute d from (e,  n)
+•Knowing e, d such that ed = 1 (mod (n))  factor n
+•The length of n= pq reflects the strength
+•700-bit n factored in 2007
+•768 bit n factored in 2009
+•RSA encryption/decryption speed is quadratic in key length
+•1024 bit for minimal level of security today (roughly 80 bit security)
+•likely to be breakable in near future
+•Minimal 2048 bits recommended for current usage (roughly 112 bit 
+security)
+•NIST suggests 15360 -bit RSA keys are equivalent in strength to 256 -bit 
+•Factoring is easier to break with quantum computers
+
+RSA Encryption and IND -CPA
+•The RSA assumption, which assumes that the RSA problem 
+is hard to solve, ensures that the plaintext cannot be fully 
+recovered.
+•Plain RSA does not provide IND -CPA security .
+•For Public Key systems, the adversary has the public key, hence 
+the initial training phase is unnecessary, as the adversary can 
+encrypt any message he wants to.
+•How to break IND -CPA security?
+•How to use it more securely?
+
+Real world usage of public key encryption
+•Often used to encrypt a symmetric key
+•To encrypt a message M under an RSA public key ( n,e), generate a 
+new AES key K, compute    [Ke mod n, AES -
+CBCK(M)]
+•Alternatively, one can use random padding. 
+•E.g., computer (M || r) e mod n to encrypt a message M with a random 
+value r
+•More generally, uses a function F( M,r), and encrypts as   F( M,r) e mod n 
+•From F( M,r), one should be able to recover M
+•This provides randomized encryption
+
+Digital Signature
+•Consider the real -life example where a person pays by credit 
+card and signs a bill; the seller verifies that the signature on 
+the bill is the same with the signature on the card
+•Contracts are valid if they are signed.
+•Signatures provide non-repudiation .
+•Ensuring that a party in a dispute cannot repudiate or refute the 
+validity of a statement or contract.
+•Can we have a similar service in the electronic world? 
+•Does Message Authentication Code provide non -repudiation?  
+
+Digital Signature and Hash
+•Very often digital signatures are used with hash functions, 
+hash of a message is signed, instead of the message.
+
+Digital Signature and Hash
+•Very often digital signatures are used with hash functions, 
+hash of a message is signed, instead of the message.
+Why is the hash of a message signed instead of the whole message?
+
+Digital Signature and Hash
+•Very often digital signatures are used with hash functions, 
+hash of a message is signed, instead of the message.
+Why is the hash of a message signed instead of the whole message?
+Answer: 
+Public key schemes are expensive computationally
+
+Digital Signature and Hash
+•Very often digital signatures are used with hash functions, 
+hash of a message is signed, instead of the message.
+Why is the hash of a message signed instead of the whole message?
+What properties are expected of the hash function and 
+why?Answer: 
+Public key schemes are expensive computationally
+
+Digital Signature and Hash
+•Very often digital signatures are used with hash functions, 
+hash of a message is signed, instead of the message.
+Why is the hash of a message signed instead of the whole message?
+What properties are expected of the hash function and 
+why?
+Answer: 
+Strong Collision ResistanceAnswer: 
+Public key schemes are expensive computationally
+
+RSA Digital Signature
+Key generation (as in RSA encryption):
+•Select 2 large prime numbers of about the 
+    same size, p and q
+•Compute n = pq, and  = (q - 1)(p - 1)
+•Select a random integer e,  1 < e < , s.t. 
+    gcd(e, ) = 1
+•Compute  d, 1 <  d <   s.t.  ed  1 mod 
+Public key:  (e, n)   used for verification
+Private key:  d,         used for generation
+
+RSA Digital Signature
+Signing message M
+•Verify 0 < M < n
+•Compute S = h(M)d mod n
+Verifying signature S
+•Use public key (e, n) 
+•Compute Se mod n = (h(M)d mod n)e mod n = h(M)
+
+Non -repudiation
+•Nonrepudiation is the assurance that someone cannot deny 
+something. 
+•Typically, nonrepudiation refers to the ability to ensure that a 
+party to a contract or a communication cannot deny the 
+authenticity of their signature on a document or the sending 
+of a message that they originated. 
+•Can one deny a digital signature one has made?
+•Does email provide non -repudiation?
+
+Big Picture
+Properties Symmetric key 
+schemesAsymmetric key 
+schemes
+Secrecy / 
+ConfidentialityStream ciphers
+Block ciphers + 
+encryption modesPublic key encryption: 
+RSA, El Gamal, etc.
+Authenticity / 
+IntegrityMessage 
+Authentication CodeDigital Signatures: 
+RSA, DSA, etc.

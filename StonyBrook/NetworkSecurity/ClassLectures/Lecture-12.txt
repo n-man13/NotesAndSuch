@@ -1,0 +1,422 @@
+--- Slide 1 ---
+CSE 508
+Network Security - Lecture 12- Border Gateway Protocol (BGP)
+Omar Haider Chowdhury
+Empire Innovation Scholar and Associate Professor
+Department of Computer Science
+Stony Brook University
+
+--- Slide 2 ---
+This class will have the following modules:
+Background: 
+Cryptography
+Introduction to Network and Protocols
+Authentication
+Access Control
+Attacks and Defenses against protocols 
+Essential tools for attack and defense
+Web Security
+Privacy and Anonymity 
+Advanced Topics (Protocol Verification)
+Modules
+
+--- Slide 3 ---
+Slide Sources
+ Many of the slide materials are from Prof. Michalis Polychronakis
+ Others are from RIPE NCC BGP Security Slides (https://www.ripe.net/media/documents/BGP_Routing_Security-Slides-17.06.24.pdf)
+
+--- Slide 4 ---
+IPv4 Addressing and Forwarding
+Packets are routed based on their destination IP address
+Router’s task:  for every IP address, forward the packet to the next hop
+Table lookup for each packet in a routing table
+32-bit addresses, 232 possibilities     impractical to maintain 232 entries
+Solution: hierarchical address scheme
+4
+
+--- Slide 5 ---
+IPv4 Address Classes
+
+
+
+
+
+Classless Inter-Domain Routing (CIDR) was introduced in 1993
+Replaced the classful A/B/C network addressing architecture
+IP addresses are now associated with a subnet mask
+Allocations to ISPs and end users can be made on any address-bit boundary
+5
+
+--- Slide 6 ---
+6
+© XKCD - https://xkcd.com/195/
+
+
+No green patches after 2011…
+
+--- Slide 7 ---
+7
+http://census2012.sourceforge.net
+
+
+--- Slide 8 ---
+Autonomous Systems
+
+8
+AS1
+AS2
+AS3
+AS: collection of connected IP routing prefixes belonging to a single administrative entity
+Presents a common routing policy to the internet
+AS number defined as 16-bit integer
+99,857 ASNs as of February 2021, assigned by IANA
+
+--- Slide 9 ---
+WHOIS
+Query–response protocol [RFC 3912] used for querying public databases that store an Internet resource's registered users/assignees
+Domain names
+IP addresses
+Autonomous systems
+Additional information
+Registrant name and contact details (not always available due to privacy concerns)
+Nameservers
+Dates related to registration
+9
+
+--- Slide 10 ---
+10
+
+--- Slide 11 ---
+11
+https://www-public.imtbs-tsp.eu/~maigron/rir-stats/rir-delegations/world/world-asn-by-number.html
+
+
+--- Slide 12 ---
+12
+https://www-public.imtbs-tsp.eu/~maigron/rir-stats/rir-delegations/world/world-asn-by-number.html
+
+
+--- Slide 13 ---
+13
+© Jon Postel
+
+Map of the internet, 1982
+
+Ovals:  sites/networks
+Rectangles:  routers
+
+
+--- Slide 14 ---
+CAIDA’s IPv4 AS CoreAS-level Internet Graph
+SkitterJanuary 2000
+
+220,533 IP addresses
+5,107 ASes
+14
+© UC Regents – https://www.caida.org/research/topology/as_core_network/historical.xml
+
+
+--- Slide 15 ---
+CAIDA’s IPv4 AS CoreAS-level Internet Graph
+ArchipelagoAugust 2010
+
+16,802,061 IP addresses
+26,702 ASes
+15
+© UC Regents – https://www.caida.org/research/topology/as_core_network/historical.xml
+
+
+--- Slide 16 ---
+CAIDA’s IPv4 AS CoreAS-level Internet Graph
+ArchipelagoFebruary 2017
+
+50 million IP addresses
+47,610 ASes
+16
+© UC Regents – https://www.caida.org/research/topology/as_core_network/historical.xml
+
+
+--- Slide 17 ---
+CAIDA’s IPv4 AS CoreAS-level Internet Graph
+ArchipelagoJanuary 2020
+
+64 million IP addresses
+61,290 ASes
+17
+© UC Regents – https://www.caida.org/projects/as-core/historical/
+
+
+
+--- Slide 18 ---
+Internet Routing
+Routers speak to each other to establish internet paths
+Exchange topology and cost information
+Calculate the best path to each destination
+Intra-domain routing: set up routes within a single network/AS
+RIP  (Routing Information Protocol):  distance vector
+OSPF  (Open Shortest Path First):  link state
+Inter-domain routing: set up routes between networks
+BGP  (Border Gateway Protocol)
+Advertisements contain a prefix and a list of ASes to traverse to reach that prefix
+
+18
+
+--- Slide 19 ---
+Internet Routing
+19
+Interiorrouters 
+Exteriorrouters 
+BGP
+BGP
+BGP
+OSPF
+OSPF
+RIP
+
+--- Slide 20 ---
+BGP  (Border Gateway Protocol)
+The de facto standard inter-AS routing protocol in today’s Internet
+BGP is what enables subnets to advertise their existence to the rest of the Internet
+Main goals:
+Obtain subnet reachability information from neighboring ASs
+Propagate the reachability information to all internal routers 
+Determine “good” routes to subnets based on the obtained reachability information and the policies of the involved ASes
+Path-vector routing protocol
+Maintains path information that is updated dynamically
+Makes routing decisions based on paths, network policies, or rules configured by network administrators
+20
+
+--- Slide 21 ---
+Some notable aspects of BGP
+It is an application layer protocol 
+It runs over TCP (Port 179)
+It prefers shortest and minimum cost path 
+It prefer specific routes over general routes 
+It is essentially a point-to-point broadcast/gossip protocol 
+It uses the path vector protocol for routing
+It prefers internal paths over external paths (minimum cost)
+It has no built-in authentication 
+
+21
+
+--- Slide 22 ---
+BGP Message Types
+
+22
+
+--- Slide 23 ---
+BGP Protocol State Machine
+
+23
+
+--- Slide 24 ---
+External BGP (eBGP) and Internal BGP (iBGP)
+eBGP
+Used between Ases 
+Peers are typically directly connected
+Updates decrements TTL (typical value 1)
+Routes can be advertised to iBGP peers
+AS_PATH is modified 
+iBGP
+Uses within a single AS 
+Peers may be multiple hops away 
+Updates preserve TTL (typical value 255) 
+AS_PATH is not modified 
+Routes are not re-advertised to other iBGP peers (split-horizon rule)
+24
+
+--- Slide 25 ---
+Split Horizon Rule
+A route learned via iBGP must not be re-advertised to another iBGP peer.
+
+Why?
+iBGP does not modify the AS_PATH, so without this rule, loops cannot be detected using AS_PATH 
+
+Loop detection in eBGP:
+A router drops a route if its own AS in already in the AS_PATH   
+25
+
+--- Slide 26 ---
+Implications of Split-Horizon Rule
+In iBGP, routes learned from on iBGP peer cannot be re-advertised to another iBGP peer
+
+So, if an AS has n routers, a full mesh of n(n-1)/2 iBGP sessions are required for all routers to see all routes. 
+
+This does not scale!
+26
+
+--- Slide 27 ---
+Route Reflectors and Confederation
+Route Reflectors:
+It is a special iBGP router that is allowed to break the split-horizon rule 
+All clients peer with the route reflector but not with each other 
+Loop prevention is tricky and can result in non-optimal routing
+Confederation: 
+Divide a single AS into multiple sub-Ases
+Internally sub-ASes use iBGP 
+Between sub-ASes, eBGP-like behavior is used 
+27
+
+--- Slide 28 ---
+Why use both eBGP and iBGP? 
+
+eBGP is used to exchange routes with other networks
+
+iBGP is used to distribute external routes across internal routers so all can make consistent forwarding decision
+28
+
+--- Slide 29 ---
+Root Causes of BGP Security Issues
+No authentication of path announcements
+Neighbor adjacencies can be “secured” using MD5 digests
+BGP messages are sent over TCP connections
+All the usual problems: eavesdropping, content manipulation, …
+Misconfigurations are easy
+BGP is a complex protocol, with complex interactions
+
+Attackers can lie to other routers
+
+29
+
+--- Slide 30 ---
+Routing Attacks
+Blackholing
+False route advertisements to attract and drop traffic
+Redirection
+Force some or all traffic to take a different network path   sniffing, interception (MitM), flooding/congestion
+Instability
+Frequent advertisements and withdrawals, or increased BGP traffic to cause connectivity disruption
+How?
+Misconfigurations, insider attacks, compromised routers, BGP traffic manipulation, …
+30
+
+--- Slide 31 ---
+Prefix Hijacking
+Announce someone else’s prefix
+Victim prefers the shortest path
+31
+User
+AS6
+10.0.0/24
+10.0.0/24
+AS3
+AS5
+AS1
+AS4
+AS2
+
+--- Slide 32 ---
+Prefix Hijacking
+Announce a more specific prefix than someone else
+Victim prefers the more specific path
+32
+User
+AS3
+10.0.0/24
+AS5
+10.0.0/25
+AS1
+AS4
+AS2
+
+--- Slide 33 ---
+33
+
+--- Slide 34 ---
+34
+
+--- Slide 35 ---
+Government:  you have to block this YouTube video
+Pakistan Telecom:  sure
+
+Use URL filtering? 
+Nope
+Change the DNS record? 
+Nope
+Use IP blocking? 
+Nope
+Blackhole 208.65.153.0/24?
+Yeah!
+35
+
+--- Slide 36 ---
+AS36561 (YouTube) announces 208.65.152.0/22
+
+36
+© RIPE NCC - https://www.ripe.net/publications/news/industry-developments/youtube-hijacking-a-ripe-ncc-ris-case-study
+
+
+--- Slide 37 ---
+The prefix 208.65.153.0/24 is not announced on the Internet before the event
+37
+© RIPE NCC - https://www.ripe.net/publications/news/industry-developments/youtube-hijacking-a-ripe-ncc-ris-case-study
+
+
+--- Slide 38 ---
+AS17557 (Pakistan Telecom) announces 208.65.153.0/24
+38
+© RIPE NCC - https://www.ripe.net/publications/news/industry-developments/youtube-hijacking-a-ripe-ncc-ris-case-study
+
+
+--- Slide 39 ---
+Other Notable Incidents
+April 2010:  China Telecom announced bogus paths to 50,000 IP prefixes
+Enabled traffic interception
+
+February 2014:  hijacking of 51 networks (incl. Amazon, Digital Ocean, OVH)
+Miner connections were redirected to an attacker-controlled mining pool
+Attacker collected the miners’ profit(estimated $83,000 in 4 months)
+
+
+39
+© Phillipa Gill - https://citizenlab.org/2012/12/characterizing-large-scale-routing-anomalies-a-case-study-of-the-china-telecom-incident/
+© Pat Litke and Joe Stewart - http://www.secureworks.com/cyber-threat-intelligence/threats/bgp-hijacking-for-cryptocurrency-profit/
+
+
+--- Slide 41 ---
+41
+
+--- Slide 43 ---
+43
+
+--- Slide 44 ---
+Mitigating BGP Threats
+Neighbor authentication
+Only authorized peers can establish a given BGP neighbor relationship
+TTL check
+Most external peering sessions are established between adjacent routers
+Good idea: set TTL=1    an attacker X hops away can still set TTL=1+X
+Better idea: set TTL=255 and accept only packets with TTL=255    an attacker further away cannot spoof such a packet
+BGP prefix restrictions, sanity checks, and filtering
+Accept only a certain number of prefixes, ignore unwanted/illegal prefixes, limit the number of accepted AS path segments, …
+ACLs to explicitly permit only authorized BGP traffic
+According to existing security policies and configurations
+44
+
+--- Slide 45 ---
+Securing BGP
+Secure BGP (S-BGP)
+Each node signs its announcements
+Secure origin BGP (soBGP)
+Origin authentication + trusted database that guarantees that a path exists
+BGPPSec
+Allow recipients to validate the AS path included in update messages 
+Many deployment challenges
+No complete, accurate registry of prefix ownership
+Cannot react rapidly to changes in connectivity
+Cost of cryptographic operations
+Incremental deployment not always possible
+Need for a public key infrastructure
+45
+
+--- Slide 46 ---
+Resource Public Key Infrastructure (RPKI)
+Certified mapping from ASes to public keys and IP prefixes [RFC6480]
+Signed records that associate a BGP route announcement with the correct originating AS number
+Deploying RPKI has two distinct stages
+Route Origin Authorizations (ROAs)
+Signed route information advertised through BGP
+Route Origin Validation (ROV)
+Validation of the cryptographic signatures of other networks’ route information
+46
+https://manrs.org/2023/10/coordination-key-to-largest-rpki-deployment/

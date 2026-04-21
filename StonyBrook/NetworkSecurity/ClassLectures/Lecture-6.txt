@@ -1,0 +1,1276 @@
+--- Slide 1 ---
+CSE 508
+Network Security (Lecture 6 – Core Protocol DNS and its Security)
+Omar Haider Chowdhury
+Empire Innovation Scholar and Associate Professor
+Department of Computer Science
+Stony Brook University
+
+--- Slide 2 ---
+This class will have the following modules:
+Background: 
+Cryptography
+Introduction to Network and Protocols
+Authentication
+Access Control
+Attacks and Defenses against protocols 
+Essential tools for attack and defense
+Web Security
+Privacy and Anonymity 
+Advanced Topics (Protocol Verification)
+Modules
+
+--- Slide 3 ---
+This class will have the following modules:
+Background: 
+Cryptography
+Introduction to Network and Protocols
+Authentication
+Access Control
+Attacks and Defenses against protocols 
+Essential tools for attack and defense
+Web Security
+Privacy and Anonymity 
+Advanced Topics (Protocol Verification)
+Modules
+
+--- Slide 4 ---
+Reading
+First attack by Schuba and Spafford: 
+http://www.openbsd.org/advisories/sni_12_resolverid.txt
+ An illustrated Guide to Kaminsky DNS Vulnerability:
+ http://unixwiz.net/techtips/iguide-kaminsky-dns-vuln.html
+
+ Dan Kaminsky’s Black Hat DNS attack presentation: 
+ https://www.blackhat.com/presentations/bh-dc-09/Kaminsky/BlackHat-DC-09-Kaminsky-DNS-Critical-Infrastructure.pdf
+
+
+--- Slide 5 ---
+Purpose of Naming
+Addresses are used to locate objects
+
+Names are easier to remember than numbers
+
+You would like to get to the address or other objects using a name
+
+DNS provides a mapping from names to resources of several types
+
+--- Slide 6 ---
+Domain Name System (DNS)
+Forward DNS Resolution
+Given a domain name lookup the associated IP address 
+Example: cs.stonybrook.edu ⇒ 23.185.0.2 
+Reverse DNS lookup 
+Given an IP address lookup the domain name associated with the IP address 
+Usage: Network troubleshooting, anti-spam techniques 
+
+--- Slide 7 ---
+DNS - Distributed Database
+ DNS records are kept in a  distributed fashion 
+ Highly dynamic 
+ Decentralized authority 
+
+--- Slide 8 ---
+DNS – Hierarchical Namespace
+
+--- Slide 9 ---
+DNS – Hierarchical Namespace
+Top-level domains (TLD)
+
+--- Slide 10 ---
+Root DNS Servers
+
+--- Slide 11 ---
+Domain Name Servers
+Top-level domain (TLD) servers 
+Responsible for com, org, net, edu, etc.  
+All top-level country domains, e.g. uk, fr, ca, jp, in. 
+Network Solutions, LLC  controls com servers 
+Authoritative DNS servers 
+Organization’s DNS servers, providing authoritative hostname to IP mappings for organization’s servers. 
+Can be maintained by organization or service provider 
+Local DNS servers
+Not strictly part of the domain hierarchy 
+Each ISP (university, hospital, company) has one  
+;; ANSWER SECTION:
+cs.stonybrook.edu. 900 IN NS mewho.stonybrook.edu.
+cs.stonybrook.edu. 900 IN NS nocnoc.stonybrook.edu.
+cs.stonybrook.edu. 900 IN NS whoisthere.stonybrook.edu.
+;; ADDITIONAL SECTION:
+mewho.stonybrook.edu. 347 IN A 199.110.254.244
+nocnoc.stonybrook.edu. 346 IN A 129.49.7.3
+whoisthere.stonybrook.edu. 380 IN A 129.49.7.250
+
+--- Slide 12 ---
+DNS Resolving
+When a host makes a DNS query, it is forwarded to a local upstream resolver 
+The local upstream resolver acts as a proxy and forwards query into the domain name hierarchy 
+
+Two resolution schemes: 
+Iterative 
+Recursive 
+
+--- Slide 13 ---
+DNS Packet in the Wire
+
+--- Slide 14 ---
+DNS Packet in the Wire
+16-bit ID (TXID)
+
+--- Slide 15 ---
+DNS Packet in the Wire
+16-bit ID (TXID)
+1-bit, 0-Query, 1-Ans
+
+--- Slide 16 ---
+DNS Packet in the Wire
+16-bit ID (TXID)
+1-bit, 0-Query, 1-Ans
+0-query
+
+--- Slide 17 ---
+DNS Packet in the Wire
+16-bit ID (TXID)
+1-bit, 0-Query, 1-Ans
+0-query
+1 for Authoritative 
+Answer, 
+0-otherwise
+
+--- Slide 18 ---
+DNS Packet in the Wire
+16-bit ID (TXID)
+1-bit, 0-Query, 1-Ans
+0-query
+1 for Authoritative 
+Answer, 
+0-otherwise
+1 for truncated 
+answer
+
+--- Slide 19 ---
+DNS Packet in the Wire
+16-bit ID (TXID)
+1-bit, 0-Query, 1-Ans
+0-query
+1 for Authoritative 
+Answer, 
+0-otherwise
+1 for truncated 
+answer
+1 for recursion desired
+
+--- Slide 20 ---
+DNS Packet in the Wire
+16-bit ID (TXID)
+1-bit, 0-Query, 1-Ans
+0-query
+1 for Authoritative 
+Answer, 
+0-otherwise
+1 for truncated 
+answer
+1 for recursion desired
+1 for recursion available
+
+--- Slide 21 ---
+DNS Packet in the Wire
+16-bit ID (TXID)
+1-bit, 0-Query, 1-Ans
+0-query
+Response code
+from server
+1 for Authoritative 
+Answer, 
+0-otherwise
+1 for truncated 
+answer
+1 for recursion desired
+1 for recursion available
+
+--- Slide 22 ---
+DNS Record Types
+A record
+Domain name to IP mapping 
+NS record 
+Information about (authoritative) DNS server 
+MX record 
+Mail exchange record 
+SOA record 
+Key information about the zone (e.g., contact address of the admin) 
+CNAME record 
+Canonical or alias of a domain 
+TXT record 
+Textual description of the domain 
+
+--- Slide 23 ---
+DNS Packet Payload
+Question Section
+Contains the question asked 
+Answer Section 
+Contains the records that answer the question 
+Authority Section 
+Contains the records that point to domain authority 
+Additional Section 
+Glue records 
+IP address of the domain authorities 
+Break circular dependency 
+
+--- Slide 24 ---
+Iterative vs Recursive
+Iterative
+Recursive
+
+--- Slide 25 ---
+DNS Resolution in Details
+
+--- Slide 26 ---
+Iterative DNS Query
+Root
+a.gtld-server.com
+ns1.google.com
+www.google.com
+asgard.ccs.neu.edu
+
+--- Slide 27 ---
+Iterative DNS Query
+Root
+a.gtld-server.com
+ns1.google.com
+www.google.com
+asgard.ccs.neu.edu
+Where is www.google.com?
+
+--- Slide 28 ---
+Iterative DNS Query
+Root
+a.gtld-server.com
+ns1.google.com
+www.google.com
+asgard.ccs.neu.edu
+Where is www.google.com?
+
+--- Slide 29 ---
+Iterative DNS Query
+Root
+a.gtld-server.com
+ns1.google.com
+www.google.com
+asgard.ccs.neu.edu
+Where is www.google.com?
+
+--- Slide 30 ---
+Iterative DNS Query
+Root
+a.gtld-server.com
+ns1.google.com
+www.google.com
+asgard.ccs.neu.edu
+Where is www.google.com?
+
+--- Slide 31 ---
+Iterative DNS Query
+Root
+a.gtld-server.com
+ns1.google.com
+www.google.com
+asgard.ccs.neu.edu
+Where is www.google.com?
+
+--- Slide 32 ---
+Iterative DNS Query
+Root
+a.gtld-server.com
+ns1.google.com
+www.google.com
+asgard.ccs.neu.edu
+Where is www.google.com?
+
+--- Slide 33 ---
+Iterative DNS Query
+Root
+a.gtld-server.com
+ns1.google.com
+www.google.com
+asgard.ccs.neu.edu
+Where is www.google.com?
+
+--- Slide 34 ---
+Iterative DNS Query
+Root
+a.gtld-server.com
+ns1.google.com
+www.google.com
+asgard.ccs.neu.edu
+Where is www.google.com?
+
+--- Slide 35 ---
+Iterative DNS Query
+Root
+a.gtld-server.com
+ns1.google.com
+www.google.com
+asgard.ccs.neu.edu
+Where is www.google.com?
+
+--- Slide 36 ---
+Recursive DNS Query
+Puts the burden of resolution on the contacted name server
+How does asgard know who to forward responses too?
+Random IDs embedded in DNS queries
+What have we said about keeping state in the network?
+Root
+com
+ns1.google.com
+www.google.com
+asgard.ccs.neu.edu
+
+--- Slide 37 ---
+Recursive DNS Query
+Puts the burden of resolution on the contacted name server
+How does asgard know who to forward responses too?
+Random IDs embedded in DNS queries
+What have we said about keeping state in the network?
+Root
+com
+ns1.google.com
+www.google.com
+asgard.ccs.neu.edu
+
+--- Slide 38 ---
+Recursive DNS Query
+Puts the burden of resolution on the contacted name server
+How does asgard know who to forward responses too?
+Random IDs embedded in DNS queries
+What have we said about keeping state in the network?
+Root
+com
+ns1.google.com
+www.google.com
+asgard.ccs.neu.edu
+
+--- Slide 39 ---
+Recursive DNS Query
+Puts the burden of resolution on the contacted name server
+How does asgard know who to forward responses too?
+Random IDs embedded in DNS queries
+What have we said about keeping state in the network?
+Root
+com
+ns1.google.com
+www.google.com
+asgard.ccs.neu.edu
+
+--- Slide 40 ---
+Recursive DNS Query
+Puts the burden of resolution on the contacted name server
+How does asgard know who to forward responses too?
+Random IDs embedded in DNS queries
+What have we said about keeping state in the network?
+Root
+com
+ns1.google.com
+www.google.com
+asgard.ccs.neu.edu
+
+--- Slide 41 ---
+Recursive DNS Query
+Puts the burden of resolution on the contacted name server
+How does asgard know who to forward responses too?
+Random IDs embedded in DNS queries
+What have we said about keeping state in the network?
+Root
+com
+ns1.google.com
+www.google.com
+asgard.ccs.neu.edu
+
+--- Slide 42 ---
+Recursive DNS Query
+Puts the burden of resolution on the contacted name server
+How does asgard know who to forward responses too?
+Random IDs embedded in DNS queries
+What have we said about keeping state in the network?
+Root
+com
+ns1.google.com
+www.google.com
+asgard.ccs.neu.edu
+
+--- Slide 43 ---
+Recursive DNS Query
+Puts the burden of resolution on the contacted name server
+How does asgard know who to forward responses too?
+Random IDs embedded in DNS queries
+What have we said about keeping state in the network?
+Root
+com
+ns1.google.com
+www.google.com
+asgard.ccs.neu.edu
+
+--- Slide 44 ---
+Recursive DNS Query
+Puts the burden of resolution on the contacted name server
+How does asgard know who to forward responses too?
+Random IDs embedded in DNS queries
+What have we said about keeping state in the network?
+Root
+com
+ns1.google.com
+www.google.com
+asgard.ccs.neu.edu
+
+--- Slide 45 ---
+Recursive DNS Query
+Puts the burden of resolution on the contacted name server
+How does asgard know who to forward responses too?
+Random IDs embedded in DNS queries
+What have we said about keeping state in the network?
+Root
+com
+ns1.google.com
+www.google.com
+asgard.ccs.neu.edu
+
+--- Slide 46 ---
+Recursive DNS Query
+Puts the burden of resolution on the contacted name server
+How does asgard know who to forward responses too?
+Random IDs embedded in DNS queries
+What have we said about keeping state in the network?
+Root
+com
+ns1.google.com
+www.google.com
+asgard.ccs.neu.edu
+
+--- Slide 47 ---
+Let’s look at the resolution process step-by-step:
+annie.west.sprockets.com
+The Resolution Process
+
+--- Slide 48 ---
+ping www.nominum.com.
+Let’s look at the resolution process step-by-step:
+annie.west.sprockets.com
+The Resolution Process
+
+--- Slide 49 ---
+The workstation annie asks its configured name server, dakota, for www.nominum.com’s address
+ping www.nominum.com.
+annie.west.sprockets.com
+dakota.west.sprockets.com
+The Resolution Process
+
+--- Slide 50 ---
+The workstation annie asks its configured name server, dakota, for www.nominum.com’s address
+ping www.nominum.com.
+annie.west.sprockets.com
+dakota.west.sprockets.com
+The Resolution Process
+
+--- Slide 51 ---
+The workstation annie asks its configured name server, dakota, for www.nominum.com’s address
+ping www.nominum.com.
+annie.west.sprockets.com
+dakota.west.sprockets.com
+The Resolution Process
+
+--- Slide 52 ---
+The name server dakota asks a root name server, m, for www.nominum.com’s address
+ping www.nominum.com.
+annie.west.sprockets.com
+m.root-servers.net
+dakota.west.sprockets.com
+The Resolution Process
+
+--- Slide 53 ---
+The name server dakota asks a root name server, m, for www.nominum.com’s address
+ping www.nominum.com.
+annie.west.sprockets.com
+m.root-servers.net
+dakota.west.sprockets.com
+The Resolution Process
+
+--- Slide 54 ---
+The name server dakota asks a root name server, m, for www.nominum.com’s address
+ping www.nominum.com.
+annie.west.sprockets.com
+m.root-servers.net
+dakota.west.sprockets.com
+The Resolution Process
+
+--- Slide 55 ---
+The root server m refers dakota to the com name servers
+This type of response is called a “referral”
+ping www.nominum.com.
+annie.west.sprockets.com
+m.root-servers.net
+dakota.west.sprockets.com
+The Resolution Process
+
+--- Slide 56 ---
+The root server m refers dakota to the com name servers
+This type of response is called a “referral”
+ping www.nominum.com.
+annie.west.sprockets.com
+m.root-servers.net
+dakota.west.sprockets.com
+The Resolution Process
+
+--- Slide 57 ---
+The root server m refers dakota to the com name servers
+This type of response is called a “referral”
+ping www.nominum.com.
+annie.west.sprockets.com
+m.root-servers.net
+dakota.west.sprockets.com
+The Resolution Process
+
+--- Slide 58 ---
+The name server dakota asks a com name server, f, for www.nominum.com’s address
+ping www.nominum.com.
+annie.west.sprockets.com
+m.root-servers.net
+dakota.west.sprockets.com
+f.gtld-servers.net
+The Resolution Process
+
+--- Slide 59 ---
+The name server dakota asks a com name server, f, for www.nominum.com’s address
+ping www.nominum.com.
+annie.west.sprockets.com
+m.root-servers.net
+dakota.west.sprockets.com
+f.gtld-servers.net
+The Resolution Process
+
+--- Slide 60 ---
+The name server dakota asks a com name server, f, for www.nominum.com’s address
+ping www.nominum.com.
+annie.west.sprockets.com
+m.root-servers.net
+dakota.west.sprockets.com
+f.gtld-servers.net
+The Resolution Process
+
+--- Slide 61 ---
+The com name server f refers dakota to the nominum.com name servers
+ping www.nominum.com.
+annie.west.sprockets.com
+f.gtld-servers.net
+m.root-servers.net
+dakota.west.sprockets.com
+The Resolution Process
+
+--- Slide 62 ---
+The com name server f refers dakota to the nominum.com name servers
+ping www.nominum.com.
+annie.west.sprockets.com
+f.gtld-servers.net
+m.root-servers.net
+dakota.west.sprockets.com
+The Resolution Process
+
+--- Slide 63 ---
+The com name server f refers dakota to the nominum.com name servers
+ping www.nominum.com.
+annie.west.sprockets.com
+f.gtld-servers.net
+m.root-servers.net
+dakota.west.sprockets.com
+The Resolution Process
+
+--- Slide 64 ---
+The name server dakota asks a nominum.com name server, ns1.sanjose, for www.nominum.com’s address
+ping www.nominum.com.
+annie.west.sprockets.com
+f.gtld-servers.net
+m.root-servers.net
+dakota.west.sprockets.com
+ns1.sanjose.nominum.net
+The Resolution Process
+
+--- Slide 65 ---
+The name server dakota asks a nominum.com name server, ns1.sanjose, for www.nominum.com’s address
+ping www.nominum.com.
+annie.west.sprockets.com
+f.gtld-servers.net
+m.root-servers.net
+dakota.west.sprockets.com
+ns1.sanjose.nominum.net
+The Resolution Process
+
+--- Slide 66 ---
+The name server dakota asks a nominum.com name server, ns1.sanjose, for www.nominum.com’s address
+ping www.nominum.com.
+annie.west.sprockets.com
+f.gtld-servers.net
+m.root-servers.net
+dakota.west.sprockets.com
+ns1.sanjose.nominum.net
+The Resolution Process
+
+--- Slide 67 ---
+The nominum.com name server ns1.sanjose responds with www.nominum.com’s address
+ping www.nominum.com.
+annie.west.sprockets.com
+f.gtld-servers.net
+m.root-servers.net
+dakota.west.sprockets.com
+ns1.sanjose.nominum.net
+The Resolution Process
+
+--- Slide 68 ---
+The nominum.com name server ns1.sanjose responds with www.nominum.com’s address
+ping www.nominum.com.
+annie.west.sprockets.com
+f.gtld-servers.net
+m.root-servers.net
+dakota.west.sprockets.com
+ns1.sanjose.nominum.net
+The Resolution Process
+
+--- Slide 69 ---
+The nominum.com name server ns1.sanjose responds with www.nominum.com’s address
+ping www.nominum.com.
+annie.west.sprockets.com
+f.gtld-servers.net
+m.root-servers.net
+dakota.west.sprockets.com
+ns1.sanjose.nominum.net
+The Resolution Process
+
+--- Slide 70 ---
+The name server dakota responds to annie with www.nominum.com’s address
+ping www.nominum.com.
+annie.west.sprockets.com
+f.gtld-servers.net
+m.root-servers.net
+dakota.west.sprockets.com
+ns1.sanjose.nominum.net
+The Resolution Process
+
+--- Slide 71 ---
+The name server dakota responds to annie with www.nominum.com’s address
+ping www.nominum.com.
+annie.west.sprockets.com
+f.gtld-servers.net
+m.root-servers.net
+dakota.west.sprockets.com
+ns1.sanjose.nominum.net
+The Resolution Process
+
+--- Slide 72 ---
+The name server dakota responds to annie with www.nominum.com’s address
+ping www.nominum.com.
+annie.west.sprockets.com
+f.gtld-servers.net
+m.root-servers.net
+dakota.west.sprockets.com
+ns1.sanjose.nominum.net
+The Resolution Process
+
+--- Slide 73 ---
+DNS responses are cached 
+Enables responding to the same query fast 
+Negative results are cached too 
+Saves time for nonexistent sites, e.g., mistyping 
+Cached data has expiration 
+Each DNS record (also known as, resource record or just RR) has an associated field called Time-To-Live (in short, TTL) 
+2/20/25
+Topic: DNS Security
+27
+DNS Result Caching
+
+--- Slide 74 ---
+ping ftp.nominum.com.
+After the previous query, the name server dakota now knows:
+The names and IP addresses of the com name servers
+The names and IP addresses of the nominum.com name servers
+The IP address of www.nominum.com
+Let’s look at the resolution process again
+annie.west.sprockets.com
+The Resolution Process (with Caching)
+
+--- Slide 75 ---
+ping ftp.nominum.com.
+The workstation annie asks its configured name server, dakota, for ftp.nominum.com’s address
+annie.west.sprockets.com
+f.gtld-servers.net
+m.root-servers.net
+dakota.west.sprockets.com
+ns1.sanjose.nominum.net
+The Resolution Process (with Caching)
+
+--- Slide 76 ---
+ping ftp.nominum.com.
+The workstation annie asks its configured name server, dakota, for ftp.nominum.com’s address
+annie.west.sprockets.com
+f.gtld-servers.net
+m.root-servers.net
+dakota.west.sprockets.com
+ns1.sanjose.nominum.net
+The Resolution Process (with Caching)
+
+--- Slide 77 ---
+ping ftp.nominum.com.
+The workstation annie asks its configured name server, dakota, for ftp.nominum.com’s address
+annie.west.sprockets.com
+f.gtld-servers.net
+m.root-servers.net
+dakota.west.sprockets.com
+ns1.sanjose.nominum.net
+The Resolution Process (with Caching)
+
+--- Slide 78 ---
+ping ftp.nominum.com.
+dakota has cached a NS record indicating ns1.sanjose is an nominum.com name server, so it asks it for ftp.nominum.com’s address
+annie.west.sprockets.com
+f.gtld-servers.net
+m.root-servers.net
+dakota.west.sprockets.com
+ns1.sanjose.nominum.net
+The Resolution Process (with Caching)
+
+--- Slide 79 ---
+ping ftp.nominum.com.
+dakota has cached a NS record indicating ns1.sanjose is an nominum.com name server, so it asks it for ftp.nominum.com’s address
+annie.west.sprockets.com
+f.gtld-servers.net
+m.root-servers.net
+dakota.west.sprockets.com
+ns1.sanjose.nominum.net
+The Resolution Process (with Caching)
+
+--- Slide 80 ---
+ping ftp.nominum.com.
+dakota has cached a NS record indicating ns1.sanjose is an nominum.com name server, so it asks it for ftp.nominum.com’s address
+annie.west.sprockets.com
+f.gtld-servers.net
+m.root-servers.net
+dakota.west.sprockets.com
+ns1.sanjose.nominum.net
+The Resolution Process (with Caching)
+
+--- Slide 81 ---
+ping ftp.nominum.com.
+The nominum.com name server ns1.sanjose responds with ftp.nominum.com’s address
+annie.west.sprockets.com
+f.gtld-servers.net
+m.root-servers.net
+dakota.west.sprockets.com
+ns1.sanjose.nominum.net
+The Resolution Process (with Caching)
+
+--- Slide 82 ---
+ping ftp.nominum.com.
+The nominum.com name server ns1.sanjose responds with ftp.nominum.com’s address
+annie.west.sprockets.com
+f.gtld-servers.net
+m.root-servers.net
+dakota.west.sprockets.com
+ns1.sanjose.nominum.net
+The Resolution Process (with Caching)
+
+--- Slide 83 ---
+ping ftp.nominum.com.
+The nominum.com name server ns1.sanjose responds with ftp.nominum.com’s address
+annie.west.sprockets.com
+f.gtld-servers.net
+m.root-servers.net
+dakota.west.sprockets.com
+ns1.sanjose.nominum.net
+The Resolution Process (with Caching)
+
+--- Slide 84 ---
+ping ftp.nominum.com.
+The name server dakota responds to annie with ftp.nominum.com’s address
+annie.west.sprockets.com
+f.gtld-servers.net
+m.root-servers.net
+dakota.west.sprockets.com
+ns1.sanjose.nominum.net
+The Resolution Process (with Caching)
+
+--- Slide 85 ---
+ping ftp.nominum.com.
+The name server dakota responds to annie with ftp.nominum.com’s address
+annie.west.sprockets.com
+f.gtld-servers.net
+m.root-servers.net
+dakota.west.sprockets.com
+ns1.sanjose.nominum.net
+The Resolution Process (with Caching)
+
+--- Slide 86 ---
+ping ftp.nominum.com.
+The name server dakota responds to annie with ftp.nominum.com’s address
+annie.west.sprockets.com
+f.gtld-servers.net
+m.root-servers.net
+dakota.west.sprockets.com
+ns1.sanjose.nominum.net
+The Resolution Process (with Caching)
+
+--- Slide 87 ---
+The principle of iterative name resolution.
+Iterative Resolution
+
+--- Slide 88 ---
+The principle of recursive name resolution
+Recursive Resolution (1)
+
+--- Slide 89 ---
+Recursive name resolution of <nl, vu, cs, ftp>. Name servers cache intermediate results for subsequent lookups.
+Recursive Resolution (2)
+
+--- Slide 90 ---
+Performance-wise, which is better?
+Iterative vs. Recursive
+
+--- Slide 91 ---
+Which works better with caching?
+Iterative vs. Recursive
+
+--- Slide 92 ---
+How about communication cost?
+Iterative vs. Recursive
+
+--- Slide 93 ---
+Iterative vs. Recursive
+Performance-wise, which is better?
+Recursive method puts higher performance demand on each name server
+
+Which works better with caching?
+Recursive method works better with caching
+
+How about communication cost?
+Recursive method can reduce communication cost
+
+--- Slide 94 ---
+Iterative vs. Recursive
+The comparison between recursive and iterative name resolution with respect to communication costs.
+
+--- Slide 95 ---
+DNS Terminologies
+
+--- Slide 96 ---
+DNS Name Resolution
+
+--- Slide 97 ---
+DNS Name Resolution
+www.unixwiz.net
+
+--- Slide 98 ---
+DNS Name Resolution
+www.unixwiz.net
+
+--- Slide 99 ---
+DNS Name Resolution
+www.unixwiz.net
+A.ROOT-SERVERS.NET. IN A 198.41.0.4
+B.ROOT-SERVERS.NET. IN A 192.228.79.201 
+C.ROOT-SERVERS.NET. IN A 192.33.4.12 
+... 
+M.ROOT-SERVERS.NET. IN A 202.12.27.33
+
+--- Slide 100 ---
+DNS Name Resolution
+www.unixwiz.net
+
+--- Slide 101 ---
+DNS Name Resolution
+www.unixwiz.net
+/* Authority section */
+NET.                 IN  NS A.GTLD-SERVERS.NET. 
+                     IN  NS B.GTLD-SERVERS.NET.
+                     IN  NS C.GTLD-SERVERS.NET.
+                     ...
+                     IN  NS M.GTLD-SERVERS.NET.
+
+/* Additional section - "glue" records */
+A.GTLD-SERVERS.net.  IN  A  192.5.6.30
+B.GTLD-SERVERS.net.  IN  A  192.33.14.30
+C.GTLD-SERVERS.net.  IN  A  192.26.92.30
+...
+M.GTLD-SERVERS.net.  IN  A  192.55.83.30
+
+--- Slide 102 ---
+DNS Name Resolution
+www.unixwiz.net
+www.unixwiz.net
+
+--- Slide 103 ---
+DNS Name Resolution
+www.unixwiz.net
+www.unixwiz.net
+/* Authority section */
+unixwiz.net.        IN  NS cs.unixwiz.net.
+                    IN  NS linux.unixwiz.net.
+
+/* Additional section - "glue" records */
+cs.unixwiz.net.     IN  A  8.7.25.94
+linux.unixwiz.net.  IN  A  64.170.162.98
+
+--- Slide 104 ---
+Inherent Weakness of DNS
+Users typically trust the host-address mapping provided by the DNS 
+What can go wrong with bad DNS information?
+
+DNS resolvers trust responses received after sending out queries
+How can one exploit this?  
+
+Root of all evil:
+No authentication for DNS responses  
+
+--- Slide 105 ---
+Threat Model and Attacker Goals
+Local
+Nameserver
+Honest DNS Servers
+6.6.6.6
+102.32.0.1
+
+--- Slide 106 ---
+Threat Model and Attacker Goals
+Local
+Nameserver
+Honest DNS Servers
+Where is www.bofa.com?
+6.6.6.6
+102.32.0.1
+
+--- Slide 107 ---
+Threat Model and Attacker Goals
+Local
+Nameserver
+Honest DNS Servers
+Where is www.bofa.com?
+6.6.6.6
+102.32.0.1
+
+--- Slide 108 ---
+Threat Model and Attacker Goals
+Local
+Nameserver
+Honest DNS Servers
+Where is www.bofa.com?
+6.6.6.6
+102.32.0.1
+I want to add a record to that local nameserver that directs www.bofa.com  6.6.6.6
+
+--- Slide 109 ---
+Threat Model and Attacker Goals
+Local
+Nameserver
+Honest DNS Servers
+Where is www.bofa.com?
+6.6.6.6
+102.32.0.1
+I want to add a record to that local nameserver that directs www.bofa.com  6.6.6.6
+Active attacker, may send DNS packets
+Remote attacker, may not eavesdrop
+Attacker may control their own domains and DNS servers
+
+--- Slide 110 ---
+User side attack - Pharming
+Exploit DNS poisoning attack 
+Change IP addresses to redirect URLs to bad sites
+Potentially more dangerous than phishing attacks 
+
+DNS poisoning attacks are not uncommon: 
+January 2005, the domain name for a large New York ISP, Panix, was hijacked to a site in Australia
+November 2004, Google and Amazon users were sent to Med Network Inc., an online pharmacy 
+
+--- Slide 111 ---
+DNS Cache Poisoning
+Attacker wants his IP address returned for a DNS query
+When the resolver asks ns1.google.com for www.google.com, the attacker could reply first, with his own IP
+What is supposed to prevent this?
+Transaction or Query ID
+16-bit random number
+The real server knows the number, because it was contained in the query
+The attacker has to guess
+
+--- Slide 112 ---
+DNS Cache Poisoning (contd.)
+Responding before the real DNS server
+An attacker can guess when a DNS cache entry times out and a query has been sent, and provide a fake response.
+The fake response will be accepted only when its 16-bit transaction ID matches the query
+CERT reported in 1997 that BIND uses sequential transaction ID and is easily predicted
+fixed by using random transaction IDs
+
+--- Slide 113 ---
+DNS Cache Poisoning (Racing)
+
+--- Slide 114 ---
+DNS Cache Poisoning Attack (1)
+By Schuba and Spafford in 1993 
+Intuition: Predictable Query ID (QID)
+First, guess QID: 
+Ask (dns.target.com) for www.evil.org 
+Request is sent to dns.evil.org (get QID) 
+Attacker controls dns.evil.org
+Second, attack: 
+Ask (dns.target.com) for www.yahoo.com 
+Gives responses from dns.yahoo.com to the attackers chosen IP
+
+--- Slide 115 ---
+Record Injection
+Local
+Nameserver
+Honest DNS Servers
+6.6.6.6
+102.32.0.1
+ns.attacker.net
+
+--- Slide 116 ---
+Record Injection
+Local
+Nameserver
+Honest DNS Servers
+6.6.6.6
+102.32.0.1
+ns.attacker.net
+Where is www.attacker.net?
+
+--- Slide 117 ---
+Record Injection
+Local
+Nameserver
+Honest DNS Servers
+6.6.6.6
+102.32.0.1
+ns.attacker.net
+Where is www.attacker.net?
+
+--- Slide 118 ---
+Record Injection
+Local
+Nameserver
+Honest DNS Servers
+6.6.6.6
+102.32.0.1
+ns.attacker.net
+Where is www.attacker.net?
+
+--- Slide 119 ---
+Record Injection
+Local
+Nameserver
+Honest DNS Servers
+6.6.6.6
+102.32.0.1
+ns.attacker.net
+Where is www.attacker.net?
+
+--- Slide 120 ---
+Record Injection
+Local
+Nameserver
+Honest DNS Servers
+6.6.6.6
+102.32.0.1
+ns.attacker.net
+
+--- Slide 121 ---
+Record Injection
+Local
+Nameserver
+Honest DNS Servers
+Where is www.bofa.com?
+6.6.6.6
+102.32.0.1
+ns.attacker.net
+
+--- Slide 122 ---
+Defense: the Bailiwicks Rules
+The bailiwick system prevents foo.com from declaring anything about com, or some other new TLD, or www.google.com
+
+Using the bailiwicks rules
+The root servers can return any record
+The com servers can return any record for com
+The google.com servers can return any record for google.com
+
+--- Slide 123 ---
+Response Spoofing
+Local
+Nameserver
+Honest DNS Servers
+6.6.6.6
+102.32.0.1
+
+--- Slide 124 ---
+Response Spoofing
+Local
+Nameserver
+Honest DNS Servers
+Where is www.bofa.com?
+6.6.6.6
+102.32.0.1
+
+--- Slide 125 ---
+Response Spoofing
+Local
+Nameserver
+Honest DNS Servers
+Where is www.bofa.com?
+6.6.6.6
+102.32.0.1
+
+--- Slide 126 ---
+Response Spoofing
+Local
+Nameserver
+Honest DNS Servers
+Where is www.bofa.com?
+6.6.6.6
+102.32.0.1
+
+--- Slide 127 ---
+Response Spoofing
+Local
+Nameserver
+Honest DNS Servers
+Where is www.bofa.com?
+6.6.6.6
+102.32.0.1
+
+--- Slide 128 ---
+Response Spoofing
+Local
+Nameserver
+Honest DNS Servers
+Where is www.bofa.com?
+6.6.6.6
+102.32.0.1
+
+--- Slide 129 ---
+DNS Cache Poisoning Attack 2
+Birthday attack – Vagner Sacramento 2022
+Have many clients send the same DNS request to the resolver 
+Each such request generated a DNS query 
+Send hundreds of reply with random TXID at the same time 
+Due to birthday paradox, the success probability can be close to 1:
+With a few hundred client queries and several hundred fake responses  
+
+
+--- Slide 130 ---
+DNS Cache Poisoning Attack 2
+Birthday attack – Vagner Sacramento 2022
+Have many clients send the same DNS request to the resolver 
+Each such request generated a DNS query 
+Send hundreds of reply with random TXID at the same time 
+Due to birthday paradox, the success probability can be close to 1:
+With a few hundred client queries and several hundred fake responses  
+
+Defense– Rate limiting 
+For all the client queries asking for the same domain name, only send out one DNS query
+
+--- Slide 131 ---
+DNS Cache Poisoning – so far
+Early versions of DNS servers deterministically incremented the ID field
+Vulnerabilities were discovered in the random ID generation
+Weak random number generator
+The attacker is able to predict the ID if knowing several IDs in previous transactions
+Birthday attack
+16- bit (only 65,536 options).
+Force the resolver to send many identical queries, with different IDs, at the same time
+Increase the probability of making a correct guess
+
+--- Slide 132 ---
+DNS Cache Poisoning (3)
+Kaminsky Attack 
+Big security news in summer of 2008 
+DNS servers were quickly patched to defend against this attack 
+Sophisticated attack 
+In prior attacks, when the attacker loses the race, the record is cached with a TTL 
+Before TTL expires, new instance of the attack cannot be carried out 
+Poisoning address for google.com in a DNS server is not easy 
+
+--- Slide 133 ---
+Kaminsky Attack
+Local
+Nameserver
+Honest DNS Servers
+6.6.6.6
+102.32.0.1
+ns.attacker.net
+6.6.6.8
+
+--- Slide 134 ---
+Kaminsky Attack
+Local
+Nameserver
+Honest DNS Servers
+6.6.6.6
+102.32.0.1
+Where is aaaa.bofa.com?
+ns.attacker.net
+6.6.6.8
+
+--- Slide 135 ---
+Kaminsky Attack
+Local
+Nameserver
+Honest DNS Servers
+6.6.6.6
+102.32.0.1
+Where is aaaa.bofa.com?
+ns.attacker.net
+6.6.6.8
+
+--- Slide 136 ---
+Kaminsky Attack
+Local
+Nameserver
+Honest DNS Servers
+6.6.6.6
+102.32.0.1
+ns.attacker.net
+6.6.6.8
+Where is aaab.bofa.com?
+
+--- Slide 137 ---
+Kaminsky Attack
+Local
+Nameserver
+Honest DNS Servers
+Where is www.bofa.com?
+6.6.6.6
+102.32.0.1
+ns.attacker.net
+6.6.6.8
+
+--- Slide 138 ---
+Features of Kaminsky Attack
+The attacker does not need to wait to launch an attack 
+The bad guy asks the resolver to look up www.google.com
+If the bad guy lost the race, the other race for www.google.com will be suppressed by the TTL
+
+If the bad guy asks the resolver to look up 1.google.com, 2.google.com, 3.google.com, and so on
+Each new query starts a new race
+
+Eventually, the bad guy will win
+he is able to spoof 183.google.com
+So what? No one wants to visit 183.google.com
+
+--- Slide 139 ---
+Kaminsky-style Poisoning
+A bad guy who wins the race for “183.google.com” can end up stealing “www.google.com” as well
+
+Original malicious response:
+google.com    NS   www.google.com
+www.google.com    A    6.6.6.6
+Killer response:
+google.com    NS   ns1.google.com
+ns1.google.com A 12.34.56.78 [GLUE RECORD]
+
+--- Slide 140 ---
+Kaminsky-style Poisoning
+ Why does it succeed? 
+The attacker can start a new instance of attack anytime without waiting for the cache entry to expire 
+No wait penalty for racing failure 
+The attack is only bandwidth limited 

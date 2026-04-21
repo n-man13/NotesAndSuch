@@ -1,0 +1,1211 @@
+More on the Web PKI:
+Certificate Transparency and ACME
+          Slides contributed by Ka Lok Wu�����������������������
+
+Introduction
+Acknowledgement
+Some of the contents in this slide deck are adapted from:
+▶Prof. Sze Yiu Chau (Department of Information Engineering,
+the Chinese University of Hong Kong)
+▶RFC 8555: Automated Certificate Management Environment
+(ACME)1
+▶RFC 6962: Certificate Transparency2
+▶RFC 9162: Certificate Transparency Version 2.02
+1Proposed standard
+2Experimental standard
+1 / 26
+
+Introduction
+Introduction
+▶Certificates are issued by CAs▶CAs can authenticate the certificate requestor by domain
+validation (DV), organization validation (OV) or extended
+validation (EV)
+▶Is there a easier way to obtain certificates?
+▶What is stopping the CAs from issuing fraudulent certificates?
+2 / 26
+
+Introduction
+Introduction
+▶Certificates are issued by CAs
+▶CAs can authenticate the certificate requestor by domain
+validation (DV), organization validation (OV) or extended
+validation (EV)▶Is there a easier way to obtain certificates?
+▶What is stopping the CAs from issuing fraudulent certificates?
+2 / 26
+
+Introduction
+Introduction
+▶Certificates are issued by CAs
+▶CAs can authenticate the certificate requestor by domain
+validation (DV), organization validation (OV) or extended
+validation (EV)
+▶Is there a easier way to obtain certificates?▶What is stopping the CAs from issuing fraudulent certificates?
+2 / 26
+
+Introduction
+Introduction
+▶Certificates are issued by CAs
+▶CAs can authenticate the certificate requestor by domain
+validation (DV), organization validation (OV) or extended
+validation (EV)
+▶Is there a easier way to obtain certificates?
+▶What is stopping the CAs from issuing fraudulent certificates?
+2 / 26
+
+Introduction
+Introduction
+▶Certificates are issued by CAs
+▶CAs can authenticate the certificate requestor by domain
+validation (DV), organization validation (OV) or extended
+validation (EV)
+▶Is there a easier way to obtain certificates?
+▶What is stopping the CAs from issuing fraudulent certificates?
+2 / 26
+
+
+Introduction
+Introduction
+▶Certificates are issued by CAs
+▶CAs can authenticate the certificate requestor by domain
+validation (DV), organization validation (OV) or extended
+validation (EV)
+▶Is there a easier way to obtain certificates?
+▶What is stopping the CAs from issuing fraudulent certificates?
+2 / 26
+
+
+Introduction
+Introduction
+▶Certificates are issued by CAs
+▶CAs can authenticate the certificate requestor by domain
+validation (DV), organization validation (OV) or extended
+validation (EV)
+▶Is there a easier way to obtain certificates?
+▶What is stopping the CAs from issuing fraudulent certificates?
+▶CRL (and OCSP) is not the solution: the certificates are
+revoked by the very CA that issues it!
+2 / 26
+
+Introduction
+Introduction
+▶Certificates are issued by CAs
+▶CAs can authenticate the certificate requestor by domain
+validation (DV), organization validation (OV) or extended
+validation (EV)
+▶Is there a easier way to obtain certificates?
+▶What is stopping the CAs from issuing fraudulent certificates?
+▶CRL (and OCSP) is not the solution: the certificates are
+revoked by the very CA that issues it!
+▶What if an attacker is able to compromise a (benign) CA and
+issue fraudulent certificates?
+▶How do we detect them?
+2 / 26
+
+Introduction
+Introduction
+▶Certificates are issued by CAs
+▶CAs can authenticate the certificate requestor by domain
+validation (DV), organization validation (OV) or extended
+validation (EV)
+▶Is there a easier way to obtain certificates?
+▶What is stopping the CAs from issuing fraudulent certificates?
+▶CRL (and OCSP) is not the solution: the certificates are
+revoked by the very CA that issues it!
+▶What if an attacker is able to compromise a (benign) CA and
+issue fraudulent certificates?
+▶How do we detect them?
+2 / 26What if we force all CAs to reveal all the certificates
+they issue into a list, and reject any certificate that is
+not in the list?
+
+Introduction
+Introduction
+▶Certificates are issued by CAs
+▶CAs can authenticate the certificate requestor by domain
+validation (DV), organization validation (OV) or extended
+validation (EV)
+▶Is there a easier way to obtain certificates?
+▶What is stopping the CAs from issuing fraudulent certificates?
+▶CRL (and OCSP) is not the solution: the certificates are
+revoked by the very CA that issues it!
+▶What if an attacker is able to compromise a (benign) CA and
+issue fraudulent certificates?
+▶How do we detect them?
+2 / 26What if we force all CAs to reveal all the certificates
+they issue into a list, and reject any certificate that is
+not in the list?
+How do we do that?
+
+Introduction
+1Introduction
+2Merkle Trees
+Inclusion Proofs
+Append-Only Merkle Trees
+3ACME
+ACME
+certbot
+4Certificate Transparency
+Introduction
+CT Logs
+SCTs and Inclusion Proofs
+Parties Involved
+Problems with CT
+3 / 26
+
+Merkle Trees
+Merkle Trees
+4 / 26
+
+Merkle Trees
+We begin by a brief introduction to Merkle trees, which is a data
+structure used in Certificate Transparency.
+5 / 26
+
+Merkle Trees
+Problem
+▶Consider a prover and a verifier, where the prover has a large
+set of data and the verifier wants to check if an element is in
+the set.▶Attempt 1: Send the entire set? Inefficient!
+▶Attempt 2: Send the list of hashes of the elements, and ask
+the verifier to look up the table?
+▶Verifiers should not need to download the entire list.
+▶Key idea: Use a tree structure to represent the data, where
+the leaves are the data, every inner non-leaf stores the hash of
+its children, and send the path from the element back to the
+root.
+6 / 26
+
+Merkle Trees
+Problem
+▶Consider a prover and a verifier, where the prover has a large
+set of data and the verifier wants to check if an element is in
+the set.
+▶Attempt 1: Send the entire set?Inefficient!
+▶Attempt 2: Send the list of hashes of the elements, and ask
+the verifier to look up the table?
+▶Verifiers should not need to download the entire list.
+▶Key idea: Use a tree structure to represent the data, where
+the leaves are the data, every inner non-leaf stores the hash of
+its children, and send the path from the element back to the
+root.
+6 / 26
+
+Merkle Trees
+Problem
+▶Consider a prover and a verifier, where the prover has a large
+set of data and the verifier wants to check if an element is in
+the set.
+▶Attempt 1: Send the entire set? Inefficient!▶Attempt 2: Send the list of hashes of the elements, and ask
+the verifier to look up the table?
+▶Verifiers should not need to download the entire list.
+▶Key idea: Use a tree structure to represent the data, where
+the leaves are the data, every inner non-leaf stores the hash of
+its children, and send the path from the element back to the
+root.
+6 / 26
+
+Merkle Trees
+Problem
+▶Consider a prover and a verifier, where the prover has a large
+set of data and the verifier wants to check if an element is in
+the set.
+▶Attempt 1: Send the entire set? Inefficient!
+▶Attempt 2: Send the list of hashes of the elements, and ask
+the verifier to look up the table?▶Verifiers should not need to download the entire list.
+▶Key idea: Use a tree structure to represent the data, where
+the leaves are the data, every inner non-leaf stores the hash of
+its children, and send the path from the element back to the
+root.
+6 / 26
+
+Merkle Trees
+Problem
+▶Consider a prover and a verifier, where the prover has a large
+set of data and the verifier wants to check if an element is in
+the set.
+▶Attempt 1: Send the entire set? Inefficient!
+▶Attempt 2: Send the list of hashes of the elements, and ask
+the verifier to look up the table?
+▶Verifiers should not need to download the entire list.▶Key idea: Use a tree structure to represent the data, where
+the leaves are the data, every inner non-leaf stores the hash of
+its children, and send the path from the element back to the
+root.
+6 / 26
+
+Merkle Trees
+Problem
+▶Consider a prover and a verifier, where the prover has a large
+set of data and the verifier wants to check if an element is in
+the set.
+▶Attempt 1: Send the entire set? Inefficient!
+▶Attempt 2: Send the list of hashes of the elements, and ask
+the verifier to look up the table?
+▶Verifiers should not need to download the entire list.
+▶Key idea: Use a tree structure to represent the data, where
+the leaves are the data, every inner non-leaf stores the hash of
+its children, and send the path from the element back to the
+root.
+6 / 26
+
+Merkle Trees Inclusion Proofs
+Merkle Tree
+h0
+h(h1||h2)
+h1
+h(h3||h4)h2
+h(h5||h6)
+h3 h4 h5 h6
+datum 1 datum 2 datum 3 datum 4Root
+Data
+7 / 26
+
+Merkle Trees Inclusion Proofs
+Merkle Tree
+h0
+h(h1||h2)
+h1
+h(h3||h4)h2
+h(h5||h6)
+h3 h4 h5 h6
+datum 1 datum 2 datum 3 datum 4RootData
+7 / 26
+
+Merkle Trees Inclusion Proofs
+Merkle Tree
+h0
+h(h1||h2)
+h1
+h(h3||h4)h2
+h(h5||h6)
+h3 h4 h5 h6
+datum 1 datum 2 datum 3 datum 4Root
+Data
+7 / 26
+
+Merkle Trees Inclusion Proofs
+Merkle Tree
+h0
+h(h1||h2)
+h1
+h(h3||h4)h2
+h(h5||h6)
+h3 h4 h5 h6
+datum 1 datum 2 datum 3 datum 4Root
+Data
+7 / 26How to prove datum 1is in the tree?
+
+Merkle Trees Inclusion Proofs
+Merkle Tree
+h0
+h(h1||h2)
+h1
+h(h3||h4)h2
+h(h5||h6)
+h3 h4 h5 h6
+datum 1 datum 2 datum 3 datum 4Root
+Data
+7 / 26How to prove datum 1is in the tree?
+Send h4,h2and h0and the path from root to the datum
+(left ,left) to the verifier.
+
+Merkle Trees Inclusion Proofs
+Inclusion Proof Example
+Verifier knows h4,h2,h0, path is ( left ,left)h′
+0
+h(h1||h2)
+h1
+h(h3||h4)h2
+h3 h4
+datum 1
+8 / 26
+
+Merkle Trees Inclusion Proofs
+Inclusion Proof Example
+Verifier knows h4,h2,h0, path is ( left ,left)h′
+0
+h(h1||h2)
+h1
+h(h3||h4)h2
+h3 h4
+datum 1
+8 / 26Compute h3=h(datum 1).
+
+Merkle Trees Inclusion Proofs
+Inclusion Proof Example
+Verifier knows h4,h2,h0, path is ( left ,left)h′
+0
+h(h1||h2)
+h1
+h(h3||h4)h2
+h3h4
+datum 1
+8 / 26
+
+Merkle Trees Inclusion Proofs
+Inclusion Proof Example
+Verifier knows h4,h2,h0, path is ( left ,left)h′
+0
+h(h1||h2)
+h1
+h(h3||h4)h2
+h3h4
+datum 1
+8 / 26h4is the right sibling of h3. Now compute
+h1=h(h3||h4).
+
+Merkle Trees Inclusion Proofs
+Inclusion Proof Example
+Verifier knows h4,h2,h0, path is ( left ,left)h′
+0
+h(h1||h2)
+h1
+h(h3||h4)h2
+h3h4
+datum 1
+8 / 26
+
+Merkle Trees Inclusion Proofs
+Inclusion Proof Example
+Verifier knows h4,h2,h0, path is ( left ,left)h′
+0
+h(h1||h2)
+h1
+h(h3||h4)h2
+h3 h4
+datum 1
+8 / 26
+
+Merkle Trees Inclusion Proofs
+Inclusion Proof Example
+Verifier knows h4,h2,h0, path is ( left ,left)h′
+0
+h(h1||h2)
+h1
+h(h3||h4)h2
+h3 h4
+datum 1
+8 / 26h2is the right sibling of h1. Now compute
+h′
+0=h(h1||h2) and check if h′
+0=h0.
+
+Merkle Trees Inclusion Proofs
+Inclusion Proof Example
+Verifier knows h4,h2,h0, path is ( left ,left)h′
+0
+h(h1||h2)
+h1
+h(h3||h4)h2
+h3 h4
+datum 1
+8 / 26
+
+Merkle Trees Inclusion Proofs
+Inclusion Proof Example
+Verifier knows h4,h2,h0, path is ( left ,left)
+h′
+0
+h(h1||h2)
+h1
+h(h3||h4)h2
+h3 h4
+datum 1
+8 / 26
+
+Merkle Trees Inclusion Proofs
+Inclusion Proof Example
+Verifier knows h4,h2,h0, path is ( left ,left)
+h′
+0
+h(h1||h2)
+h1
+h(h3||h4)h2
+h3 h4
+datum 1
+8 / 26
+
+Merkle Trees Inclusion Proofs
+Inclusion Proof Example
+Verifier knows h4,h2,h0, path is ( left ,left)
+h′
+0
+h(h1||h2)
+h1
+h(h3||h4)h2
+h3 h4
+datum 1
+8 / 26We have constructed just enough of the tree to verify
+the membership of data!
+
+Merkle Trees Inclusion Proofs
+Analysis
+▶How much data does the prover need to send to the verifier in
+an inclusion proof?
+▶If a collision occurs for one of the hashes (aka a second
+preimage collsion), what can we do?
+9 / 26
+
+Merkle Trees Append-Only Merkle Trees
+Append-Only Merkle Trees
+▶We can also construct an append-only merkle tree
+▶In an append-only merkle tree, we can only add new leaves to
+the tree, but cannot remove or modify existing leaves.
+▶When a tree is modified, we have to recompute the hashes
+from the modified leaf all the way up to the root.
+▶How to ensure that the tree contains all the leaves that were
+previously added?▶We need a consistency proof that given two merkle trees T1
+and T2, where T1is a subtree of T2, we can prove that T2
+contains all the leaves of T1.
+10 / 26
+
+Merkle Trees Append-Only Merkle Trees
+Append-Only Merkle Trees
+▶We can also construct an append-only merkle tree
+▶In an append-only merkle tree, we can only add new leaves to
+the tree, but cannot remove or modify existing leaves.
+▶When a tree is modified, we have to recompute the hashes
+from the modified leaf all the way up to the root.
+▶How to ensure that the tree contains all the leaves that were
+previously added?
+▶We need a consistency proof that given two merkle trees T1
+and T2, where T1is a subtree of T2, we can prove that T2
+contains all the leaves of T1.
+10 / 26
+
+ACME
+ACME
+11 / 26
+
+ACME ACME
+Goal
+▶Let’s Encrypt: a CA that provides free (as in free) TLS
+certificates for everyone▶You get a certificate, everyone gets a certificate!
+▶Getting a certificate from a CA is often manual
+▶Let’s Encrypt does not support revocation, and the leaf
+certificates they issue are only valid for 90 days
+▶Goal: automate the process of certificate issuance and renewal
+12 / 26
+
+ACME ACME
+Goal
+▶Let’s Encrypt: a CA that provides free (as in free) TLS
+certificates for everyone
+▶You get a certificate, everyone gets a certificate!▶Getting a certificate from a CA is often manual
+▶Let’s Encrypt does not support revocation, and the leaf
+certificates they issue are only valid for 90 days
+▶Goal: automate the process of certificate issuance and renewal
+12 / 26
+
+ACME ACME
+Goal
+▶Let’s Encrypt: a CA that provides free (as in free) TLS
+certificates for everyone
+▶You get a certificate, everyone gets a certificate!
+▶Getting a certificate from a CA is often manual▶Let’s Encrypt does not support revocation, and the leaf
+certificates they issue are only valid for 90 days
+▶Goal: automate the process of certificate issuance and renewal
+12 / 26
+
+ACME ACME
+Goal
+▶Let’s Encrypt: a CA that provides free (as in free) TLS
+certificates for everyone
+▶You get a certificate, everyone gets a certificate!
+▶Getting a certificate from a CA is often manual
+▶Let’s Encrypt does not support revocation, and the leaf
+certificates they issue are only valid for 90 days▶Goal: automate the process of certificate issuance and renewal
+12 / 26
+
+ACME ACME
+Goal
+▶Let’s Encrypt: a CA that provides free (as in free) TLS
+certificates for everyone
+▶You get a certificate, everyone gets a certificate!
+▶Getting a certificate from a CA is often manual
+▶Let’s Encrypt does not support revocation, and the leaf
+certificates they issue are only valid for 90 days
+▶Goal: automate the process of certificate issuance and renewal
+12 / 26
+
+ACME ACME
+ACME
+▶Automated Certificate Management Environment▶Proposed in RFC 8555
+▶Using JSON messages over HTTPS to communicate between
+the CAs and the client’s servers that deploy the certs (most
+likely web servers)
+▶Accounts are bound to a public key, which is used to sign
+requests to the ACME server
+▶Challenge-Response protocol to prove control over a domain.
+For example:
+▶HTTP: the client places a file with a specific content at a
+specified location
+▶DNS: the client creates a TXT record in the DNS zone for the
+domain with a specific string
+▶Once the challenge is completed, the ACME server will issue a
+certificate for the domain.
+13 / 26
+
+ACME ACME
+ACME
+▶Automated Certificate Management Environment
+▶Proposed in RFC 8555▶Using JSON messages over HTTPS to communicate between
+the CAs and the client’s servers that deploy the certs (most
+likely web servers)
+▶Accounts are bound to a public key, which is used to sign
+requests to the ACME server
+▶Challenge-Response protocol to prove control over a domain.
+For example:
+▶HTTP: the client places a file with a specific content at a
+specified location
+▶DNS: the client creates a TXT record in the DNS zone for the
+domain with a specific string
+▶Once the challenge is completed, the ACME server will issue a
+certificate for the domain.
+13 / 26
+
+ACME ACME
+ACME
+▶Automated Certificate Management Environment
+▶Proposed in RFC 8555
+▶Using JSON messages over HTTPS to communicate between
+the CAs and the client’s servers that deploy the certs (most
+likely web servers)▶Accounts are bound to a public key, which is used to sign
+requests to the ACME server
+▶Challenge-Response protocol to prove control over a domain.
+For example:
+▶HTTP: the client places a file with a specific content at a
+specified location
+▶DNS: the client creates a TXT record in the DNS zone for the
+domain with a specific string
+▶Once the challenge is completed, the ACME server will issue a
+certificate for the domain.
+13 / 26
+
+ACME ACME
+ACME
+▶Automated Certificate Management Environment
+▶Proposed in RFC 8555
+▶Using JSON messages over HTTPS to communicate between
+the CAs and the client’s servers that deploy the certs (most
+likely web servers)
+▶Accounts are bound to a public key, which is used to sign
+requests to the ACME server▶Challenge-Response protocol to prove control over a domain.
+For example:
+▶HTTP: the client places a file with a specific content at a
+specified location
+▶DNS: the client creates a TXT record in the DNS zone for the
+domain with a specific string
+▶Once the challenge is completed, the ACME server will issue a
+certificate for the domain.
+13 / 26
+
+ACME ACME
+ACME
+▶Automated Certificate Management Environment
+▶Proposed in RFC 8555
+▶Using JSON messages over HTTPS to communicate between
+the CAs and the client’s servers that deploy the certs (most
+likely web servers)
+▶Accounts are bound to a public key, which is used to sign
+requests to the ACME server
+▶Challenge-Response protocol to prove control over a domain.
+For example:▶HTTP: the client places a file with a specific content at a
+specified location
+▶DNS: the client creates a TXT record in the DNS zone for the
+domain with a specific string
+▶Once the challenge is completed, the ACME server will issue a
+certificate for the domain.
+13 / 26
+
+ACME ACME
+ACME
+▶Automated Certificate Management Environment
+▶Proposed in RFC 8555
+▶Using JSON messages over HTTPS to communicate between
+the CAs and the client’s servers that deploy the certs (most
+likely web servers)
+▶Accounts are bound to a public key, which is used to sign
+requests to the ACME server
+▶Challenge-Response protocol to prove control over a domain.
+For example:
+▶HTTP: the client places a file with a specific content at a
+specified location▶DNS: the client creates a TXT record in the DNS zone for the
+domain with a specific string
+▶Once the challenge is completed, the ACME server will issue a
+certificate for the domain.
+13 / 26
+
+ACME ACME
+ACME
+▶Automated Certificate Management Environment
+▶Proposed in RFC 8555
+▶Using JSON messages over HTTPS to communicate between
+the CAs and the client’s servers that deploy the certs (most
+likely web servers)
+▶Accounts are bound to a public key, which is used to sign
+requests to the ACME server
+▶Challenge-Response protocol to prove control over a domain.
+For example:
+▶HTTP: the client places a file with a specific content at a
+specified location
+▶DNS: the client creates a TXT record in the DNS zone for the
+domain with a specific string▶Once the challenge is completed, the ACME server will issue a
+certificate for the domain.
+13 / 26
+
+ACME ACME
+ACME
+▶Automated Certificate Management Environment
+▶Proposed in RFC 8555
+▶Using JSON messages over HTTPS to communicate between
+the CAs and the client’s servers that deploy the certs (most
+likely web servers)
+▶Accounts are bound to a public key, which is used to sign
+requests to the ACME server
+▶Challenge-Response protocol to prove control over a domain.
+For example:
+▶HTTP: the client places a file with a specific content at a
+specified location
+▶DNS: the client creates a TXT record in the DNS zone for the
+domain with a specific string
+▶Once the challenge is completed, the ACME server will issue a
+certificate for the domain.
+13 / 26
+
+ACME ACME
+ACME
+▶Automated Certificate Management Environment
+▶Proposed in RFC 8555
+▶Using JSON messages over HTTPS to communicate between
+the CAs and the client’s servers that deploy the certs (most
+likely web servers)
+▶Accounts are bound to a public key, which is used to sign
+requests to the ACME server
+▶Challenge-Response protocol to prove control over a domain.
+For example:
+▶HTTP: the client places a file with a specific content at a
+specified location
+▶DNS: the client creates a TXT record in the DNS zone for the
+domain with a specific string
+▶Once the challenge is completed, the ACME server will issue a
+certificate for the domain.
+13 / 26For HTTP challenges, if the client is already running a
+web server, then this can probably be done
+automatically!
+
+ACME certbot
+certbot
+▶A python-based, free and open source client3for ACME to
+obtain certificates from Let’s Encrypt
+▶Issuing and (in some cases) deploying certificates is fully
+automated
+▶You can even set up automatic renewal
+3https://github.com/certbot/certbot
+14 / 26
+
+ACME: Domain Validation
+in Detail
+
+ACME   Domain Validation
+Overall ACME Protocol Flow
+15 / 351 Client generates an account key pair and registers with the ACME server
+2 Client submits an order for a domain (e.g. example.com)
+3 Server responds with an authorization object containing challenge options
+4 Client fulfils a challenge (HTTP -01 or DNS -01) and signals readiness
+5 Server verifies the challenge — authorization marked valid
+6 Client submits a CSR signed with the domain key; server issues the certificate
+All requests are JWS -signed with the account private key; each carries a fresh server -issued nonce → replay attacks are prevented.
+
+ACME   Domain Validation
+Key Authorization & JWK Thumbprint
+16 / 35► Every challenge response embeds a key authorization string
+▸ key_authorization  =  token  ||  "."  ||  base 64url(SHA -256(account_public_key_JWK))
+► JWK = JSON Web Key (RFC 7517 ) — a JSON serialization of the account public key
+▸ { "crv":"P -256", "kty":"EC", "x":" …", "y":" …" }  (keys in lexicographic order, no whitespace)
+► The JWK Thumbprint (RFC 7638 ) is SHA -256 of that canonical JSON, base 64url-encoded
+▸ Result is always 43 characters — compact enough for DNS TXT records
+► Security role: binds the challenge to a specific ACME account
+▸ An attacker who intercepts a token cannot reuse it — the thumbprint of their key won't match what the server 
+expects
+► DNS -01 hashes the key authorization a second time before placing it in DNS
+▸ dns_value  =  base 64url(SHA -256(key_authorization))
+
+ACME   HTTP -01 Challenge
+HTTP -01 Challenge — Setup
+17 / 35► Server issues a random token (URL -safe base 64)
+► Client computes the key authorization string and serves it at:
+▸ http://<domain>/.well -known/acme -challenge/<token>
+► Must be plain HTTP (port 80), Content -Type: text/plain
+► Client POSTs a signed 'ready' message to the ACME server
+► Server fetches the URL and verifies:
+▸ ① token matches  ② thumbprint matches account keyACME Client
+place file at URL
+Web Server
+(port 80)
+GET /.well -known/acme -challenge/<token>
+ACME Server
+(Let's Encrypt)
+
+ACME   HTTP -01 Challenge
+HTTP -01 Challenge — Security Properties
+18 / 35► Proof of domain control
+▸ Only the operator of the web server at that domain can place the file at the exact URL
+► Replay prevention
+▸ Nonce in each signed ACME request; token is single -use and short -lived
+► Token -forwarding attack prevented
+▸ Key authorization binds token to the requesting account's public key thumbprint
+▸ Intercepted token is useless without the matching private key
+► BGP hijacking: partially mitigated by multi -perspective validation
+▸ Let's Encrypt queries from multiple geographically diverse vantage points
+▸ Attacker must hijack the victim's IP prefix simultaneously on all paths — much harder
+► Limitations
+▸ Requires port 80 open and a running web server  •  Cannot issue wildcard certificates
+
+ACME   DNS -01 Challenge
+DNS -01 Challenge — Setup
+19 / 35► Server again issues a random token
+► Client derives the DNS value (double -hashed):
+▸ key_auth   = token + "." + base 64url(SHA -256(JWK))
+▸ dns_value  = base 64url(SHA -256(key_auth))
+► Client creates a DNS TXT record:
+▸ _acme -challenge.<domain>   IN   TXT   "<dns_value>"
+► Server queries multiple DNS resolvers and verifies the TXT record
+► Double -hashing rationale: DNS TXT length limits; hides the account key 
+thumbprint from public DNS
+ Delegation Trick
+CNAME _acme -challenge to a separate zone managed by a 
+cert-management service. Primary DNS API credentials stay 
+isolated — only the delegated zone needs write access.
+  Wildcard Support
+DNS -01 is the only challenge type that supports wildcard 
+certificates (*.example.com).
+
+ACME   DNS -01 Challenge
+DNS -01 Challenge — Security Properties
+20 / 35► Stronger proof of domain control than HTTP -01
+▸ Requires write access to the DNS zone — not just a running web server
+► Works behind NAT or firewalls — no inbound HTTP port required
+► BGP hijacking is harder to exploit
+▸ DNS queries fan out to many resolvers globally; no single HTTP endpoint to intercept
+▸ Attacker would need to poison resolvers across many independent networks simultaneously
+► New risk: DNS provider API key exposure
+▸ Automation requires credentials to the DNS provider API
+▸ Mitigation: scope API key to _acme -challenge subdomain only (if provider supports it)
+▸ Or delegate _acme -challenge via CNAME to an isolated zone (see previous slide)
+► Account -binding: same key authorization mechanism prevents token forwarding
+
+ACME   Domain Validation
+HTTP -01 vs DNS -01 — Comparison
+21 / 35Property HTTP -01 DNS-01
+Web server on port 80 needed Yes No
+Wildcard certificate support No Yes
+Works behind NAT / firewall No Yes
+Automation complexity Low Medium
+DNS API credential risk None Moderate
+BGP hijacking resistance Weaker (single endpoint) Stronger (global DNS)
+Token -forwarding attack prevented Yes — JWK thumbprint Yes — JWK thumbprint
+Replay attack prevented Yes — nonce per request Yes — nonce per request
+
+ACME   Domain Validation
+ACME Domain Validation — Summary
+22 / 35► ACME uses a challenge -response protocol to prove the requester controls the domain
+► All ACME messages are JWS -signed with the account private key + fresh nonce → replay -safe
+► Key authorization string = token + JWK Thumbprint of account public key
+▸ Binds challenge to a specific account; prevents token -forwarding attacks
+► HTTP -01: client serves the key authorization at a well -known HTTP URL
+▸ Simple to automate; cannot issue wildcards; vulnerable to single -path BGP hijacks
+► DNS -01: client provisions a TXT record at _acme -challenge.<domain>
+▸ Supports wildcards; stronger BGP resistance; requires DNS API access
+► Multi -perspective validation (Let's Encrypt) further hardens HTTP -01 against BGP hijacks
+► Next: Certificate Transparency — ensuring all issued certificates are publicly logged
+
+Certificate Transparency
+Certificate Transparency
+15 / 26
+
+Certificate Transparency Introduction
+Certificate Transparency
+▶Certificate Transparency (CT) is a system that provides a
+public log of allcertificates issued by public CAs
+▶Proposed by Google
+▶The goal of CT is to detect and prevent the issuance of
+fraudulent certificates by CAs
+▶When a CA issues a certificate or when a party obtains a
+certificate, they submit the certificate to one or more CT logs
+▶The log operators may also misbehave, so we need watchers
+that watches the watchers
+▶The log is an append-only Merkle tree
+▶The head is signed, and is called Signed Tree Head (STH).
+16 / 26
+
+Certificate Transparency Introduction
+Incentives to Implement CT
+▶Why would CAs want to submit certificates to CT logs?▶Google Chrome would reject your certificates if it is not
+logged!
+▶Firefox (desktop) and Safari also do the same.
+▶Essentially, by using market shares to bully CAs.
+17 / 26
+
+Certificate Transparency Introduction
+Incentives to Implement CT
+▶Why would CAs want to submit certificates to CT logs?
+▶Google Chrome would reject your certificates if it is not
+logged!▶Firefox (desktop) and Safari also do the same.
+▶Essentially, by using market shares to bully CAs.
+17 / 26
+
+Certificate Transparency Introduction
+Incentives to Implement CT
+▶Why would CAs want to submit certificates to CT logs?
+▶Google Chrome would reject your certificates if it is not
+logged!
+▶Firefox (desktop) and Safari also do the same.▶Essentially, by using market shares to bully CAs.
+17 / 26
+
+Certificate Transparency Introduction
+Incentives to Implement CT
+▶Why would CAs want to submit certificates to CT logs?
+▶Google Chrome would reject your certificates if it is not
+logged!
+▶Firefox (desktop) and Safari also do the same.
+▶Essentially, by using market shares to bully CAs.
+17 / 26
+
+Certificate Transparency CT Logs
+Flow of CT
+▶Anyone can submit a certificate to a CT log
+▶As long as the certificate is
+1. properly signed
+2. contains the chain of trust, and
+3. the root CA is acceptable to the log
+▶CAs can also prepare specicial precertificates to submit to CT
+logs prior to issuance
+▶After the certificate is included in a CT log, everyone can ask
+to see the inclusion proof of the certificate in the log
+18 / 26
+
+Certificate Transparency CT Logs
+Signed Certificate Timestamps (SCTs)
+▶When a party submits a certificate to a CT log, the log will
+not immediately append the certificate to the log
+▶Instead, the log merely promises to include the certificate in
+the log within the maximum merge delay(MMD), usually 24
+hours
+▶The log will generate a Signed Certificate Timestamp (SCT)
+for the certificate as a promise
+▶the SCT includes, among other things,
+1. the entry id
+2. a timestamp at which the certificate is accepted, and
+3. a signature of the submitted certificate signed by the public
+key of the log server.
+19 / 26
+
+Certificate Transparency CT Logs
+Checking Inclusion Proofs?
+▶When a browser receives a server certificate, how does it
+check whether the certificate is included in a CT log?▶Browsers can request an inclusion proof from the CT log
+server.
+▶The browser can verify the inclusion proof, but this is usually
+not done
+▶
+20 / 26
+
+Certificate Transparency CT Logs
+Checking Inclusion Proofs?
+▶When a browser receives a server certificate, how does it
+check whether the certificate is included in a CT log?
+▶Browsers can request an inclusion proof from the CT log
+server.▶The browser can verify the inclusion proof, but this is usually
+not done
+▶
+20 / 26
+
+Certificate Transparency CT Logs
+Checking Inclusion Proofs?
+▶When a browser receives a server certificate, how does it
+check whether the certificate is included in a CT log?
+▶Browsers can request an inclusion proof from the CT log
+server.
+▶The browser can verify the inclusion proof, but this is usually
+not done
+▶
+20 / 26
+
+Certificate Transparency CT Logs
+Checking Inclusion Proofs?
+▶When a browser receives a server certificate, how does it
+check whether the certificate is included in a CT log?
+▶Browsers can request an inclusion proof from the CT log
+server.
+▶The browser can verify the inclusion proof, but this is usually
+not done
+▶
+20 / 26Is there are problem with this approach?
+
+Certificate Transparency CT Logs
+Checking Inclusion Proofs?
+▶When a browser receives a server certificate, how does it
+check whether the certificate is included in a CT log?
+▶Browsers can request an inclusion proof from the CT log
+server.
+▶The browser can verify the inclusion proof, but this is usually
+not done
+▶Speed.
+▶The server needs to send the inclusion proof to the browser
+▶While the inclusion proof is already made small, it still adds
+latency to the TLS handshake.
+20 / 26
+
+Certificate Transparency CT Logs
+Checking Inclusion Proofs?
+▶When a browser receives a server certificate, how does it
+check whether the certificate is included in a CT log?
+▶Browsers can request an inclusion proof from the CT log
+server.
+▶The browser can verify the inclusion proof, but this is usually
+not done
+▶Speed.
+▶The server needs to send the inclusion proof to the browser
+▶While the inclusion proof is already made small, it still adds
+latency to the TLS handshake.
+▶Privacy! The browser essentially reveals what domain it is
+visiting to the CT log
+20 / 26
+
+Certificate Transparency CT Logs
+Checking Inclusion Proofs?
+▶When a browser receives a server certificate, how does it
+check whether the certificate is included in a CT log?
+▶Browsers can request an inclusion proof from the CT log
+server.
+▶The browser can verify the inclusion proof, but this is usually
+not done
+▶Speed.
+▶The server needs to send the inclusion proof to the browser
+▶While the inclusion proof is already made small, it still adds
+latency to the TLS handshake.
+▶Privacy! The browser essentially reveals what domain it is
+visiting to the CT log
+▶Instead, the server include the SCT inside the certificate4, and
+the client just check the signature of the SCT.
+4They can also include it in the TLS extension or inside OCSP stapling in
+the certificate.
+20 / 26
+
+Certificate Transparency SCTs and Inclusion Proofs
+Meaning of SCTs
+▶What does it mean when a certificate has SCT and is checked
+to be valid?▶It only means that the certificate was submitted to a CT log
+▶It also does not mean that the certificate is valid or
+trustworthy!
+▶Notice that a malicious CA can still issue a fraudulent
+certificate and submit it to a CT log, and obtain an SCT for it.
+▶It just means that the owner of the certificate would be able to
+detect the fraudulent certificate, if they were indeed
+monitoring the logs for their domain. If they do detect it, they
+can try to take action like revocation.
+▶It does not mean that the certificate was actually included in
+the log yet!
+21 / 26
+
+Certificate Transparency SCTs and Inclusion Proofs
+Meaning of SCTs
+▶What does it mean when a certificate has SCT and is checked
+to be valid?
+▶It only means that the certificate was submitted to a CT log▶It also does not mean that the certificate is valid or
+trustworthy!
+▶Notice that a malicious CA can still issue a fraudulent
+certificate and submit it to a CT log, and obtain an SCT for it.
+▶It just means that the owner of the certificate would be able to
+detect the fraudulent certificate, if they were indeed
+monitoring the logs for their domain. If they do detect it, they
+can try to take action like revocation.
+▶It does not mean that the certificate was actually included in
+the log yet!
+21 / 26
+
+Certificate Transparency SCTs and Inclusion Proofs
+Meaning of SCTs
+▶What does it mean when a certificate has SCT and is checked
+to be valid?
+▶It only means that the certificate was submitted to a CT log
+▶It also does not mean that the certificate is valid or
+trustworthy!▶Notice that a malicious CA can still issue a fraudulent
+certificate and submit it to a CT log, and obtain an SCT for it.
+▶It just means that the owner of the certificate would be able to
+detect the fraudulent certificate, if they were indeed
+monitoring the logs for their domain. If they do detect it, they
+can try to take action like revocation.
+▶It does not mean that the certificate was actually included in
+the log yet!
+21 / 26
+
+Certificate Transparency SCTs and Inclusion Proofs
+Meaning of SCTs
+▶What does it mean when a certificate has SCT and is checked
+to be valid?
+▶It only means that the certificate was submitted to a CT log
+▶It also does not mean that the certificate is valid or
+trustworthy!
+▶Notice that a malicious CA can still issue a fraudulent
+certificate and submit it to a CT log, and obtain an SCT for it.▶It just means that the owner of the certificate would be able to
+detect the fraudulent certificate, if they were indeed
+monitoring the logs for their domain. If they do detect it, they
+can try to take action like revocation.
+▶It does not mean that the certificate was actually included in
+the log yet!
+21 / 26
+
+Certificate Transparency SCTs and Inclusion Proofs
+Meaning of SCTs
+▶What does it mean when a certificate has SCT and is checked
+to be valid?
+▶It only means that the certificate was submitted to a CT log
+▶It also does not mean that the certificate is valid or
+trustworthy!
+▶Notice that a malicious CA can still issue a fraudulent
+certificate and submit it to a CT log, and obtain an SCT for it.
+▶It just means that the owner of the certificate would be able to
+detect the fraudulent certificate, if they were indeed
+monitoring the logs for their domain. If they do detect it, they
+can try to take action like revocation.▶It does not mean that the certificate was actually included in
+the log yet!
+21 / 26
+
+Certificate Transparency SCTs and Inclusion Proofs
+Meaning of SCTs
+▶What does it mean when a certificate has SCT and is checked
+to be valid?
+▶It only means that the certificate was submitted to a CT log
+▶It also does not mean that the certificate is valid or
+trustworthy!
+▶Notice that a malicious CA can still issue a fraudulent
+certificate and submit it to a CT log, and obtain an SCT for it.
+▶It just means that the owner of the certificate would be able to
+detect the fraudulent certificate, if they were indeed
+monitoring the logs for their domain. If they do detect it, they
+can try to take action like revocation.
+▶It does not mean that the certificate was actually included in
+the log yet!
+21 / 26Who watches the CT logs to make sure that the logs
+behave correctly?
+
+Certificate Transparency SCTs and Inclusion Proofs
+Meaning of SCTs
+▶What does it mean when a certificate has SCT and is checked
+to be valid?
+▶It only means that the certificate was submitted to a CT log
+▶It also does not mean that the certificate is valid or
+trustworthy!
+▶Notice that a malicious CA can still issue a fraudulent
+certificate and submit it to a CT log, and obtain an SCT for it.
+▶It just means that the owner of the certificate would be able to
+detect the fraudulent certificate, if they were indeed
+monitoring the logs for their domain. If they do detect it, they
+can try to take action like revocation.
+▶It does not mean that the certificate was actually included in
+the log yet!
+21 / 26Who watches the CT logs to make sure that the logs
+behave correctly?
+Are website owners supposed to monitor the CT logs
+constantly for their domains?
+
+Certificate Transparency Parties Involved
+Monitors
+▶Monitors are third-party services that monitor CT logs
+▶They have a list of domains to monitor, and will periodically
+check the CT logs for new entries
+▶When a new certificate is found, the monitor will notify the
+domain owner about the new certificate.
+▶They should also fetch all the entries in the log to make sure
+that the root hash is consistent and the signature is valid in
+the STHs
+▶They would either keep a copy of the log locally and compute
+the new root hash, or rely on the consistency proofs provided
+by the log server to track the incremental changes in the log.
+22 / 26
+
+Certificate Transparency Parties Involved
+23 / 26
+
+Certificate Transparency Parties Involved
+Auditors
+▶Auditors only take partial information and verify with other
+partial information that they have
+▶They can check for consistency proofs with pairs of STHs
+▶Given a certificate with an SCT, after the SCT timestamp +
+MMD (usually 24 hours), auditors can request an inclusion
+proof from the CT log to verify that the certificate was indeed
+included in the log.
+▶Monitors can also act as auditors
+24 / 26
+
+Certificate Transparency Problems with CT
+Domain Enumeration
+▶CT logs are public
+▶If someone issues a certificate for a domain, it will be logged
+in CT logs
+▶Even ones that you may not want to be known.
+▶How to prevent this?▶Not using TLS at all?
+▶Wildcard certificates?
+▶Change CT to allow domain redaction5?
+▶Maybe run your own PKI?
+5https://datatracker.ietf.org/doc/html/draft-strad-trans-redaction-01
+25 / 26
+
+Certificate Transparency Problems with CT
+Domain Enumeration
+▶CT logs are public
+▶If someone issues a certificate for a domain, it will be logged
+in CT logs
+▶Even ones that you may not want to be known.
+▶How to prevent this?
+▶Not using TLS at all?▶Wildcard certificates?
+▶Change CT to allow domain redaction5?
+▶Maybe run your own PKI?
+5https://datatracker.ietf.org/doc/html/draft-strad-trans-redaction-01
+25 / 26
+
+Certificate Transparency Problems with CT
+Domain Enumeration
+▶CT logs are public
+▶If someone issues a certificate for a domain, it will be logged
+in CT logs
+▶Even ones that you may not want to be known.
+▶How to prevent this?
+▶Not using TLS at all?
+▶Wildcard certificates?▶Change CT to allow domain redaction5?
+▶Maybe run your own PKI?
+5https://datatracker.ietf.org/doc/html/draft-strad-trans-redaction-01
+25 / 26
+
+Certificate Transparency Problems with CT
+Domain Enumeration
+▶CT logs are public
+▶If someone issues a certificate for a domain, it will be logged
+in CT logs
+▶Even ones that you may not want to be known.
+▶How to prevent this?
+▶Not using TLS at all?
+▶Wildcard certificates?
+▶Change CT to allow domain redaction5?▶Maybe run your own PKI?
+5https://datatracker.ietf.org/doc/html/draft-strad-trans-redaction-01
+25 / 26
+
+Certificate Transparency Problems with CT
+Domain Enumeration
+▶CT logs are public
+▶If someone issues a certificate for a domain, it will be logged
+in CT logs
+▶Even ones that you may not want to be known.
+▶How to prevent this?
+▶Not using TLS at all?
+▶Wildcard certificates?
+▶Change CT to allow domain redaction5?
+▶Maybe run your own PKI?
+5https://datatracker.ietf.org/doc/html/draft-strad-trans-redaction-01
+25 / 26
+
+Certificate Transparency Problems with CT
+Figure: https://crt.sh/?q=cs.stonybrook.edu
+26 / 26

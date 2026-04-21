@@ -1,0 +1,658 @@
+--- Slide 1 ---
+CSE 508
+Network Security (Lecture 11- Firewall and Tunnels)
+Omar Haider Chowdhury
+Empire Innovation Scholar and Associate Professor
+Department of Computer Science
+Stony Brook University
+1
+
+--- Slide 2 ---
+This class will have the following modules:
+Background: 
+Cryptography
+Introduction to Network and Protocols
+Authentication
+Access Control
+Attacks and Defenses against protocols 
+Essential tools for attack and defense
+Web Security
+Privacy and Anonymity 
+Advanced Topics (Protocol Verification)
+Modules
+2
+
+--- Slide 3 ---
+Slide Sources
+Slides courtesy of Michalis Polychronakis (Stony Brook University)
+3
+
+--- Slide 4 ---
+Typical Network Topology
+
+4
+WiFi
+DMZ
+LAN
+
+--- Slide 5 ---
+Firewalls: separate local networks from the Internet
+
+5
+WiFi
+DMZ
+LAN
+“Demilitarized Zone”publicly accessible servers
+Public/private wireless networks
+Internalnetworks
+
+--- Slide 6 ---
+Firewalls: Reality
+
+6
+WiFi
+DMZ
+LAN
+
+--- Slide 7 ---
+Firewalls
+Filter traffic according to a predefined policy
+Mostly statically defined, but dynamic updates are possible (block an ongoing DoS attack, protocols with dynamically negotiated port numbers, etc.)
+Barrier between administrative domains
+Internal networks vs. the outside world
+Mission-specific subnets/VLANs (publicly accessible servers, machine clusters, user groups, printers, VoIP, IoT, …)
+Less trusted segments (guest WiFi network, contractors, …)
+Main strategies
+Default-deny: drop everything unless explicitly allowed
+Default-allow: block specific protocols/hosts/ports/…
+7
+
+--- Slide 8 ---
+Firewall Policy Representation
+The firewall is typically represented as Access Control List (ACL)
+An ACL can be viewed as a list of access control policy rules
+Each policy rule can be viewed as having two components: <Target, Decision>
+Target dictates which packet this rule applies to
+Decision is either Allow, Deny, Allow-Log, Deny-Log
+A Target is a tuple of the form: <source IP, source port, destination IP, destination port, protocol>
+Ordering of the rules matter: 
+The first policy that applies to a packet, the destiny of the packet depends on the decision
+8
+
+--- Slide 9 ---
+Firewalls: why are they needed?
+Hosts may run vulnerable services:  prevent outside access
+Limit the “attack surface”   expose fewer services
+Internal hosts may get compromised:  damage control
+Prevent propagation, outgoing attacks, exfiltration, …
+Hide the structure of private networks:  hinder network reconnaissance
+Block port scanning, service fingerprinting, …
+Network intelligence:  log interesting events
+Troubleshooting, monitoring/tuning, auditing, forensics, …
+Simply block unwanted traffic:  policy enforcement
+Noise, backscatter, spoofed packets, DoS attacks, brute-force password guessing, file sharing, social networking, streaming services, games, VPNs, …
+
+9
+
+--- Slide 10 ---
+A Theory of Firewalls (Bellovin)
+Three properties must hold for a firewall to be effective
+1) The firewall should be placed at a topological chokepoint
+Not always true in modern enterprises: links to suppliers/contractors, cellular connectivity, VPN/proxy software, …
+2) “Inside” nodes share the same security policy
+Do they? BYOD, IoT, work from home, …
+3) “Inside” nodes are trusted, “outside” hosts are untrusted
+BYOD: an already infected device may appear inside the network
+Internal hosts can be infected due to client-side attacks (e.g., drive-by download attacks, malware, phishing, supply chain attacks, …)
+Insider threats, disgruntled employees, …
+10
+
+--- Slide 11 ---
+Firewalls: Reality
+
+11
+WiFi
+DMZ
+LAN
+
+--- Slide 12 ---
+Stateless Filtering
+Policy decisions by considering each packet in isolation
+Rules mostly based on network and transport layer fields
+Simple implementation:  no need to keep state
+Limitations
+Dynamically negotiated/non-standard port numbers (FTP, SIP, BitTorrent, …)
+Connectionless protocols (e.g., UDP):  cannot distinguish between queries and replies
+IP fragmentation: port numbers are present only in the first fragment
+Rule sets can get complex and hard to understand
+Still useful for simple scenarios
+Ingress/egress filtering, strict configurations, …
+12
+
+--- Slide 13 ---
+Stateless Firewalls and TCP
+Common configuration (e.g., typical home network): block incoming but allow outgoing connections
+Incoming (externally initiated) connections should be blocked
+Incoming packets of established connections should be allowed 
+Can be achieved without keeping state
+Block incoming SYN-only packets
+Allow incoming packets with the ACK bit set
+Not an ideal solution: ACK scanning
+13
+
+--- Slide 14 ---
+ACK Scanning (nmap -sA)
+Can determine whether a stateless firewall is used
+Not whether a specific port is open or not
+When an ACK is sent to a closed port, or sent out-of-sync to an open port, the expected behavior is to respond with a RST
+Stateful firewalls discard out-of-sync ACK packets, leading to no response
+Step 1: SYN  SYN/ACK or RSTStep 2: ACK  RST			The port is unfiltered by any firewall type
+Step 1: SYN  SYN/ACKStep 2: ACK  no response		Stateful firewall
+Step 1: SYN  no responseStep 2: ACK  RST			Stateless firewall
+14
+
+--- Slide 15 ---
+Stateful Filtering 
+Firewall keeps per-connection state
+Track TCP three-way handshake, UDP query/responses, …
+Decisions are made by considering each packet in the context of the connection/session it belongs to
+Most common firewall type
+More flexible policies
+Internally vs. externally initiated connections/sessions
+Still cannot handle dynamically negotiated port numbers and higher-level protocol semantics
+Missing application-level context
+15
+
+--- Slide 16 ---
+Network Address Translation
+Share a public IP address with many internal hosts
+In general: remap an IP address space into another address space
+Global shortage of IPv4 addresses
+Widely used (home networks, wireless networks, …)
+Rewrite packet address and port information (per-connection state)
+16
+192.168.0.10
+192.168.0.11
+192.168.0.12
+NAT box
+130.245.42.2
+
+--- Slide 17 ---
+NAT vs. Stateful Firewall
+Similar functionality and state
+NAT in addition modifies packets: performs address/port translation
+Are NATs firewalls?
+Not in the strict sense, as they do not fully track the TCP 3-way handshake or any other higher-layer state
+But they inherently do enforce a default firewall policy: block incoming and allow only outgoing connections
+Internal hosts can become accessible through port forwarding
+Explicitly map a local IP:port to a public IP:port
+17
+SSH server
+192.168.0.10:1234
+NAT box
+130.245.27.2:22
+130.245.27.2:80
+Web server
+192.168.0.10:80
+
+--- Slide 18 ---
+UPnP
+Universal Plug and Play
+Widely supported protocol by home routers to enable device discovery and NAT traversal
+“Please allow external hosts to reach me on port 12345”
+Skype, Bittorrent, games, …
+No authentication!
+Malware can easily punch holes
+Worse: Flash, XSS, …
+Even worse: external requests (!)
+18
+
+--- Slide 19 ---
+19
+
+--- Slide 20 ---
+Generic Port Forwarding
+Bypass firewall policies!
+Example: connect to a host that is blocked by a local firewall policy
+Remote host:  nc -l -p 12345 -c ‘nc blocked.com 80’
+Local host:  wget remote.edu:12345
+Or using SSH local port forwarding
+ssh -L 12345:blocked.com:80 remote.edu
+Also the other way around: remote port forwarding
+Example: allow public access to a server running in a private network
+ ssh -R 8080:localhost:80 remote.edu
+20
+
+--- Slide 21 ---
+1. The netcat (nc) Relay
+This is a manual, insecure, "old school" way to build a bridge.
+The Command: nc -l -p 12345 -c 'nc blocked.com 80'
+Where it runs: This runs on the Remote Server (remote.edu).
+The Client (Your Mac): Runs wget remote.edu:12345.
+What happens: 
+The remote server listens on port 12345. 
+When your Mac connects to it, the server instantly launches a second netcat process to talk to blocked.com. 
+It then "pipes" the data back and forth between your Mac and the blocked site.
+21
+Netcat Relay (Insecure)
+
+--- Slide 22 ---
+2. SSH Local Port Forwarding (-L)
+This is the most common way to pull a remote service to your local machine.
+The Command: ssh -L 12345:blocked.com:80 remote.edu
+Where it runs: This runs on Your Mac.
+The Client (Your Mac): You now simply visit localhost:12345 in your browser.
+What happens: 
+Your Mac opens a listener on port 12345. 
+Anything you send to localhost:12345 is encrypted and sent to remote.edu. 
+The Remote Server then decrypts it and sends it to blocked.com on port 80.
+Use Case: Accessing a website that is blocked by your local school firewall but allowed by the remote server's network.
+22
+SSH Local Port Forwarding
+
+--- Slide 23 ---
+3. SSH Remote Port Forwarding (-R)
+This is the "Reverse" of the previous one. It allows the internet to reach your Mac.
+The Command: ssh -R 8080:localhost:80 remote.edu
+Where it runs: This runs on your computer.
+The Client (External): Someone on the internet goes to remote.edu:8080.
+What happens: 
+The Remote Server starts listening on port 8080. 
+When someone connects to that port, the server tunnels that traffic backward through the SSH connection to your Mac’s port 80.
+Use Case: You are developing a website on your Mac (port 80) and want to show it to a friend, but your Mac is behind a router/NAT that you can't control.
+23
+Remote Port Forwarding
+
+--- Slide 24 ---
+1. You Create the "Tunnel" First
+Even though your Mac has a private, inaccessible local IP (like 192.168.1.5), it can make outbound connections to the internet. 
+When you run: ssh -R 8080:localhost:80 remote.edu :  you are opening an outbound "pipe" from your Mac to the remote server. This pipe stays open as long as the SSH session is active.
+2. The Remote Server Listens
+Because of that -R flag, the remote server's SSH software (sshd) starts listening on its own port 8080. 
+It doesn't need to know your IP address; it just knows that anything arriving at its port 8080 should be shoved into that "pipe" you just opened.
+24
+How can remote server access your machine? 
+
+--- Slide 25 ---
+3. The Data "Flows Backwards"
+When a user on the internet connects to remote.edu:8080:
+The Server accepts the connection.
+The Server takes the data and sends it back through the existing SSH tunnel you created.
+Your machine receives the data at the other end of the tunnel.
+Your machine hands that data to your local service (like a web server running on port 80).
+25
+How can remote server access your machine? 
+
+--- Slide 26 ---
+Proxies
+Intermediate “stepping stones”
+Operate at the application layer
+Act as both a client and a server
+Application-level filtering
+Example: HTTP-level filtering (domains, URLs, ads, …)
+Many non-security uses as well
+HTTP content caching  (one of the first uses of web proxies)
+Reverse proxies (in front of application servers):  quickly serve the same dynamically-generated content
+Transcoding (reduce the resolution of media content for mobile devices)
+Explicit vs. transparent proxies
+The former require application configuration
+26
+
+--- Slide 27 ---
+SOCKS Proxies
+Also known as circuit-level gateways
+Socket Secure (SOCKS): protocol for generic forwarding of packets through a proxy (Protocol-agnostic)
+Supported by many applications and protocols
+HTTP, FTP, SMTP, POP3, NNTP, …
+27
+
+--- Slide 28 ---
+Scenario: I have a Mac machine (M) that wants to access a webpage (W) and uses a remote server (S) to route HTTPS traffic from M to W. 
+Why?: M cannot direct access W
+28
+SOCKS Proxy Setup
+
+--- Slide 29 ---
+1. Requirements for your machine (M)
+SSH Client: You must have an SSH client installed (standard on macOS).
+The Command: You must run ssh -D [port] user@S.
+Application Config: Your browser or tool (e.g., Firefox or curl) must be configured to use localhost:[port] as its SOCKS5 Proxy.
+2. Requirements for the Remote Server (S)
+SSH Daemon (sshd): It must be running an SSH server (standard on almost all Linux/Unix servers).
+Allow TCP Forwarding: In the server's configuration (usually /etc/ssh/sshd_config), the setting AllowTCPForwarding must be set to yes (this is the default).
+Outbound Access: S must be able to reach W over the internet (i.e., no firewall on S blocking port 80/443 outbound).
+29
+Requirements
+
+--- Slide 30 ---
+Example: dynamic application-level port forwarding
+Client machine (M):ssh –D 12345 sshserver.com
+chrome --proxyserver='socks://localhost:12345'
+
+30
+Now accessing
+Issue: 
+It is very easy for resourceful firewalls (Great Firewall of China) 
+to see that it is an SSH connection and stop it
+
+--- Slide 31 ---
+31
+
+--- Slide 32 ---
+32
+ShadowSocks Archicture
+Client
+SS-LOCAL
+SS-REMOTE
+SERVER
+ShadowSocks 
+Protocol
+Advantage: 
+ShadowSocks claim to be better for Privacy.
+
+--- Slide 33 ---
+Application-level “Firewalls”
+Similar to proxies, but less generic
+Application-specific filtering
+Often built into applications
+Example: SMTP
+Spam filtering, phishing detection, attachment scanning, …
+Overlap with more generic intrusion detection systems  (future lecture)
+Recent buzzword: web application firewalls (WAF)
+Server-side HTTP filtering for common attack patterns (XSS, SQL injection, …)
+A specific instance of application-level filtering/scanning
+33
+
+--- Slide 34 ---
+Host-based Firewalls
+Firewalls running on end hosts
+Windows firewall
+IPtables
+“Personal” firewalls: apply common-sense policies (deny incoming, allow outgoing)
+Particularly important for home users, laptops, etc.
+On-by-default client firewall deployment contributed significantly in ending the era of internet worms
+Starting with Windows XP SP2
+34
+
+--- Slide 35 ---
+iptables is a powerful command-line utility used to configure the Linux kernel's IPv4 packet filtering ruleset. 
+It organizes these rules into tables, which contain chains, which in turn contain individual rules. 
+Rules are categorized by the type of decision they make (Tables)
+The timing of when that decision happens (Chains)
+35
+IPtables
+
+--- Slide 36 ---
+The most common are:
+filter: The default table for basic packet filtering (deciding whether to allow or block traffic).
+nat: Used for Network Address Translation (e.g., port forwarding or masking private IPs).
+mangle: Used for specialized packet header alterations (like changing Quality of Service bits).
+36
+Tables in IPtables
+
+--- Slide 37 ---
+Default Chains: These represent specific "hooks" in the network stack where a packet can be intercepted:
+INPUT: Packets destined for the local system.
+OUTPUT: Packets generated by the local system and heading out.
+FORWARD: Packets being routed through the system (not intended for the local host).
+PREROUTING: Processing packets as soon as they arrive, before any routing decision is made.
+POSTROUTING: Processing packets just before they leave the system.
+37
+Chains in IPtables
+
+--- Slide 38 ---
+A standard iptables rule follows this general pattern:
+iptables [-t table] COMMAND [chain] [parameters] -j TARGET 
+Commands: Specify the action to take on the chain (e.g., -A to append, -I to insert at a specific position, -D to delete, or -F to flush all rules).
+Parameters (Matches): The criteria a packet must meet to trigger the rule:
+-p [protocol]: Matches TCP, UDP, ICMP, etc.
+-s [source IP] and -d [destination IP]: Matches specific addresses or subnets.
+--dport [port]: Matches the destination port (e.g., 22 for SSH or 80 for HTTP).
+-i [interface] and -o [interface]: Matches the incoming or outgoing network interface (e.g., eth0).
+Targets (-j Jump): The action taken if the packet matches:
+ACCEPT: Allows the packet to pass through.
+DROP: Silently discards the packet.
+REJECT: Discards the packet and sends an error response back to the sender.
+LOG: Records the packet's information in the system log without deciding its fate (the next rule is then checked).
+
+38
+Rule Structure
+
+--- Slide 39 ---
+Every built-in chain has a default policy, which is the action taken if a packet does not match any specific rule in that chain. 
+Security-minded setups often set the default policy to DROP and then explicitly allow only necessary traffic.
+Example command: 
+iptables -P INPUT DROP sets the default action for incoming traffic to "drop”. 
+39
+Default Policies
+
+--- Slide 40 ---
+Simple IPtables Example
+
+40
+# flush all chains
+iptables -F
+iptables –X
+
+# defaults for predefined chains
+iptables -P INPUT DROP
+iptables -P OUTPUT DROP
+iptables -P FORWARD DROP
+
+# allow anything on localhost interface
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A OUTPUT -o lo -j ACCEPT
+
+# allow all traffic from specific subnets
+iptables -A INPUT -s 128.59.0.0/255.255.0.0 -j ACCEPT
+iptables -A INPUT -s 160.39.0.0/255.255.0.0 -j ACCEPT
+
+
+--- Slide 41 ---
+Simple IPtables Example
+
+41
+# allow all inbound traffic for specific services
+iptables -A INPUT -p tcp -m tcp --syn --dport 22 -j ACCEPT
+iptables -A INPUT -p tcp -m tcp --syn --dport 80 -j ACCEPT
+
+# allow inbound established and related outside communication
+iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+# allow ICMP
+iptables -A INPUT -p icmp -j ACCEPT
+
+# allow all outgoing traffic
+iptables -A OUTPUT -j ACCEPT
+
+
+Is this a good idea?
+
+--- Slide 42 ---
+42
+Before host-based firewalls: attacker connects to victim
+After host-based firewalls: victim connects to attacker
+
+--- Slide 43 ---
+Per-process Firewall
+Most “personal” firewalls still allow all outgoing traffic by default
+Severe usability problems otherwise
+Do all programs really need to communicate with the outside world?
+Deny by default and allowlist only what is needed
+No easy solution for this in most OSes – need to rely on hacks or third party solutions
+GlassWire, TinyWall, Windows Firewall Control, …
+
+43
+
+--- Slide 44 ---
+Virtual Private Networks
+Users may not always be behind the firewall, but still need full access to internal network resources
+Offices at different locations, employees on the move, access to home “cloud,” …
+VPNs bridge private networks across a public (untrusted) network
+Virtual point-to-point secure connections (encryption)
+Create a trusted shared network among them
+Remote host/network virtually becomes part of the local network
+
+44
+
+--- Slide 45 ---
+VPN Examples
+
+45
+© Ludovic.ferre – https://commons.wikimedia.org/wiki/File:Virtual_Private_Network_overview.svg
+
+
+
+--- Slide 46 ---
+VPN Implementations
+Tunneling/encapsulation: packets are transferred as data over another protocol
+L2 over L4 (PPTP), L2 over L2 (PPPoE), L2 over L3 (L2TP), L3/L4 over L3 (IPsec), L2/L3 over L4 (OpenVPN)
+Three major families in wide use today:
+PPTP: L2, introduced in 1995, commonly used in Windows  Broken
+IPsec: L3, widely supported by most operating systems
+Completely transparent to applications
+Tunnel is handled directly by the OS
+SSL: Application layer – OpenVPN
+User-space implementation, multiplatform
+Typically requires the installation of a software client
+46
+
+--- Slide 47 ---
+VPN Implementations
+Tunneling/encapsulation: packets are transferred as data over another protocol
+L2 over L4 (PPTP), L2 over L2 (PPPoE), L2 over L3 (L2TP), L3/L4 over L3 (IPsec), L2/L3 over L4 (OpenVPN)
+Three major families in wide use today:
+PPTP: L2, introduced in 1995, commonly used in Windows  Broken
+IPsec: L3, widely supported by most operating systems
+Completely transparent to applications
+Tunnel is handled directly by the OS
+SSL: Application layer – OpenVPN
+User-space implementation, multiplatform
+Typically requires the installation of a software client
+47
+Just use Wireguard
+
+--- Slide 48 ---
+48
+
+--- Slide 49 ---
+VPN Risks
+Personal use of VPNs has become popular for bypassing restrictions
+Country-based content, censorship, corporate/school/parental controls, …
+A third-party VPN server can observe all our traffic (!)
+Be wary of VPN services that claim “privacy” and “anonymity”
+VPN services are still subject to local laws
+Shady services may monetize our traffic
+Client-side VPN software is too powerful
+Can monitor (spy on) system-wide activities besides the traffic itself
+Most operating systems have built-in VPN support!
+There shouldn’t be any need to install closed-source VPN software
+49
+
+--- Slide 50 ---
+50
+
+--- Slide 51 ---
+51
+Trivially easy to set up a personal VPN on the cloud!
+
+--- Slide 52 ---
+52
+
+--- Slide 53 ---
+“Secure Gateways”
+Nowadays it is common for most of the discussed technologies to be consolidated into a single box
+Routing, Firewall, NAT, VPN, Proxy, WiFi access point, …
+Common in home and enterprise settings
+Routers and firewalls used to be “simple” devices – not anymore
+Features    complexity    security issues
+Critical hosts in the network that need to be protected
+Administrative interface, OS patches/updates, service vulnerabilities, …
+
+53
+
+--- Slide 54 ---
+54
+
+--- Slide 55 ---
+55
+
+--- Slide 56 ---
+56
+
+--- Slide 57 ---
+57
+
+--- Slide 58 ---
+58
+
+--- Slide 59 ---
+59
+
+--- Slide 60 ---
+Beyond Firewalls and VPNs
+The “safe” network perimeter approach does not apply to modern environments and threats
+Internal devices may will be compromised: phishing, insiders, …
+Bring your own device (BYOD), work from home/anywhere, …
+Establishing trusted vs. untrusted network boundaries enforced through firewalls and VPNs becomes pointless: what happens when the perimeter is breached?
+Alternative: consider the “internal” network as untrusted too!
+Shift access control from the network perimeter to individual users
+Enable secure work from virtually anywhere without the need for traditional VPNs
+Popularized by Google: BeyondCorp
+An implementation of a “zero trust” architecture
+
+60
+
+--- Slide 61 ---
+Operation aurora
+
+61
+
+--- Slide 62 ---
+62
+
+--- Slide 63 ---
+63
+BeyondCorp: A New Approach to Enterprise Security – USENIX ;login:, Vol. 39, No. 6 (2014), pp. 6-11
+
+--- Slide 64 ---
+Zero Trust
+Assume the network is always hostile and all devices and users are potentially compromised
+Not a technology, but a strategy: “never trust, always verify”
+Core principles
+Identity: users and devices must undergo continuous authentication and authorization before being granted access
+Devices: all devices (managed and unmanaged) should be continuously monitored and validated before access is granted; detailed inventory
+Networks: all traffic should encrypted; micro-segmentation to prevent lateral movement
+Applications and workloads: ensure secure application delivery; treat all applications and workloads as internet-connected 
+Data: develop data categories and security policies to protect sensitive data
+
+
+64
+https://www.cisa.gov/sites/default/files/2023-04/zero_trust_maturity_model_v2_508.pdf
+
+
+--- Slide 65 ---
+Zero Trust Architecture (NIST 800-207)
+All data sources and computing services are considered resources
+Including IoT devices, cloud services, personal devices (if they can access org. resources)
+All communication is secured regardless of network location
+Network location alone does not imply trust: all communication should be encrypted
+Access to individual enterprise resources is granted on a per-session basis
+Authentication and authorization to one resource does not automatically grant access to a different resource
+Access to resources is determined by dynamic policy
+May include other behavioral and environmental attributes beyond client identity (user/service account): device characteristics (software versions, network location, time/date of request, previously observed behavior), device analytics, measured deviations from observed usage patterns, …
+65
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-207.pdf
+
+
+--- Slide 66 ---
+Zero Trust Architecture (NIST 800-207)
+The enterprise monitors and measures the integrity and security posture of all owned and associated assets
+Preferably: all code is signed; code integrity is continuously verified based on a hardware root of trust (e.g., ChromeOS)
+At a minimum: continuous evaluation of the security posture of endpoints
+All resource authentication and authorization is dynamic and strictly enforced before access is allowed
+Re-authentication/authorization (e.g., time-based, new resource, resource modification, anomalous activity)  balance of security, availability, usability, and cost-efficiency
+Continuous monitoring and auditing
+The enterprise collects as much information as possible about the current state of assets, network infrastructure, and communications, and uses it to improve its security posture
+66
+https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-207.pdf
