@@ -30,15 +30,6 @@ A compact reference for core concepts likely to appear on the midterm.
 
 ---
 
-## TLS 1.3 Protocol Exchange (1‑RTT overview)
-1. **ClientHello** — client sends supported cipher suites and a KeyShare (e.g., ECDHE public key share).
-2. **ServerHello & Response** — server replies with selected cipher suite, server KeyShare; sends encrypted extensions and Certificate; includes Finished MAC to prove handshake integrity.
-3. **Client Finished** — client verifies server Certificate and Finished; sends its own Finished message.
-
-- TLS 1.3 reduces round trips by sending key shares early; handshake keys derive from ECDHE and certificates.
-
----
-
 ## Merkle Tree (construction)
 1. Hash each data block to produce leaves: $H_1, H_2, \ldots$.
 2. Pair neighboring leaves, concatenate pairs, and hash pairs to form parent nodes: e.g. $H_{12} = H( H_1 \| H_2 )$.
@@ -115,6 +106,21 @@ A compact reference for core concepts likely to appear on the midterm.
 - Certificate validation: verify chain, check CN/SAN, validity window, revocation methods (OCSP/CRL/OCSP stapling); TLS session resumption relies on ticket/PSK trust.
 - Operational notes: prefer TLS 1.3; disable legacy cipher suites and renegotiation; enable OCSP stapling and short-lived certs where possible.
 
+### TLS 1.3 Protocol Exchange (1‑RTT overview)
+1. **ClientHello** — client sends supported cipher suites and a KeyShare (e.g., ECDHE public key share).
+2. **ServerHello & Response** — server replies with selected cipher suite, server KeyShare; sends encrypted extensions and Certificate; includes Finished MAC to prove handshake integrity.
+3. **Client Finished** — client verifies server Certificate and Finished; sends its own Finished message.
+
+- TLS 1.3 reduces round trips by sending key shares early; handshake keys derive from ECDHE and certificates.
+
+### TLS — Common vulnerabilities & pitfalls
+- Certificate issues: misissued or compromised CAs, improper chain/hostname/expiry checks, and unreliable revocation handling (CRL/OCSP).
+- Protocol downgrade & legacy ciphers: fallback to weak suites enables downgrade attacks.
+- Handshake/implementation bugs: e.g., Early CCS and similar flaws that allow weak keying or transcript manipulation.
+- 0-RTT replay risks: TLS 1.3 early data may be replayed unless mitigated at the application layer.
+- RNG & key management: poor randomness, nonce reuse, and long-lived keys (no PFS) weaken security.
+- Side-channel and memory bugs: timing/oracle attacks, Heartbleed-style memory leaks, and other implementation defects.
+
 ---
 
 ## Certificate Transparency (CT) & ACME
@@ -141,11 +147,15 @@ A compact reference for core concepts likely to appear on the midterm.
 ---
 
 ## Firewalls & Tunnels
-- Firewalls:
-  - Packet-filter (stateless): ACLs based on IP/port.
-  - Stateful firewall: tracks connections and applies policies based on state.
-  - Application-layer / Next-Gen Firewall (NGFW): inspects L7, provides IDS/IPS, application controls.
-  - Best practice: default-deny inbound, restrict outbound as needed, log and monitor.
+ - Firewalls:
+   - Types: stateless (ACLs), stateful (tracks sessions), NGFW (L7 inspection).
+   - Rule order (quick): `allow RELATED,ESTABLISHED` → allow required services → `default-deny`.
+   - Placement: edge chokepoint + internal segmentation (VLAN/DMZ).
+   - Pitfalls: open management ports, UPnP/auto-port-mapping, misordered rules, broad CIDRs.
+   - Quick `iptables` snippet:
+     - `iptables -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT`
+     - `iptables -A INPUT -p tcp --dport 22 -s 198.51.100.0/24 -j ACCEPT`
+     - `iptables -A INPUT -j DROP`
 - Tunnels / VPNs:
   - IPSec (site-to-site, transport vs tunnel mode), OpenVPN/TLS-based VPNs, WireGuard (modern, simple, fast), SSH tunnels.
   - Use strong auth (certificates or strong PSKs), encrypt both control and data planes, and enable perfect forward secrecy where possible.
@@ -159,6 +169,23 @@ A compact reference for core concepts likely to appear on the midterm.
 - Route selection (simplified): highest local-pref → shortest AS_PATH → lowest origin type → lowest MED → eBGP over iBGP → lowest IGP cost to next-hop.
 - Common issues: route hijacks (malicious or accidental announcements), prefix leaks, AS path manipulation.
 - Mitigations: prefix filtering and route-policy, max-prefix limits, IRR-based filtering, RPKI/ROA origin validation (detect bogus origin AS), monitoring (BGPmon), and strict peering policies.
+
+### eBGP vs iBGP (key differences)
+- eBGP (external BGP): runs between different Autonomous Systems (ASes). Peers are typically directly connected; eBGP updates normally modify the `AS_PATH` (prepend local AS) and are used to advertise reachability to the global Internet.
+- iBGP (internal BGP): runs within a single AS. iBGP preserves `AS_PATH` (does not prepend) and peers may be multiple hops away; routes learned from one iBGP peer are not re-advertised to another iBGP peer (split-horizon), so a full mesh or route reflectors are required for scalability.
+- Operational notes: eBGP sessions often assume adjacent peers and may use TTL/adjacency checks; iBGP requires careful topology (full mesh, route reflectors, or confederations) to ensure route propagation and avoid loops.
+
+### BGP — Security risks
+- Prefix hijacking: an AS advertises IP prefixes it does not own (maliciously or by misconfiguration), causing traffic to be diverted or dropped.
+- Route leaks: an AS improperly advertises routes learned from one peer to others, exposing prefixes to unintended paths and disrupting routing.
+- Path manipulation & AS_PATH spoofing: altering `AS_PATH` or prepending to influence route selection and route acceptance.
+- Lack of authentication: classic BGP has no cryptographic origin/path validation, enabling impersonation and false announcements.
+- Session attacks: TCP-level attacks (RST injection, session hijacking) or compromised peers can inject malicious UPDATEs.
+- Instability & amplification: frequent bogus announcements/withdrawals (flapping) can create routing instability and large control-plane loads.
+- RPKI/ROA risks & operational pitfalls: incomplete deployment, misconfigured ROAs, and reliance on a centralized trust infrastructure can cause accidental outages or false validation failures.
+- Impact: traffic interception (MitM), blackholing, censorship, interception for data exfiltration or DDoS amplification via misdirected traffic.
+
+**Brief mitigations:** strict prefix filtering, IRR/RPKI origin validation, max-prefix and sanity checks, neighbor authentication/ACLs, TTL/adjacency protections, monitoring and rapid remediation (BGPmon, route collectors).
 
 ---
 
