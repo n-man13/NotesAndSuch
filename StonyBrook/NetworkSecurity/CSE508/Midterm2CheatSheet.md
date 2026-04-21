@@ -9,8 +9,6 @@ A compact reference for core concepts likely to appear on the midterm.
  - CDH (Computational Diffie‑Hellman): given $g^a$ and $g^b$, compute $g^{ab}$.
  - DDH (Decisional Diffie‑Hellman): given $g^a, g^b$ and a value $Z$, decide whether $Z=g^{ab}$ or $Z$ is random.
 
-> Notes: problems are defined over a chosen cyclic group (e.g., $\mathbb{Z}_p^*$ or elliptic-curve groups).
-
 ---
 
 ## One‑Time Pad (OTP)
@@ -48,46 +46,20 @@ A compact reference for core concepts likely to appear on the midterm.
 ---
 
 ## DNS Protocol Recap
- - Lookup flow: stub resolver (client) → recursive resolver (ISP or public resolver) which performs iterative queries starting at the root → TLD → authoritative name server; the resolver caches the answer and returns it to the client.
 
- - Typical transports and ports:
-   - UDP/53: standard queries/responses (fast, connectionless).
-   - TCP/53: zone transfers (AXFR/IXFR), large/truncated responses, and DNS-over-TLS (DoT).
+- Flow: stub resolver → recursive resolver → root → TLD → authoritative server; resolver caches and returns the answer.
 
- - Key header fields (DNS message format):
-   - 16-bit Transaction ID (TXID)
-   - Flags: QR (query/response), Opcode, AA (authoritative answer), TC (truncation), RD (recursion desired), RA (recursion available), RCODE (response code)
-   - Counts: QDCOUNT, ANCOUNT, NSCOUNT, ARCOUNT
+- Transport: UDP/53 (default, fast) ; TCP/53 (truncation, large responses, AXFR) ; DoT/DoH for encrypted queries.
 
- - Common query / resource record (RR) types: `A`, `AAAA`, `NS`, `CNAME`, `MX`, `PTR`, `TXT`, `SRV`, `SOA`, `AXFR`.
+- Key fields & RRs (very quick): 16‑bit TXID; flags (QR, TC, RD, RA); counts (QD/AN/NS/AR); common RRs: A, AAAA, NS, CNAME, MX, PTR, TXT, SOA.
 
- - Resolution modes:
-   - Recursive: the resolver does the full lookup and returns a final answer to the client.
-   - Iterative/referral: a server returns a referral to the next-level name servers; the resolver follows the referral.
+- Caching/TTL: answers cached for TTL seconds; negative caching via SOA; TTL controls propagation/staleness window.
 
- - Caching & TTL:
-   - Responses are cached by resolvers for the record's TTL seconds.
-   - Negative caching (NXDOMAIN) is controlled by SOA/minimum values.
-   - TTLs determine propagation time for updates and the window for stale data.
+- Important extensions: EDNS(0) (larger UDP payloads), DNS Cookies, QNAME minimization.
 
- - Extensions & modern features:
-   - EDNS(0): allows larger UDP payloads and additional options (bigger responses, EDNS flags).
-   - DNS over TLS (DoT) and DNS over HTTPS (DoH): encrypt DNS for privacy and tamper-resistance.
-   - DNS Cookies, Query Name Minimization: reduce abuse and improve privacy/security.
+- Attacks & short mitigations: cache poisoning → TXID+source‑port randomization + DNSSEC; amplification → close/harden open resolvers + rate‑limit; on‑path tampering → DoT/DoH.
 
- - Common attacks & mitigations:
-   - Cache poisoning: mitigate with TXID + source-port randomization and DNSSEC validation.
-   - Amplification/reflection: mitigate by restricting open resolvers and rate-limiting.
-   - On-path tampering / eavesdropping: mitigate with DoT/DoH and DNSSEC.
-
- - Operational notes:
-   - Truncation (TC bit): when UDP response exceeds negotiated size, server sets TC; client retries over TCP.
-   - Zone transfers (AXFR) should be restricted and authenticated (e.g., TSIG).
-
- **Diagram:**
-
- ![DNS packet on the wire](media/DNSPacket.png)
-
+- Ops notes: TC→retry over TCP; restrict/authenticate AXFR (TSIG); avoid open recursive resolvers.
 
 ### DNSSEC
 - Adds digital signatures to DNS records and a chain of trust (root → TLD → authoritative).
@@ -133,16 +105,21 @@ A compact reference for core concepts likely to appear on the midterm.
 
 ---
 
-## Denial-of-Service (DoS) attacks
+## Denial-of-Service (DoS)
+- Goal: deny or degrade availability. Often distributed (DDoS); can exhaust bandwidth, CPU, memory, sockets, or human attention.
+
 - Categories:
-  - Volumetric: saturate bandwidth (e.g., UDP amplification via DNS/NTP/CLDAP/SSDP).
-  - Protocol/state exhaustion: SYN floods, TCP connection table exhaustion.
-  - Application-layer: HTTP GET/POST floods, slowloris (keep connections open), targeted resource exhaustion.
-- Typical mitigations:
-  - Network-level: upstream filtering, source-IP validation (uRPF), blackholing, Anycast and CDNs, capacity overprovisioning.
-  - Transport-level: SYN cookies, connection limits, TCP timeouts, rate limiting.
-  - Application-level: WAFs, request rate-limiting, challenge-response (CAPTCHAs), caching and scaling.
-  - For amplification: close or harden open resolvers, filter spoofed source IPs, minimize UDP amplification surface.
+  - Volumetric / Amplification: spoofed small requests cause much larger replies (Smurf, DNS/NTP/CLDAP/SSDP).
+  - Transport/state exhaustion: SYN flooding (half‑open connections), TCP RST injection to kill sessions.
+  - Application‑layer: connection flooding, Slowloris, HTTP/2 Rapid Reset, and algorithmic complexity attacks.
+
+- Short mitigations:
+  - Network: upstream filtering, ingress/egress filtering (uRPF), Anycast/CDN, blackholing and capacity planning.
+  - Transport: SYN cookies, drop old half‑opens, connection limits, TCP timeouts, rate limiting.
+  - Application: WAFs, request rate‑limits, resource quotas, fix algorithmic worst-cases (input validation, safer parsers).
+  - Amplification-specific: disable/respond-to-broadcasts, restrict/harden open UDP services, close open resolvers, apply rate limits.
+
+- Extra notes: Smurf (broadcast amplification), SYN cookies (state‑less SYN defense), Slowloris (hold connections open), HTTP/2 Rapid Reset (stream-reset abuse).
 
 ---
 
