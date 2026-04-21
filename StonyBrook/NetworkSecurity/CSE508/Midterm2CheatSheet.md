@@ -35,7 +35,7 @@ A compact reference for core concepts likely to appear on the midterm.
 
 ---
 
-## Common Weaknesses — quick mapping
+## Common Weaknesses
 | Weakness | Typical attack | Mitigation |
 |---|---|---|
 | Static keys | Retrospective decryption | Use ephemeral keys (PFS) |
@@ -147,7 +147,7 @@ A compact reference for core concepts likely to appear on the midterm.
 - Common issues: route hijacks (malicious or accidental announcements), prefix leaks, AS path manipulation.
 - Mitigations: prefix filtering and route-policy, max-prefix limits, IRR-based filtering, RPKI/ROA origin validation (detect bogus origin AS), monitoring (BGPmon), and strict peering policies.
 
-### eBGP vs iBGP (key differences)
+### eBGP vs iBGP
 - eBGP (external BGP): runs between different Autonomous Systems (ASes). Peers are typically directly connected; eBGP updates normally modify the `AS_PATH` (prepend local AS) and are used to advertise reachability to the global Internet.
 - iBGP (internal BGP): runs within a single AS. iBGP preserves `AS_PATH` (does not prepend) and peers may be multiple hops away; routes learned from one iBGP peer are not re-advertised to another iBGP peer (split-horizon), so a full mesh or route reflectors are required for scalability.
 - Operational notes: eBGP sessions often assume adjacent peers and may use TTL/adjacency checks; iBGP requires careful topology (full mesh, route reflectors, or confederations) to ensure route propagation and avoid loops.
@@ -166,7 +166,7 @@ A compact reference for core concepts likely to appear on the midterm.
 
 ---
 
-## MAC vs Digital Signature (comparison)
+## MAC vs Digital Signature
 | Feature | MAC | Digital Signature |
 |---|---:|---:|
 | Key type | Symmetric (shared secret) | Asymmetric (public/private pair) |
