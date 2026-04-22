@@ -163,6 +163,8 @@ A compact reference for core concepts likely to appear on the midterm.
 - Route selection (simplified): highest local-pref → shortest AS_PATH → lowest origin type → lowest MED → eBGP over iBGP → lowest IGP cost to next-hop.
 - Common issues: route hijacks (malicious or accidental announcements), prefix leaks, AS path manipulation.
 - Mitigations: prefix filtering and route-policy, max-prefix limits, IRR-based filtering, RPKI/ROA origin validation (detect bogus origin AS), monitoring (BGPmon), and strict peering policies.
+- Route Origin Authorization (ROA) is a way to definitively state that a certain AS owns an IP range
+- Route Origin Verification (ROV) allows for checking if an AS has the ROA for a specific IP and is able to check if that AS is on the path
 
 ### eBGP vs iBGP
 - eBGP (external BGP): runs between different Autonomous Systems (ASes). Peers are typically directly connected; eBGP updates normally modify the `AS_PATH` (prepend local AS) and are used to advertise reachability to the global Internet.
