@@ -146,10 +146,6 @@ A compact reference for core concepts likely to appear on the midterm.
    - Rule order (quick): `allow RELATED,ESTABLISHED` → allow required services → `default-deny`.
    - Placement: edge chokepoint + internal segmentation (VLAN/DMZ).
    - Pitfalls: open management ports, UPnP/auto-port-mapping, misordered rules, broad CIDRs.
-   - Quick `iptables` snippet:
-     - `iptables -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT`
-     - `iptables -A INPUT -p tcp --dport 22 -s 198.51.100.0/24 -j ACCEPT`
-     - `iptables -A INPUT -j DROP`
 - Tunnels / VPNs:
   - IPSec (site-to-site, transport vs tunnel mode), OpenVPN/TLS-based VPNs, WireGuard (modern, simple, fast), SSH tunnels.
   - Use strong auth (certificates or strong PSKs), encrypt both control and data planes, and enable perfect forward secrecy where possible.
@@ -204,5 +200,12 @@ A compact reference for core concepts likely to appear on the midterm.
 ## In Class Highlights
 Firewall Access Control List
 
-aes cbc decryption understanding
+---
+## Lecture extras
+- ARP poisoning / spoofing: inject fake ARP replies to poison host caches (enables MITM); defend with static bindings, Dynamic ARP Inspection (DAI) and monitoring.
+- DHCP exhaustion / rogue DHCP: consume IP pool or run fake servers to disrupt clients; mitigate with DHCP snooping, trusted switch ports and rate limits.
+- MAC/CAM table flooding: flood switches with fake MACs to overflow the CAM table and force fail‑open behavior; use port security and MAC limits.
+- Wi‑Fi deauth & evil‑twin: send spoofed deauth frames or run rogue APs to disconnect or capture clients; mitigate with 802.11w (MFP), WPA2/3 and strong AP authentication.
+- "Evil packet" exploits (Ping‑of‑Death, LAND, Teardrop): crafted packets that trigger kernel/stack bugs and crashes; defend by patching, ingress filtering, and fragmentation checks.
+- Operational defenses (lecture): enable DHCP snooping/DAI on switches, disable IP‑directed broadcasts (Smurf mitigation), restrict open resolvers and close unnecessary UDP services.
 
