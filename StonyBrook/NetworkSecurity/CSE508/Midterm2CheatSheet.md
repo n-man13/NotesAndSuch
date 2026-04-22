@@ -150,6 +150,7 @@ A compact reference for core concepts likely to appear on the midterm.
     - <sourceIP, sourcePort, destinationIP, destinationPort, condition, protocol, decision>
     - <*, *, *, *, true, *, deny> - default-deny rule outline
 - Tunnels / VPNs:
+  - Use SSH Tunneling to bypass a restrictive firewall by allowing tcp forwarding and port translating to allow web surfing from the server's visibility
   - IPSec (site-to-site, transport vs tunnel mode), OpenVPN/TLS-based VPNs, WireGuard (modern, simple, fast), SSH tunnels.
   - Use strong auth (certificates or strong PSKs), encrypt both control and data planes, and enable perfect forward secrecy where possible.
   - NAT traversal: NAT-T for IPsec, UDP encapsulation, STUN/TURN for P2P apps.
