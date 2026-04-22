@@ -19,13 +19,13 @@ A compact reference for core concepts likely to appear on the midterm.
 ---
 
 ## AES Modes
- - **ECB — Electronic Code Book**: Encrypts each 128-bit block independently (Ci = E_K(Pi)). Deterministic (same plaintext → same ciphertext), so it leaks patterns; avoid for multi-block data.
+ - **AES-ECB — Electronic Code Book**: Encrypts each 128-bit block independently (Ci = E_K(Pi)). Deterministic (same plaintext → same ciphertext), so it leaks patterns; avoid for multi-block data.
 
-- **CBC — Cipher Block Chaining**: Uses a fresh random IV; encryption Ci = E_K(Mi ⊕ Ci-1), decryption Mi = Ci-1 ⊕ D_K(Ci). Provides chaining but needs integrity (MAC/AEAD) and correct IV handling to be secure.
+- **AES-CBC — Cipher Block Chaining**: Uses a fresh random IV; encryption Ci = E_K(Mi ⊕ Ci-1), decryption Mi = Ci-1 ⊕ D_K(Ci). Provides chaining but needs integrity (MAC/AEAD) and correct IV handling to be secure.
 
-- **CTR — Counter Mode**: Turns block cipher into a stream cipher using EK(IV + i); Ci = Mi ⊕ EK(IV+i). Allows random access and efficient parallelism; nonce/IV must never repeat for a key.
+- **AES-CTR — Counter Mode**: Turns block cipher into a stream cipher using EK(IV + i); Ci = Mi ⊕ EK(IV+i). Allows random access and efficient parallelism; nonce/IV must never repeat for a key.
 
-- **GCM/CCM (AEAD) — Authenticated Encryption**: GCM (Galois/Counter) and CCM combine CTR-like encryption with an authentication tag (AEAD). Provide confidentiality + integrity in one primitive and are the recommended modes (used in TLS).
+- **AES-GCM/CCM (AEAD) — Authenticated Encryption**: GCM (Galois/Counter) and CCM combine CTR-like encryption with an authentication tag (AEAD). Provide confidentiality + integrity in one primitive and are the recommended modes (used in TLS).
 
 > Use authenticated encryption (AEAD) whenever possible (e.g., GCM, ChaCha20‑Poly1305).
 
@@ -41,7 +41,7 @@ A compact reference for core concepts likely to appear on the midterm.
 ## Common Weaknesses
 | Weakness | Typical attack | Mitigation |
 |---|---|---|
-| Static keys | Retrospective decryption | Use ephemeral keys (PFS) |
+| Static keys | Retrospective decryption | Use ephemeral keys (Perfect Forward Secrecy) |
 | No randoms | Replay attacks | Use nonces, sequence numbers, timestamps |
 | Weak hashing | Collision attacks | Use SHA‑256 or stronger |
 | Plaintext handshake | Eavesdropping | Encrypt handshake (modern TLS) |
@@ -112,13 +112,13 @@ A compact reference for core concepts likely to appear on the midterm.
   - ACME uses challenges (HTTP-01, DNS-01, TLS-ALPN-01) to prove domain control and an account key for the requester.
   - ACME + short-lived certs encourage automation and reduce manual CA processes.
   - ACME - Lets Encrypt is automated way to provide free certs. But each cert is a short time. needs to validate that you control the server and domain if you want a cert. no *.domain.com certs
-  - Overall ACME Protocol Flow
-  1 Client generates an account key pair and registers with the ACME server
-  2 Client submits an order for a domain (e.g. example.com)
-  3 Server responds with an authorization object containing challenge options
-  4 Client fulfils a challenge (HTTP -01 or DNS -01) and signals readiness
-  5 Server verifies the challenge — authorization marked valid
-  6 Client submits a CSR signed with the domain key; server issues the certificate
+- Overall ACME Protocol Flow
+  1. Client generates an account key pair and registers with the ACME server
+  2. Client submits an order for a domain (e.g. example.com)
+  3. Server responds with an authorization object containing challenge options
+  4. Client fulfils a challenge (HTTP -01 or DNS -01) and signals readiness
+  5. Server verifies the challenge — authorization marked valid
+  6. Client submits a CSR signed with the domain key; server issues the certificate
 
 ---
 
@@ -146,6 +146,9 @@ A compact reference for core concepts likely to appear on the midterm.
    - Rule order (quick): `allow RELATED,ESTABLISHED` → allow required services → `default-deny`.
    - Placement: edge chokepoint + internal segmentation (VLAN/DMZ).
    - Pitfalls: open management ports, UPnP/auto-port-mapping, misordered rules, broad CIDRs.
+   - each rule is priority top to bottom:
+    - <sourceIP, sourcePort, destinationIP, destinationPort, condition, protocol, decision>
+    - <*, *, *, *, true, *, deny> - default-deny rule outline
 - Tunnels / VPNs:
   - IPSec (site-to-site, transport vs tunnel mode), OpenVPN/TLS-based VPNs, WireGuard (modern, simple, fast), SSH tunnels.
   - Use strong auth (certificates or strong PSKs), encrypt both control and data planes, and enable perfect forward secrecy where possible.
@@ -208,4 +211,15 @@ Firewall Access Control List
 - Wi‑Fi deauth & evil‑twin: send spoofed deauth frames or run rogue APs to disconnect or capture clients; mitigate with 802.11w (MFP), WPA2/3 and strong AP authentication.
 - "Evil packet" exploits (Ping‑of‑Death, LAND, Teardrop): crafted packets that trigger kernel/stack bugs and crashes; defend by patching, ingress filtering, and fragmentation checks.
 - Operational defenses (lecture): enable DHCP snooping/DAI on switches, disable IP‑directed broadcasts (Smurf mitigation), restrict open resolvers and close unnecessary UDP services.
+
+---
+## Public Key Infrastructure (PKI)
+- Purpose: bind public keys to identities using certificates (X.509). CAs issue and sign certs; trust is anchored in root CA public keys.
+- CA hierarchy: Root CA (trust anchor) → Intermediate CA(s) → End‑entity certs; validation builds a chain to a trusted root.
+- Certificate essentials: Subject, SubjectAltName (SAN), Issuer, Validity (notBefore/notAfter), Public Key, Signature, Extensions (keyUsage, EKU, basicConstraints, CRL/OCSP endpoints).
+- Issuance flow: generate keypair + CSR (keep private key secret) → CA verifies identity → CA issues cert. Protect CA/keys (HSMs, secure ops).
+- Revocation & checking: CRLs (pull), OCSP (real‑time), OCSP stapling (server‑provided proof) — clients must check expiry and revocation where required.
+- Validation checklist: chain signature verification, expiry, CN/SAN name match, keyUsage/EKU policy, and revocation status.
+- Threats & mitigations: misissued or compromised CA → use Certificate Transparency (CT) logs, short‑lived certs, strict auditing, key protection (HSM), and rapid revocation/patching.
+- Ops note: automate issuance (ACME) + short lifetimes; enable OCSP stapling and monitor CT and revocation telemetry.
 
