@@ -64,7 +64,7 @@ A compact reference for core concepts likely to appear on the midterm.
 
 - Ops notes: TC→retry over TCP; restrict/authenticate AXFR (TSIG); avoid open recursive resolvers.
 
-![DNS Packet](media\DNSPacket.png)
+![DNS Packet](media/DNSPacket.png)
 
 ### DNSSEC
 - Adds digital signatures to DNS records and a chain of trust (root → TLD → authoritative).
@@ -104,7 +104,7 @@ A compact reference for core concepts likely to appear on the midterm.
 - Certificate Transparency: public, append-only logs of issued certificates. CAs submit certs to CT logs and return Signed Certificate Timestamps (SCTs).
   - CT is a bulletin Board for what CA issued what certificate. needs to be confirmable. its a deterrent to stop bad CA's 
   - initially get a Signed Certificat Timestamp with max merge of 24 hrs.
-  - inclusion proof: ![Merkle Proof](media\MerkleProof.png)
+  - inclusion proof: ![Merkle Proof](media/MerkleProof.png)
   - checks if your cert is inside the merkel tree
   - SCTs are embedded in certificates or stapled by servers; monitors/auditors watch logs to detect misissuance.
   - CT helps detect rogue or misissued certificates quickly by providing public visibility.
