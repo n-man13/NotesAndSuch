@@ -18,11 +18,14 @@ A compact reference for core concepts likely to appear on the midterm.
 
 ---
 
-## AES Modes (quick)
-- **AES‑ECB**: encrypts each block independently. Leaks plaintext patterns (do not use for structured data).
-- **AES‑CBC**: provides confidentiality (chain blocks), but no built‑in integrity/authentication.
-- **AES‑CTR**: turns block cipher into stream cipher (keystream XOR plaintext); no authenticity.
-- **AES‑GCM**: AEAD mode — provides both confidentiality and integrity (recommended when available).
+## AES Modes
+ - **ECB — Electronic Code Book**: Encrypts each 128-bit block independently (Ci = E_K(Pi)). Deterministic (same plaintext → same ciphertext), so it leaks patterns; avoid for multi-block data.
+
+- **CBC — Cipher Block Chaining**: Uses a fresh random IV; encryption Ci = E_K(Mi ⊕ Ci-1), decryption Mi = Ci-1 ⊕ D_K(Ci). Provides chaining but needs integrity (MAC/AEAD) and correct IV handling to be secure.
+
+- **CTR — Counter Mode**: Turns block cipher into a stream cipher using EK(IV + i); Ci = Mi ⊕ EK(IV+i). Allows random access and efficient parallelism; nonce/IV must never repeat for a key.
+
+- **GCM/CCM (AEAD) — Authenticated Encryption**: GCM (Galois/Counter) and CCM combine CTR-like encryption with an authentication tag (AEAD). Provide confidentiality + integrity in one primitive and are the recommended modes (used in TLS).
 
 > Use authenticated encryption (AEAD) whenever possible (e.g., GCM, ChaCha20‑Poly1305).
 
@@ -61,6 +64,8 @@ A compact reference for core concepts likely to appear on the midterm.
 
 - Ops notes: TC→retry over TCP; restrict/authenticate AXFR (TSIG); avoid open recursive resolvers.
 
+![DNS Packet](media\DNSPacket.png)
+
 ### DNSSEC
 - Adds digital signatures to DNS records and a chain of trust (root → TLD → authoritative).
 - Provides integrity and authentication, but not privacy (DNSSEC responses are still visible unless combined with DoT/DoH).
@@ -97,11 +102,23 @@ A compact reference for core concepts likely to appear on the midterm.
 
 ## Certificate Transparency (CT) & ACME
 - Certificate Transparency: public, append-only logs of issued certificates. CAs submit certs to CT logs and return Signed Certificate Timestamps (SCTs).
+  - CT is a bulletin Board for what CA issued what certificate. needs to be confirmable. its a deterrent to stop bad CA's 
+  - initially get a Signed Certificat Timestamp with max merge of 24 hrs.
+  - inclusion proof: ![Merkle Proof](media\MerkleProof.png)
+  - checks if your cert is inside the merkel tree
   - SCTs are embedded in certificates or stapled by servers; monitors/auditors watch logs to detect misissuance.
   - CT helps detect rogue or misissued certificates quickly by providing public visibility.
 - ACME (Automated Certificate Management Environment): protocol (used by Let's Encrypt) for automated issuance/renewal of certificates.
   - ACME uses challenges (HTTP-01, DNS-01, TLS-ALPN-01) to prove domain control and an account key for the requester.
   - ACME + short-lived certs encourage automation and reduce manual CA processes.
+  - ACME - Lets Encrypt is automated way to provide free certs. But each cert is a short time. needs to validate that you control the server and domain if you want a cert. no *.domain.com certs
+  - Overall ACME Protocol Flow
+  1 Client generates an account key pair and registers with the ACME server
+  2 Client submits an order for a domain (e.g. example.com)
+  3 Server responds with an authorization object containing challenge options
+  4 Client fulfils a challenge (HTTP -01 or DNS -01) and signals readiness
+  5 Server verifies the challenge — authorization marked valid
+  6 Client submits a CSR signed with the domain key; server issues the certificate
 
 ---
 
@@ -161,6 +178,7 @@ A compact reference for core concepts likely to appear on the midterm.
 - Instability & amplification: frequent bogus announcements/withdrawals (flapping) can create routing instability and large control-plane loads.
 - RPKI/ROA risks & operational pitfalls: incomplete deployment, misconfigured ROAs, and reliance on a centralized trust infrastructure can cause accidental outages or false validation failures.
 - Impact: traffic interception (MitM), blackholing, censorship, interception for data exfiltration or DDoS amplification via misdirected traffic.
+-- lower content amount
 
 **Brief mitigations:** strict prefix filtering, IRR/RPKI origin validation, max-prefix and sanity checks, neighbor authentication/ACLs, TTL/adjacency protections, monitoring and rapid remediation (BGPmon, route collectors).
 
@@ -182,4 +200,9 @@ A compact reference for core concepts likely to appear on the midterm.
 - For network security QA: know tradeoffs (speed vs non‑repudiation), and when to use AEAD vs separate MAC+enc schemes.
 
 ---
+
+## In Class Highlights
+Firewall Access Control List
+
+aes cbc decryption understanding
 
