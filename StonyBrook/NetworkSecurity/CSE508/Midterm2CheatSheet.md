@@ -18,6 +18,23 @@ A compact reference for core concepts likely to appear on the midterm.
 
 ---
 
+## RSA
+1. Key Generation
+  - Select 2 primes p and q
+  - n = p * q
+  - select d,e such that $x^(de) % n=x$
+  - public key <e,n>
+  - private key <d,n>
+2. Encrypt using public key
+  - $c = m^e % n $
+3. decrypt with private key
+  - $ m = c^d % n $
+  - RSA will be broken with Quantum Computing
+  - RSA is deterministic, so it fails INDCPA
+    - Repeat of M gets the exact same C
+
+---
+
 ## AES Modes
  - **AES-ECB — Electronic Code Book**: Encrypts each 128-bit block independently (Ci = E_K(Pi)). Deterministic (same plaintext → same ciphertext), so it leaks patterns; avoid for multi-block data.
 
