@@ -145,9 +145,13 @@ A compact reference for core concepts likely to appear on the midterm.
    - Types: stateless (ACLs), stateful (tracks sessions), NGFW (L7 inspection).
    - Rule order (quick): `allow RELATED,ESTABLISHED` → allow required services → `default-deny`.
    - Placement: edge chokepoint + internal segmentation (VLAN/DMZ).
-   - Pitfalls: open management ports, UPnP/auto-port-mapping, misordered rules, broad CIDRs.
+  - Pitfalls: open management ports, UPnP/auto-port-mapping, misordered rules, broad CIDRs.
+  - UPnP (auto port‑mapping) — brief: allows LAN apps to request NAT/firewall port openings dynamically (automatic port forwarding).
+    - Why it's a flaw: typically unauthenticated and enabled by default on consumer gateways so malware or malicious apps can open WAN‑accessible ports, exposing internal services.
+    - Mitigations: disable UPnP on edge devices unless necessary, use explicit/manual port forwarding, restrict UPnP to trusted LAN interfaces, keep firmware patched, and monitor/clear dynamic mappings; block IGD/UPnP traffic on the WAN side.
    - each rule is priority top to bottom:
     - <sourceIP, sourcePort, destinationIP, destinationPort, condition, protocol, decision>
+    - <localhost, *, X, 22, *, SSH/TCP, allow> - allow outgoing ssh connections
     - <*, *, *, *, true, *, deny> - default-deny rule outline
 - Tunnels / VPNs:
   - Use SSH Tunneling to bypass a restrictive firewall by allowing tcp forwarding and port translating to allow web surfing from the server's visibility
@@ -163,8 +167,6 @@ A compact reference for core concepts likely to appear on the midterm.
 - Route selection (simplified): highest local-pref → shortest AS_PATH → lowest origin type → lowest MED → eBGP over iBGP → lowest IGP cost to next-hop.
 - Common issues: route hijacks (malicious or accidental announcements), prefix leaks, AS path manipulation.
 - Mitigations: prefix filtering and route-policy, max-prefix limits, IRR-based filtering, RPKI/ROA origin validation (detect bogus origin AS), monitoring (BGPmon), and strict peering policies.
-- Route Origin Authorization (ROA) is a way to definitively state that a certain AS owns an IP range
-- Route Origin Verification (ROV) allows for checking if an AS has the ROA for a specific IP and is able to check if that AS is on the path
 
 ### eBGP vs iBGP
 - eBGP (external BGP): runs between different Autonomous Systems (ASes). Peers are typically directly connected; eBGP updates normally modify the `AS_PATH` (prepend local AS) and are used to advertise reachability to the global Internet.
