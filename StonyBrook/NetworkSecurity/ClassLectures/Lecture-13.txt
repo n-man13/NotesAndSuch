@@ -1,0 +1,852 @@
+CSE508 Network Security
+Information Flow and the CBC Padding Oracle Attack
+Ka Lok Wu
+April 28, 2026
+
+Introduction
+Acknowledgement
+Some of the contents in this slide deck are adapted from:
+▶Prof. Sze Yiu Chau (Department of Information Engineering,
+the Chinese University of Hong Kong)
+▶Serge Vaudenay. Security flaws induced by CBC
+padding—applications to SSL, IPSEC, WTLS...
+(EUROCRYPT 2002)
+▶Brice Canvel, Alain Hiltgen, Serge Vaudenay, and Martin
+Vuagnoux. Password interception in a SSL/TLS channel.
+(CRYPTO 2003)
+▶Nadhem J. AlFardan and Kenneth G. Paterson. Lucky
+Thirteen: Breaking the TLS and DTLS Record Protocols
+(IEEE S&P 2013)
+1 / 34
+
+Introduction
+Introduction
+The content itself may not be as “network security” as the others,
+but it relates to many real-world security issues.
+2 / 34
+
+Introduction
+1Introduction
+2Information Flow
+Noninterference
+Non-deducibility
+Covert Channels
+Side-Channel Attacks
+3CBC Padding Oracle Attack
+PKCS#7 Padding
+Vaudenay’s Attack
+Side-Channel Attack
+Constant-Time Cryptography
+3 / 34
+
+Information Flow
+Information Flow
+4 / 34
+
+Information Flow
+Information Flow
+▶A concept in Multi-level Security (MLS)
+▶In a program or system, we want to reason about how the
+“information” flows from varialbes to variables.
+▶Security labels
+▶Simplest case: High and Low
+▶High = Highly sensitive, Low = Low sensitivity
+▶A program takes in inputs with low and high sensitivity, return
+things with low and high sensitivity
+▶Assume: high inputs are secret, low inputs are public; high
+outputs are secret, low outputs are public
+▶If a user input (low) flows to commands in the server (high
+output), then bad things may happen.
+▶E.g., SQL injection, if user input is used to construct a SQL
+query without sanitization
+5 / 34
+
+Information Flow
+Example
+A password checker takes in a user-input password (as low input),
+a secret password (as high input) and outputs whether the
+password is correct (as public, or low output).
+6 / 34
+
+Information Flow Noninterference
+Noninterference
+▶Model information flow with inputs and outputs
+▶The idea that the high inputs should not affect, or flow to, the
+low outputs.
+▶If a program fail to satisfy noninterference, then in a sense,
+the high inputs are leaked into the low outputs.
+▶If a program does satisfy noninterference, then given the
+output, one learns nothing about the high inputs.
+7 / 34
+
+Information Flow Noninterference
+Noninterference
+▶More formally, letPbe a deterministic program, andI HandI L
+be the high and low inputs respectively, andO HandO Lbe the
+high and low outputs respectively, soP(I H,IL) = (O H,OL).
+▶Then we sayPhas thenoninterferenceproperty if for any
+IH1andI H2and anyI L, if we have(
+P(IH1,IL) = (O H1,OL1)
+P(IH2,IL) = (O H2,OL2), thenO L1=O L2.
+▶We also say that there is no information flow betweenI Hand
+OL.
+▶Notice that the property has to quantify over two traces of
+the program, so noninterference is also called ahyperproperty.
+8 / 34
+
+Information Flow Noninterference
+Example
+A functionfthat takes one high and one low input, and returns
+one low output withf(x,y) =x+y−x.Then it is easy to see
+thatfhas the noninterference property.
+Example (Encryption)
+A functionfthat takes one high and two low inputs, and returns
+one low output withf(m,n,e) =me(modn). fdoes not have
+non-interference, because the low input certainly depends onm.
+Example (Password Checking)
+The password checking function certainly does not have
+noninterference, because the output of the function depends on
+the high input (the secret password).
+9 / 34
+
+Information Flow Noninterference
+Example
+A functionfthat takes one high and one low input, and returns
+one low output withf(x,y) =x+y−x. Then it is easy to see
+thatfhas the noninterference property.Example (Encryption)
+A functionfthat takes one high and two low inputs, and returns
+one low output withf(m,n,e) =me(modn). fdoes not have
+non-interference, because the low input certainly depends onm.
+Example (Password Checking)
+The password checking function certainly does not have
+noninterference, because the output of the function depends on
+the high input (the secret password).
+9 / 34
+
+Information Flow Noninterference
+Example
+A functionfthat takes one high and one low input, and returns
+one low output withf(x,y) =x+y−x. Then it is easy to see
+thatfhas the noninterference property.
+Example (Encryption)
+A functionfthat takes one high and two low inputs, and returns
+one low output withf(m,n,e) =me(modn).fdoes not have
+non-interference, because the low input certainly depends onm.
+Example (Password Checking)
+The password checking function certainly does not have
+noninterference, because the output of the function depends on
+the high input (the secret password).
+9 / 34
+
+Information Flow Noninterference
+Example
+A functionfthat takes one high and one low input, and returns
+one low output withf(x,y) =x+y−x. Then it is easy to see
+thatfhas the noninterference property.
+Example (Encryption)
+A functionfthat takes one high and two low inputs, and returns
+one low output withf(m,n,e) =me(modn). fdoes not have
+non-interference, because the low input certainly depends onm.Example (Password Checking)
+The password checking function certainly does not have
+noninterference, because the output of the function depends on
+the high input (the secret password).
+9 / 34
+
+Information Flow Noninterference
+Example
+A functionfthat takes one high and one low input, and returns
+one low output withf(x,y) =x+y−x. Then it is easy to see
+thatfhas the noninterference property.
+Example (Encryption)
+A functionfthat takes one high and two low inputs, and returns
+one low output withf(m,n,e) =me(modn). fdoes not have
+non-interference, because the low input certainly depends onm.
+Example (Password Checking)
+The password checking function certainly does not have
+noninterference, because the output of the function depends on
+the high input (the secret password).
+9 / 34
+
+Information Flow Noninterference
+Example
+A functionfthat takes one high and one low input, and returns
+one low output withf(x,y) =x+y−x. Then it is easy to see
+thatfhas the noninterference property.
+Example (Encryption)
+A functionfthat takes one high and two low inputs, and returns
+one low output withf(m,n,e) =me(modn). fdoes not have
+non-interference, because the low input certainly depends onm.
+Example (Password Checking)
+The password checking function certainly does not have
+noninterference, because the output of the function depends on
+the high input (the secret password).
+9 / 34
+
+Information Flow Noninterference
+Example
+A functionfthat takes one high and one low input, and returns
+one low output withf(x,y) =x+y−x. Then it is easy to see
+thatfhas the noninterference property.
+Example (Encryption)
+A functionfthat takes one high and two low inputs, and returns
+one low output withf(m,n,e) =me(modn). fdoes not have
+non-interference, because the low input certainly depends onm.
+Example (Password Checking)
+The password checking function certainly does not have
+noninterference, because the output of the function depends on
+the high input (the secret password).
+9 / 34However, encryption and password checking are not
+really insecure.
+
+Information Flow Noninterference
+Problem with non-interference
+▶Essentially, noninterference is very strong
+▶Too strong to be realized in any real-world system
+▶Not easy to define for non-deterministic programs
+10 / 34
+
+Information Flow Non-deducibility
+Non-deducibility
+▶Similar to non-interference, but instead of learning nothing
+about the inputs from the outputs, we do not want to be able
+to eliminate (high) input from the set of possible input.
+▶Works for non-deterministic programs
+▶For any outputO Lin the domain ofPand for allI H, there
+exists a low inputI Lsuch that the low output ofP(I H,IL) is
+OL.
+▶The negation would be that there exist someO Lsuch that we
+haveI Hwhere noI Lcan be used to produceO L.
+▶This means that after observing the low outputO L, we can
+rule out the high inputI H.
+11 / 34
+
+Information Flow Non-deducibility
+Example (Password Checking)
+The password checking functionfcan return True or False as low
+outputs. For every secret password, we have one low input such
+thatfreturns True, and many low inputs such thatfreturns
+False. Thus, the password checking function has the
+non-deducibility property.Example (Information Leak)
+Consider a functionfthat takes a file as high input and a
+user-chosen indexias low input. Ifiis out of bounds, thenf
+returns a random character. Otherwise,freturns the character at
+indexiof the file 99.9% of the time, and returns a random
+character 0.1% of the time. It is left as exercise to show that this
+has non-deducible.
+12 / 34
+
+Information Flow Non-deducibility
+Example (Password Checking)
+The password checking functionfcan return True or False as low
+outputs. For every secret password, we have one low input such
+thatfreturns True, and many low inputs such thatfreturns
+False. Thus, the password checking function has the
+non-deducibility property.
+Example (Information Leak)
+Consider a functionfthat takes a file as high input and a
+user-chosen indexias low input. Ifiis out of bounds, thenf
+returns a random character. Otherwise,freturns the character at
+indexiof the file 99.9% of the time, and returns a random
+character 0.1% of the time. It is left as exercise to show that this
+has non-deducible.
+12 / 34
+
+Information Flow Non-deducibility
+Example (Password Checking)
+The password checking functionfcan return True or False as low
+outputs. For every secret password, we have one low input such
+thatfreturns True, and many low inputs such thatfreturns
+False. Thus, the password checking function has the
+non-deducibility property.
+Example (Information Leak)
+Consider a functionfthat takes a file as high input and a
+user-chosen indexias low input. Ifiis out of bounds, thenf
+returns a random character. Otherwise,freturns the character at
+indexiof the file 99.9% of the time, and returns a random
+character 0.1% of the time. It is left as exercise to show that this
+has non-deducible.
+12 / 34However, the second function is certainly not secure!
+
+Information Flow Covert Channels
+Covert Channels
+▶In the functional viewpoint, we care about the pure output of
+the program.
+▶However, low outputs should include everything that can be
+observed by the user.
+▶Consider the program
+int f(high int x, low int y) {
+if (x > 0) {
+usleep(1000);
+}
+return y;
+}
+▶We can deduce the value ofxfrom the timing of the output!
+13 / 34
+
+Information Flow Side-Channel Attacks
+Side-Channel Attacks
+▶Covert channels are a way to violate security policies by
+intentionally leaking high data
+▶Sometimes the violation is unintentional
+▶We call these violationsside-channel attacks
+▶Side-channel attacks can be timing attacks, power analysis
+attacks, etc.
+14 / 34
+
+CBC Padding Oracle Attack
+CBC Padding Oracle Attack
+15 / 34
+
+CBC Padding Oracle Attack Introduction
+Introduction
+Now we shift our focus to a real-world attack on CBC. There is an
+attack that allows an attacker to decrypt ciphertexts without
+knowing the key. Attempts to fix the attack has lead to a
+side-channel variant of the attack.
+16 / 34
+
+CBC Padding Oracle Attack Introduction
+CBC Padding Oracle Attack
+▶The attack is based on AES with CBC mode of operation
+▶Recall that CBC mode is malleable (What does it mean?)
+▶Ci=E k(Pi⊕C i−1) (whereC 0is the IV)
+▶Pi=D k(C1)⊕C i−1
+▶Since AES only works on blocks of 16 bytes, we need to pad
+the plaintext to a multiple of 16 bytes.
+▶This is typically done with PKCS#7 padding.
+17 / 34
+
+CBC Padding Oracle Attack PKCS#7 Padding
+PKCS#7 Padding
+▶Consider a plaintextPof lengthnbytes. We want to add
+p= 16−(nmod 16) bytes of padding.
+▶For PKCS#7, the value of each padding byte isp.▶For example, ifP=Hello\20World1, thenn= 11, and we
+need to pad 5 bytes. The padded plaintext is thus
+“Hello\20World\05\05\05\05\05”2
+▶Iflis already a multiple of 16, we still need to pad 16 bytes of
+padding with value 16 (\10).
+1\20 is a whitespace in ASCII.
+2\05 has value 05 as a raw byte, and not the ASCII text “05”, which has
+byte value 3035 16.
+18 / 34
+
+CBC Padding Oracle Attack PKCS#7 Padding
+PKCS#7 Padding
+▶Consider a plaintextPof lengthnbytes. We want to add
+p= 16−(nmod 16) bytes of padding.
+▶For PKCS#7, the value of each padding byte isp.
+▶For example, ifP=Hello\20World1, thenn= 11, and we
+need to pad 5 bytes. The padded plaintext is thus
+“Hello\20World\05\05\05\05\05”2
+▶Iflis already a multiple of 16, we still need to pad 16 bytes of
+padding with value 16 (\10).
+1\20 is a whitespace in ASCII.
+2\05 has value 05 as a raw byte, and not the ASCII text “05”, which has
+byte value 3035 16.
+18 / 34
+
+CBC Padding Oracle Attack PKCS#7 Padding
+Padding Removal
+▶Notice that while every string can be padded, not every string
+with length being a multiple of 16 corresponds to a valid
+unpadded plaintext.▶The unpad function would have to return an error if the
+padding is invalid.
+▶Thus, after decrypting the ciphertext, it is natural to check for
+the padding, and return an error if the padding is invalid.
+▶However, this leads to an attack where we can decrypt the
+ciphertext without knowing the key.
+▶Attributed to Vaudenay in 2002.
+▶A kind of adaptive chosen-ciphertext attack.
+19 / 34
+
+CBC Padding Oracle Attack PKCS#7 Padding
+Padding Removal
+▶Notice that while every string can be padded, not every string
+with length being a multiple of 16 corresponds to a valid
+unpadded plaintext.
+▶The unpad function would have to return an error if the
+padding is invalid.▶Thus, after decrypting the ciphertext, it is natural to check for
+the padding, and return an error if the padding is invalid.
+▶However, this leads to an attack where we can decrypt the
+ciphertext without knowing the key.
+▶Attributed to Vaudenay in 2002.
+▶A kind of adaptive chosen-ciphertext attack.
+19 / 34
+
+CBC Padding Oracle Attack PKCS#7 Padding
+Padding Removal
+▶Notice that while every string can be padded, not every string
+with length being a multiple of 16 corresponds to a valid
+unpadded plaintext.
+▶The unpad function would have to return an error if the
+padding is invalid.
+▶Thus, after decrypting the ciphertext, it is natural to check for
+the padding, and return an error if the padding is invalid.▶However, this leads to an attack where we can decrypt the
+ciphertext without knowing the key.
+▶Attributed to Vaudenay in 2002.
+▶A kind of adaptive chosen-ciphertext attack.
+19 / 34
+
+CBC Padding Oracle Attack PKCS#7 Padding
+Padding Removal
+▶Notice that while every string can be padded, not every string
+with length being a multiple of 16 corresponds to a valid
+unpadded plaintext.
+▶The unpad function would have to return an error if the
+padding is invalid.
+▶Thus, after decrypting the ciphertext, it is natural to check for
+the padding, and return an error if the padding is invalid.
+▶However, this leads to an attack where we can decrypt the
+ciphertext without knowing the key.
+▶Attributed to Vaudenay in 2002.
+▶A kind of adaptive chosen-ciphertext attack.
+Serge Vaudenay. Security flaws induced by CBC
+padding—applications to SSL, IPSEC, WTLS... (EUROCRYPT
+2002)
+19 / 34
+
+CBC Padding Oracle Attack PKCS#7 Padding
+Padding Oracle
+▶Abstractly, let us assume that there is a black-box functionO
+that takes a ciphertextCand returns whether the padding is
+valid.
+▶We will call this function apadding oracle.
+▶In practice, we may submit a ciphertext to a web server. If the
+padding is valid, the server may proceed with the decrypted
+data. Otherwise, the server may return an error message.
+▶This produces a one-bit signal that tells us whether the
+padding is valid.
+20 / 34
+
+CBC Padding Oracle Attack Vaudenay’s Attack
+Vaudenay’s Attack
+▶Assume we have a ciphertextC= (IV,C), and we know that
+the padding is valid, and that the padding length isp.
+▶Then we know that the lastpbytes of the plaintext all have
+valuep.
+▶Now we can maulIV, so that the lastpbytes ofChas value
+p+ 1.▶We can send the modified ciphertext to the oracle, and check
+if the padding is valid.
+▶If yes, then we know that byte before the lastpbytes of the
+plaintext has valuep+ 1
+▶If the padding is invalid, then maul the byte before the lastp
+bytes of the IV until the padding is valid.
+21 / 34
+
+CBC Padding Oracle Attack Vaudenay’s Attack
+Vaudenay’s Attack
+▶Assume we have a ciphertextC= (IV,C), and we know that
+the padding is valid, and that the padding length isp.
+▶Then we know that the lastpbytes of the plaintext all have
+valuep.
+▶Now we can maulIV, so that the lastpbytes ofChas value
+p+ 1.
+▶We can send the modified ciphertext to the oracle, and check
+if the padding is valid.▶If yes, then we know that byte before the lastpbytes of the
+plaintext has valuep+ 1
+▶If the padding is invalid, then maul the byte before the lastp
+bytes of the IV until the padding is valid.
+21 / 34
+
+CBC Padding Oracle Attack Vaudenay’s Attack
+Vaudenay’s Attack
+▶Assume we have a ciphertextC= (IV,C), and we know that
+the padding is valid, and that the padding length isp.
+▶Then we know that the lastpbytes of the plaintext all have
+valuep.
+▶Now we can maulIV, so that the lastpbytes ofChas value
+p+ 1.
+▶We can send the modified ciphertext to the oracle, and check
+if the padding is valid.
+▶If yes, then we know that byte before the lastpbytes of the
+plaintext has valuep+ 1▶If the padding is invalid, then maul the byte before the lastp
+bytes of the IV until the padding is valid.
+21 / 34
+
+CBC Padding Oracle Attack Vaudenay’s Attack
+Vaudenay’s Attack
+▶Assume we have a ciphertextC= (IV,C), and we know that
+the padding is valid, and that the padding length isp.
+▶Then we know that the lastpbytes of the plaintext all have
+valuep.
+▶Now we can maulIV, so that the lastpbytes ofChas value
+p+ 1.
+▶We can send the modified ciphertext to the oracle, and check
+if the padding is valid.
+▶If yes, then we know that byte before the lastpbytes of the
+plaintext has valuep+ 1
+▶If the padding is invalid, then maul the byte before the lastp
+bytes of the IV until the padding is valid.
+21 / 34
+
+CBC Padding Oracle Attack Vaudenay’s Attack
+Illustration
+Assume that for the original plaintext,P 15=IV 15⊕D(C) 15̸= 01.
+IV0IV1IV2···IV 15
+⊕D(C)
+? ? ?···?
+22 / 34
+
+CBC Padding Oracle Attack Vaudenay’s Attack
+Brute force onx...
+Most of the time we will get invalid padding.
+x
+NewIVIV0IV1IV2···IV 15
+⊕D(C)
+? ? ?···junk
+23 / 34
+
+CBC Padding Oracle Attack Vaudenay’s Attack
+Until...
+However, when we DO get a valid padding, we have
+x∗
+NewIVIV0IV1IV2···IV 15
+⊕D(C)
+? ? ?··· \x01
+24 / 34
+
+CBC Padding Oracle Attack Vaudenay’s Attack
+Thus we get the following relation:IV15⊕D(C) 15=P 15
+x∗⊕IV 15⊕D(C) 15=\x01
+xor the two equations to obtain
+x∗=P 15⊕ \x01
+Now xor both sides with\x01 and rearrange to get
+P15=x∗⊕ \x01
+so we have successfully recovered the last byte of the plaintext!
+25 / 34
+
+CBC Padding Oracle Attack Vaudenay’s Attack
+Thus we get the following relation:IV15⊕D(C) 15=P 15
+x∗⊕IV 15⊕D(C) 15=\x01
+xor the two equations to obtain
+x∗=P 15⊕ \x01
+Now xor both sides with\x01 and rearrange to get
+P15=x∗⊕ \x01
+so we have successfully recovered the last byte of the plaintext!
+25 / 34We can rinse and repeat to recover the entire plaintext
+block!
+
+CBC Padding Oracle Attack Vaudenay’s Attack
+Analysis
+▶We only need at most 256 queries to the oracle to recover one
+byte of the plaintext.
+▶We can repeat this for every byte of the plaintext block.
+▶We can recover the entire plaintext blockPin at most
+256×16 = 4096 queries.
+26 / 34
+
+CBC Padding Oracle Attack Vaudenay’s Attack
+Recovering the original padding length
+▶Recovering the original padding length is easy.
+▶Assume the original ciphertext (IV,C) has correct padding
+lengthp.▶If we maul one ofIV[16−p..15] by xor-ing some arbitrary
+value, then the padding will be invalid. (Why?)
+▶If we maul one ofIV[0..16−p−1], then since we are not
+touching the padding, then the padding is still valid.
+▶So we have a distinguisher that can tell whether the original
+padding length ispor not.
+27 / 34
+
+CBC Padding Oracle Attack Vaudenay’s Attack
+Recovering the original padding length
+▶Recovering the original padding length is easy.
+▶Assume the original ciphertext (IV,C) has correct padding
+lengthp.
+▶If we maul one ofIV[16−p..15] by xor-ing some arbitrary
+value, then the padding will be invalid. (Why?)▶If we maul one ofIV[0..16−p−1], then since we are not
+touching the padding, then the padding is still valid.
+▶So we have a distinguisher that can tell whether the original
+padding length ispor not.
+27 / 34
+
+CBC Padding Oracle Attack Vaudenay’s Attack
+Recovering the original padding length
+▶Recovering the original padding length is easy.
+▶Assume the original ciphertext (IV,C) has correct padding
+lengthp.
+▶If we maul one ofIV[16−p..15] by xor-ing some arbitrary
+value, then the padding will be invalid. (Why?)
+▶If we maul one ofIV[0..16−p−1], then since we are not
+touching the padding, then the padding is still valid.▶So we have a distinguisher that can tell whether the original
+padding length ispor not.
+27 / 34
+
+CBC Padding Oracle Attack Vaudenay’s Attack
+Recovering the original padding length
+▶Recovering the original padding length is easy.
+▶Assume the original ciphertext (IV,C) has correct padding
+lengthp.
+▶If we maul one ofIV[16−p..15] by xor-ing some arbitrary
+value, then the padding will be invalid. (Why?)
+▶If we maul one ofIV[0..16−p−1], then since we are not
+touching the padding, then the padding is still valid.
+▶So we have a distinguisher that can tell whether the original
+padding length ispor not.
+27 / 34
+
+CBC Padding Oracle Attack Vaudenay’s Attack
+Corollary
+This shows that AES-CBC with PKCS#7 padding will fail to have
+a kind of IND-CPA security where the adversary also has access to
+a padding oracle (in addition to the encryption oracle).
+Exercise
+Show that we can generalize this to recover a three-block
+ciphertext (IV,C 1,C2).
+Exercise (Encryption Oracle (hard))
+Show that besides recovering ciphertexts, we can actually encrypt
+arbitrary plaintexts with the padding oracle without knowing the
+key. (Hint: if you know the plaintext corresponding to some
+ciphertexts, then you can maul that ciphertext to correspond to
+any plaintext you want.)
+28 / 34
+
+CBC Padding Oracle Attack Vaudenay’s Attack
+Remedy...?
+▶The key idea in Vaudenay’s attack is the fact that we possess
+a padding oracle from decryption failure.▶The obvious fix is to not return any information about the
+padding.
+▶In TLS, for example, the server encrypts the alert message, so
+an attacker cannot distinguish between an unpad failure and
+an error further down the line.
+29 / 34
+
+CBC Padding Oracle Attack Vaudenay’s Attack
+Remedy...?
+▶The key idea in Vaudenay’s attack is the fact that we possess
+a padding oracle from decryption failure.
+▶The obvious fix is to not return any information about the
+padding.▶In TLS, for example, the server encrypts the alert message, so
+an attacker cannot distinguish between an unpad failure and
+an error further down the line.
+29 / 34
+
+CBC Padding Oracle Attack Vaudenay’s Attack
+Remedy...?
+▶The key idea in Vaudenay’s attack is the fact that we possess
+a padding oracle from decryption failure.
+▶The obvious fix is to not return any information about the
+padding.
+▶In TLS, for example, the server encrypts the alert message, so
+an attacker cannot distinguish between an unpad failure and
+an error further down the line.
+29 / 34
+
+CBC Padding Oracle Attack Side-Channel Attack
+TLS
+▶Consider TLS 1.0 to 1.2, where if AES-CBC is chosen as the
+ciphersuite, then the record protocol will perform a
+MAC-Encode-Encrypt operation to encrypt the plaintexts.▶The MAC is first computed, the plaintext is then padded and
+encrypted.
+▶If the padding is invalid, then the server will return an alert
+message without computing MAC.
+▶If an attacker messed with the non-padding part, unpad would
+succeed, but MAC would still fail, returning another
+(encrypted) alert message.
+▶A timing difference between valid and invalid padding!
+Brice Canvel, Alain Hiltgen, Serge Vaudenay, and Martin
+Vuagnoux. Password interception in a SSL/TLS channel.
+(CRYPTO 2003)
+30 / 34
+
+CBC Padding Oracle Attack Side-Channel Attack
+TLS
+▶Consider TLS 1.0 to 1.2, where if AES-CBC is chosen as the
+ciphersuite, then the record protocol will perform a
+MAC-Encode-Encrypt operation to encrypt the plaintexts.
+▶The MAC is first computed, the plaintext is then padded and
+encrypted.▶If the padding is invalid, then the server will return an alert
+message without computing MAC.
+▶If an attacker messed with the non-padding part, unpad would
+succeed, but MAC would still fail, returning another
+(encrypted) alert message.
+▶A timing difference between valid and invalid padding!
+Brice Canvel, Alain Hiltgen, Serge Vaudenay, and Martin
+Vuagnoux. Password interception in a SSL/TLS channel.
+(CRYPTO 2003)
+30 / 34
+
+CBC Padding Oracle Attack Side-Channel Attack
+TLS
+▶Consider TLS 1.0 to 1.2, where if AES-CBC is chosen as the
+ciphersuite, then the record protocol will perform a
+MAC-Encode-Encrypt operation to encrypt the plaintexts.
+▶The MAC is first computed, the plaintext is then padded and
+encrypted.
+▶If the padding is invalid, then the server will return an alert
+message without computing MAC.▶If an attacker messed with the non-padding part, unpad would
+succeed, but MAC would still fail, returning another
+(encrypted) alert message.
+▶A timing difference between valid and invalid padding!
+Brice Canvel, Alain Hiltgen, Serge Vaudenay, and Martin
+Vuagnoux. Password interception in a SSL/TLS channel.
+(CRYPTO 2003)
+30 / 34
+
+CBC Padding Oracle Attack Side-Channel Attack
+TLS
+▶Consider TLS 1.0 to 1.2, where if AES-CBC is chosen as the
+ciphersuite, then the record protocol will perform a
+MAC-Encode-Encrypt operation to encrypt the plaintexts.
+▶The MAC is first computed, the plaintext is then padded and
+encrypted.
+▶If the padding is invalid, then the server will return an alert
+message without computing MAC.
+▶If an attacker messed with the non-padding part, unpad would
+succeed, but MAC would still fail, returning another
+(encrypted) alert message.▶A timing difference between valid and invalid padding!
+Brice Canvel, Alain Hiltgen, Serge Vaudenay, and Martin
+Vuagnoux. Password interception in a SSL/TLS channel.
+(CRYPTO 2003)
+30 / 34
+
+CBC Padding Oracle Attack Side-Channel Attack
+TLS
+▶Consider TLS 1.0 to 1.2, where if AES-CBC is chosen as the
+ciphersuite, then the record protocol will perform a
+MAC-Encode-Encrypt operation to encrypt the plaintexts.
+▶The MAC is first computed, the plaintext is then padded and
+encrypted.
+▶If the padding is invalid, then the server will return an alert
+message without computing MAC.
+▶If an attacker messed with the non-padding part, unpad would
+succeed, but MAC would still fail, returning another
+(encrypted) alert message.
+▶A timing difference between valid and invalid padding!
+Brice Canvel, Alain Hiltgen, Serge Vaudenay, and Martin
+Vuagnoux. Password interception in a SSL/TLS channel.
+(CRYPTO 2003)
+30 / 34
+
+CBC Padding Oracle Attack Side-Channel Attack
+Side-Channel Attack on CBC
+▶Even though there is a timing difference, the difference is very
+small.
+▶In the network setting, there are lots of noise that affects the
+timing.
+▶We need to perform a lot of measurements, and perform
+standard statistical analysis to obtain a correct guess with
+high probability.
+▶Even if the attacker is physically close to the server, the
+random nature of noise means that the we need a lot of
+measurements to even deduce one bit of information, but this
+is possible
+31 / 34
+
+CBC Padding Oracle Attack Side-Channel Attack
+Side-Channel Attack on CBC
+▶Even though there is a timing difference, the difference is very
+small.
+▶In the network setting, there are lots of noise that affects the
+timing.
+▶We need to perform a lot of measurements, and perform
+standard statistical analysis to obtain a correct guess with
+high probability.
+▶Even if the attacker is physically close to the server, the
+random nature of noise means that the we need a lot of
+measurements to even deduce one bit of information, but this
+is possible
+31 / 34
+
+
+CBC Padding Oracle Attack Constant-Time Cryptography
+Remedy...?
+▶We want to remove padding oracle▶Make the unpad function constant-time w.r.t. input size
+▶Constant-time cryptography
+▶Language-based security: Every pair of inputs to unpad (with
+the same padded length) should give the same “leakage”
+▶Practically, make the number of iterations of loops constant,
+eliminate branches that depend on (high/secret) input, use
+instructions that should be constant-time, ask the compiler
+not to optimize...
+32 / 34
+
+CBC Padding Oracle Attack Constant-Time Cryptography
+Remedy...?
+▶We want to remove padding oracle
+▶Make the unpad function constant-time w.r.t. input size▶Constant-time cryptography
+▶Language-based security: Every pair of inputs to unpad (with
+the same padded length) should give the same “leakage”
+▶Practically, make the number of iterations of loops constant,
+eliminate branches that depend on (high/secret) input, use
+instructions that should be constant-time, ask the compiler
+not to optimize...
+32 / 34
+
+CBC Padding Oracle Attack Constant-Time Cryptography
+Remedy...?
+▶We want to remove padding oracle
+▶Make the unpad function constant-time w.r.t. input size
+▶Constant-time cryptography▶Language-based security: Every pair of inputs to unpad (with
+the same padded length) should give the same “leakage”
+▶Practically, make the number of iterations of loops constant,
+eliminate branches that depend on (high/secret) input, use
+instructions that should be constant-time, ask the compiler
+not to optimize...
+32 / 34
+
+CBC Padding Oracle Attack Constant-Time Cryptography
+Remedy...?
+▶We want to remove padding oracle
+▶Make the unpad function constant-time w.r.t. input size
+▶Constant-time cryptography
+▶Language-based security: Every pair of inputs to unpad (with
+the same padded length) should give the same “leakage”▶Practically, make the number of iterations of loops constant,
+eliminate branches that depend on (high/secret) input, use
+instructions that should be constant-time, ask the compiler
+not to optimize...
+32 / 34
+
+CBC Padding Oracle Attack Constant-Time Cryptography
+Remedy...?
+▶We want to remove padding oracle
+▶Make the unpad function constant-time w.r.t. input size
+▶Constant-time cryptography
+▶Language-based security: Every pair of inputs to unpad (with
+the same padded length) should give the same “leakage”
+▶Practically, make the number of iterations of loops constant,
+eliminate branches that depend on (high/secret) input, use
+instructions that should be constant-time, ask the compiler
+not to optimize...
+32 / 34
+
+CBC Padding Oracle Attack Constant-Time Cryptography
+Remedy...? (Cont’d)
+▶If padding is valid but the MAC is not, then we get an alert
+▶If padding fails, we treat the decrypted junk as valid data to
+feed into the MAC (in other words, we treat padding=0 bytes)
+▶Then, MAC will still fail, and we will return an alert message.
+▶In either cases, MAC gets executed
+33 / 34
+
+CBC Padding Oracle Attack Constant-Time Cryptography
+Remedy...? (Cont’d)
+▶If padding is valid but the MAC is not, then we get an alert
+▶If padding fails, we treat the decrypted junk as valid data to
+feed into the MAC (in other words, we treat padding=0 bytes)
+▶Then, MAC will still fail, and we will return an alert message.
+▶In either cases, MAC gets executed
+33 / 34RFC5246 (RFC for TLS1.2):
+“This leaves a small timing channel, since MAC
+performance depends to some extent on the size of the
+data fragment, but it is not believed to be large enough
+to be exploitable, due to the large block size of existing
+MACs and the small size of the timing signal.”
+
+CBC Padding Oracle Attack Constant-Time Cryptography
+Remedy...? (Cont’d)
+▶If padding is valid but the MAC is not, then we get an alert
+▶If padding fails, we treat the decrypted junk as valid data to
+feed into the MAC (in other words, we treat padding=0 bytes)
+▶Then, MAC will still fail, and we will return an alert message.
+▶In either cases, MAC gets executed
+▶AlFardan and Paterson broke this approach in 2013.
+Nadhem J. AlFardan and Kenneth G. Paterson. Lucky Thirteen:
+Breaking the TLS and DTLS Record Protocols (IEEE S&P 2013)
+33 / 34
+
+CBC Padding Oracle Attack Constant-Time Cryptography
+Remedy
+▶The real problem is that CBC is malleable.
+▶Encrypt-then-MAC instead of MAC-then-Encrypt?
+▶Instead, use authenticated encryption like AES-GCM.
+34 / 34
