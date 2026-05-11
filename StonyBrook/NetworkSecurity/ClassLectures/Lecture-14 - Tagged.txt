@@ -1,0 +1,599 @@
+CSE508  Network Security
+  Email
+  Michalis Polychronakis
+  Stony Brook University
+
+
+2
+Typical flow:
+MUA ➔ MSA ➔ MTA ➔ … ➔ MTA ➔ MDA ➔ MUAEmail Overview
+MUA:  Mail User Agent
+ Thunderbird, Apple Mail, …
+MSA:  Mail Submission Agent
+ SMTP (port 587)
+ Often same as initial MTA
+MTA:  Mail Transfer Agent
+ SMTP (port 25)
+MDA:  Mail Delivery Agent
+ IMAP (port 143) , POP3 (port 110) , local, …
+
+SMTP Transport Example
+S: 220 smtp.example.com ESMTP Postfix
+C: HELO relay.example.org
+S: 250 Hello relay.example.org, I am glad to meet you
+C: MAIL FROM:<bob@example.org>
+S: 250 Ok
+C: RCPT TO:<alice@example.com>
+S: 250 Ok
+C: RCPT TO:<theboss@example.com>
+S: 250 Ok
+C: DATA
+S: 354 End data with <CR><LF>.<CR><LF>
+C: From: "Bob Example" <bob@example.org>
+C: To: "Alice Example" <alice@example.com>
+C: Cc: theboss@example.com
+C: Date: Tue, 15 January 2008 16:02:43 -0500
+C: Subject: Test message
+C:
+C: Hello Alice.
+C: This is a test message with 5 header fields and 4 lines in the message body.
+C: Your friend,
+C: Bob
+C: .
+S: 250 Ok: queued as 12345
+C: QUIT
+S: 221 Bye
+3
+
+Email/Messaging Security and Privacy Goals
+Protect message content
+Fight spam
+Fight phishing
+(future lecture: social engineering)
+Verify communicating parties’ identities
+Hide communication patterns
+(future lecture: anonymity)
+4
+
+Who can read
+my email?
+5
+Adversaries with local or 
+remote access to my devices
+Intruders, spouse, system 
+administrator, …
+Malware, stolen credentials, 
+physical access, …
+
+Who can read
+my email?
+6
+Adversaries with local or 
+remote access to MTAs and 
+other intermediary servers
+System administrators, other 
+insiders, intruders, LEAs, …
+
+Who can read
+my email?
+7
+Adversaries with access to 
+any intermediate network
+System administrators, other 
+insiders, intruders, LEAs, …
+Passive eavesdropping, MitM, 
+DNS poisoning, …
+
+Confidentiality Threats Recap:
+Stored messages
+Compromised system (either local user machine or remote email server)
+Malware, intruder, insider, stolen/lost device, …
+Compromised authentication
+Password theft, phone unlock, …
+Messages in transit
+Eavesdropping and interception
+Displayed messages
+Screendump , reflections, shoulder surfing, …
+8
+
+Securing Email Transit
+These days encryption is mandatory for client -to-server email 
+transmission and retrieval
+MUA ➔ MSA: TLS/STARTTLS  (port 587/25), SMTPS  (port 465)
+MDA ➔ MUA: POP3S  (port 995), IMAPS  (port 993)
+MTA ➔ MTA relaying:  a different story…
+9mikepo@capcom :~> nc smtp.gmail.com 25
+220 mx.google.com ESMTP i185sm2356739qhc.49 - gsmtp
+HELO foo.example.com
+250 mx.google.com at your service
+MAIL FROM:<mikepo@example.com>
+530 5.7.0 Must issue a STARTTLS command first. 
+
+STARTTLS: Opportunistic Encryption
+Legacy MTAs may not support TLS
+Fail-open design is necessary
+MTAs do their best to deliver messages
+A recipient MTA may present a self -signed cert (common in antispam /AV 
+systems)
+There is no PKI for email…
+MitM  is trivially easy
+STARTTLS command is sent over a plaintext channel (!)
+Analogous to SSL stripping, but in this case the client has no indication that 
+downgrade has happened
+Just assumes that the receiving MTA does not support TLS
+Message interception is still possible
+Better than nothing: bulk passive eavesdropping not possible
+10
+
+I want to STARTTLS
+11mikepo@capcom :~> nc aspmx.l.google.com 25
+220 mx.google.com ESMTP h126si17458667qhh.29 - gsmtp
+EHLO foo.example.com
+250-mx.google.com at your service, [128.59.23.41]
+250-SIZE 157286400
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+STARTTLS
+220 2.0.0 Ready to start TLS
+<TLS Handshake>
+
+I want to STARTTLS
+12mikepo@capcom :~> nc aspmx.l.google.com 25
+220 mx.google.com ESMTP h126si17458667qhh.29 - gsmtp
+EHLO foo.example.com
+250-mx.google.com at your service, [128.59.23.41]
+250-SIZE 157286400
+250-8BITMIME
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-CHUNKING
+250 SMTPUTF8
+STARTTLS
+220 2.0.0 Ready to start TLS
+<TLS Handshake>Can be stripped 
+off
+by a MitM  
+attacker
+
+
+Facebook STARTTLS Study: May 2014
+13 © Facebook -https://www.facebook.com/notes/protect -the-graph/the -current -state -of-smtp -starttls -deployment/1453015901605223/~60% of all messages 
+sent via encrypted 
+connection
+Only ~30% pass strict 
+validation (mostly due to 
+self-signed certs)
+
+Facebook STARTTLS Study: August 2014
+14 © Facebook -https://www.facebook.com/notes/protect -the-graph/massive -growth -in-smtp -starttls -deployment/1491049534468526/~95% of outgoing 
+messages encrypted with 
+PFS and strict certificate 
+validation
+Mostly due to changes by 
+big recipient networks 
+(Microsoft, Yahoo)
+
+16
+
+
+17 © Google -https://googleblog.blogspot.com/2016/02/building -safer -web-for-everyone.html
+A tiny GUI change 
+prompted many networks 
+to deploy STARTTLS
+
+21
+
+
+Defending against MitM
+STARTTLS stripping is not the only way to intercept email
+DNS MX record poisoning: spoofed MX response
+Compromised name server, MotS  DNS poisoning, …
+Messages are diverted through the attacker’s mail server
+DANE  (DNS -based Authentication of Named Entities)
+Allow X.509 certs to be bound to DNS names through DNSSEC
+Provides a way to authenticate TLS clients/servers without a CA
+Enables downgrade -resistant TLS: advertise support for secure SMTP via a TLSA record
+MTA -STS (MTA Strict Transport Security – RFC 8461 )
+Allows recipient domains to tell senders whether they support TLS, how MTAs should 
+validate certificates, and what to do if TLS negotiation fails
+Client -side policy cache provides TOFU -like protection (similar to HSTS for HTTPS)
+24
+
+25
+
+26I don’t 
+like 
+SPAM!
+
+Spam Sources
+Commercial entities
+Legitimate or “gray” businesses, advertisers, …
+Spammers’ own hosts or open relays ➔ easily blocked
+Botnets
+Abuse of ISPs and webmail providers
+Abuse of legitimate user email accounts
+Address harvesting from users’ address books
+Beyond email
+Fraudulent messages:  Facebook, Twitter, Yelp, Amazon, online comments, forum 
+messages, Apple/Google Store, …
+Fraudulent activities:  likes, retweets, clicks, app store rankings, fake reviews, …
+27
+
+28© TechInAsia -https://www.techinasia.com/viral -photo -china -shows -manipulate -app-store -rankings -hard
+© iFeng -http://tech.ifeng.com/a/20161024/44476050_0.shtml
+
+
+29 https://www.cnn.com/style/vietnam -farms -jack-latham -beggars -honey/index.html
+
+
+Email Spam Lifecycle
+Gathering addresses
+Valid, actively used addresses are precious
+Stolen address books, web crawling, black market, …
+Message content
+Advertising, 419 scams, fraud, phishing, malware, …
+Anti-spam filter evasion: content obfuscation
+Spam email delivery
+Valid accounts: newly created (sweatshops), hijacked ones, …
+Fake social media accounts “primed” over time
+Open relays/proxies (not common anymore)
+Malware: most spam comes from infected machines/botnets
+30
+
+Email Address Protection
+Keep it safe from automated address harvesting crawlers
+Munging:    username [at] example.com
+Image instead of text
+CAPTCHAs
+…
+Limited effectiveness
+Leaks, breaches, vendors, …
+31
+
+
+Fighting Spam
+Content -based filtering
+False positives vs. false negatives
+Local vs. cloud -based
+Block lists
+IPs/domains of known spammers, open relays, zombie machines, hosts that 
+shouldn’t be sending emails (e.g., ISP DHCP pools), …
+Honeypots
+Relays, proxies, spamtraps  (fake email addresses)
+Outbound filtering (block port 25)
+SMTP authentication is now mandatory by most ISPs
+Email authentication
+32
+
+Content -based Filtering
+Machine learning
+Training with labeled “spam” and “ham” messages
+Feedback from user activities (e.g., “not spam” button)
+Rule-based systems
+Signatures, regular expressions, patterns, …
+Certain keywords, phrases, unusual text, …
+Example: SpamAssassin
+Spam authors try to evade filters
+V1agra, Via'gra , Vi@graa , vi*gra, \/iagra
+Intentional spelling mistakes, symbols, weird punctuation, …
+Continuous arms race
+Example: attackers started using images, defenders started using OCR
+33
+
+False positives are a challenging problem
+34
+
+
+Personal example: Google’s own message classified as spam by 
+Gmail
+35 https://twitter.com/polychronakis/status/950873453648850944
+
+
+DNSBL Filtering
+DNS Block List
+DB queried by mail servers 
+to check the reputation of 
+the origin of incoming email
+IP addresses, domain 
+names, and other 
+information compiled as a 
+DNS zone
+DNS-based
+Easy to query
+Light on 
+bandwidth/resources
+36 © Spamhaus  - https://www.spamhaus.org/whitepapers/dnsbl_function/
+
+
+False positives, IP addresses change owners, …
+37
+
+
+SPF: Origin Authentication
+SMTP allows anyone to send an email with an arbitrary “From” 
+address
+“Envelop” sender: domain included in HELO andMAIL  FROM commands
+Sender Policy Framework (SPF)
+DNS TXT record pointing to the hosts  that are allowed to send email from the 
+domain
+Receiving SMTP servers compare the IP address attempting to send an email 
+with the allowed (by SPF) addresses of the domain provided in the SMTP 
+envelope
+Helps block spam at it source: cannot send spoofed emails from non -authorized 
+IPs
+38mikepo@styx :~> dig google.com TXT
+;; ANSWER SECTION:
+google.com.          3599    IN     TXT    "v=spf1 include:_spf.google.com  ~all"
+
+39X-Google-DKIM-Signature: v=1; a=rsa -sha256; c=relaxed/relaxed; d=1e100.net; s=20161025;
+h=x-gm-message-state:mime -version:from:date:message -id:subject:to;
+bh=0BSnrwLTQ7KblIwINxoPJN40a/K5PZCIV8atL6a1Dvg=; 
+b=Nch9yEorgibAjkh90ukDL6SU0FYn70qP6AMsWFfpLO+W3iroMoVdKIjKk8Cv6Gc1TW ...
+mikepo@styx :~> dig 20161025 ._domainkey. 1e100.net  TXT
+;; ANSWER SECTION:
+20161025._domainkey.1e100.net. 21599 IN TXT     "k= rsa; 
+p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnOv6+Txyz+SEc7mT719QQtOj6g2MjpErYUGVrRGGc7f5rmE...DKIM: Email Validation
+DomainKeys Identified Mail (DKIM) : digitally sign some email 
+headers and message body
+Allows the recipient to verify that 
+The message is sent from the domain it claims to be sent from 
+The message has not been tampered with
+Domain’s public key is stored in a DNS TXT record
+
+SPF + DKIM = DMARC
+Domain -based Message Authentication, Reporting, and 
+Conformance
+Standardizes how email receivers perform email authentication using SPF and 
+DKIM
+Tells receivers what to do if neither of those authentication methods passes
+(possible actions: mark as junk, or reject the message)
+DMARC policies are published as DNS TXT records
+40mikepo@styx :~> dig _dmarc.google.com TXT
+;; ANSWER SECTION:
+_dmarc.google.com.      299     IN      TXT     "v=DMARC1; p=reject ; 
+rua=mailto:mailauth -reports@google.com"
+
+DMARC Email Authentication Process
+41 http://dmarc.org/overview/
+
+
+Recap: SPF, DKIM, DMARC
+SPF validates MAIL FROM vs. its source server (“envelope” information)
+Prevents spammers from sending email on behalf of a domain from other IP addresses
+DKIM  cryptographically signs a message’s headers and body
+Ensures a message from a specific domain was indeed authorized by the owner of that 
+domain
+Ensures the message content is authentic and has not been altered in transit
+DMARC specifies how emails that fail SPF+DKIM should be treated
+Do nothing (just log), quarantine (place into spam/junk folder), reject
+Not effective against spammers who
+Use their own domains
+Use legitimate email services (e.g., Gmail)
+Are legitimate users of (or have access to) the same domain as the victim
+Good for allowlisting/verifying email from trusted sources (.gov, banks, 
+…)43
+
+End-to-End Email Encryption
+Two major standards: PGP and S/MIME  (similar, but incompatible)
+Both rely on public key cryptography
+Both support signing and/or encryption
+Main difference: how certificates are signed
+Typical workflow
+Encrypt message with a random symmetric key
+Encrypt symmetric key with the public key(s) of recipient(s)
+Digitally sign a hash of the message
+Metadata still in the clear (!)
+Email headers, appended “Received:” records, subject line
+44
+
+Pretty Good Privacy
+De facto standard for encrypted email
+PGP (Phil Zimmermann) ➔ OpenPGP  (RFC 4880 )
+Gnu Privacy Guard (GPG): GPL implementation
+Authentication
+Senders attach their digital signature to the message
+Receivers verify the signature using public -key cryptography
+Confidentiality
+Symmetric key encryption
+Random session key generated for each message
+Session key is encrypted with recipient’s public key
+Both are typically used on the same message
+45
+
+PGP Encryption
+46 http://www.slideshare.net/rvenkatesh25/network -security -primer
+
+
+PGP Signed Message Example
+47
+ http://www.slideshare.net/rvenkatesh25/network -security -primer
+
+PGP Additional Features
+Compression
+Sign ➔ Compress ➔ Encrypt
+Compression after encryption is pointless (no redundancy)
+Signature does not depend on the compression algorithm
+Email Compatibility
+Ciphertext  contains arbitrary 8 -bit octects
+Some email systems may interpret some of them as control commands
+Solution: base64 encoding (33% space overhead)
+Segmentation
+Transparent message segmentation and reassembly for very large messages
+Segments mailed separately
+48
+
+Encrypted Email: Two Main Challenges
+Public key authenticity
+Assurance that a public key is correct and belongs to the person or 
+entity claimed
+Ensure it has not been tampered with or replaced by an attacker
+Public key discovery
+How can we find the public key of a person/entity?
+Especially the very first time we need to contact them
+49
+
+PGP: Web of Trust
+Entirely decentralized authentication
+No need to buy certs from CAs: users create their own certificates
+Users validate other users’ certificates, forming a “web of trust”
+No trusted authorities: trust is established through friends  (yay! key signing 
+parties!)
+Main problems
+Privacy issues: social graph metadata
+Bootstrapping: new users are not readily trusted by others
+When opinions vary, “stronger set” wins: impersonation through 
+collusion/compromised keys
+Scalability: WoT for the whole world?
+50
+
+51 https://xkcd.com/364/
+
+Finding Public Keys
+Public PGP key servers
+pgp.mit.edu
+keyserver.pgp.com
+Cache certificates from received emails
+Integration with user management systems (LDAP)
+Ad-hoc approaches
+List public key on home page
+Print on business card
+Exchange through another medium on a case -by-case basis
+Association with social profiles/identities
+keybase.io
+52
+
+53
+
+
+54
+
+
+Keybase.io
+In essence, a directory associating public keys with names
+Identity established through public signatures
+Identity proofs : “I am Joe on Keybase  and MrJoe  on Twitter”
+Follower statements : “I am Joe on Keybase  and I just looked at Chris's identity”
+Key ownership : “I am Joe on Keybase  and here's my public key”
+Revocations : “I take back what I said earlier”
+Keybase  identity = sum of public identities
+Twitter, Facebook, Github , Reddit ,
+domain ownership, …
+An attacker has to compromise all connected identities
+The more connected identities, the harder to impersonate a user
+55
+
+
+Biggest Issue: Usability
+Non-trivial setup
+PGP: users are responsible
+for everything
+Key management
+Key revocation
+Public key fingerprints
+Poor mail client integration
+Can lead to catastrophic failures: e.g., Enigmail+Thunderbird  silent encryption 
+failure
+(Let alone key discovery and trustworthiness issues)
+56 https://xkcd.com/1181/
+
+
+57
+
+
+58 https://xkcd.com/1553/
+
+59
+
+
+60
+
+
+S/MIME
+Based on standard X.509 certificates
+Analogous operation to TLS: trusted CA sign certificates
+Traditional PKI
+Uses MIME to include cryptographic information in the message
+Multipurpose Internet Mail Extensions: extends the format of email messages to 
+support binary attachments, and text in non -ASCII character sets
+Works well within corporations
+Certificate distribution through the existing Active Directory infrastructure
+Built-in support in most modern email clients
+Seamless interoperability between them
+62
+
+S/MIME Signed Message Example
+63 http://www.slideshare.net/rvenkatesh25/network -security -primer
+
+
+End-to-End vs. Cloud -to-Cloud
+IMAP: one of the oldest “cloud” services!
+Keep messages on the server
+Conveniently access them from multiple devices (no file synchronization needed)
+Useful modern cloud -based email features
+Powerful and rapid search, collaborative SPAM filtering, …
+Need access to the plaintext (!)  Gmail cannot index or filter encrypted 
+messages
+Tradeoff: privacy vs. convenience
+Active research on searchable encryption
+64
+
+Encrypted Webmail?
+Several recent efforts have focused on transparently combining the 
+convenience of webmail with PGP encryption
+Is this really possible in a secure way?
+JavaScript crypto is not a good idea
+Secure JS code delivery?
+Secure key storage?
+Secure runtime (it’s a web browser !)?
+Google end -to-end: implement cryptographic functionality as part 
+of a browser extension
+More control, but still not trivial
+After initial excitement, it seems the effort has been abandoned
+65
+
+66
+
+
+Lavabit : “so secure that even our administrators can’t read your e -
+mail”
+But they could , if they wanted to…
+“Basically we generate public and private keys for the user and then 
+encrypt the private key using a derivative of the plain text password. 
+We then encrypt user messages using their public key before writing 
+them to disk. ”
+“Because we need the plain text password to decrypt a user’s private 
+key, we don’t support secure password authentication. We decided to 
+support SSL instead (which encrypts everything; not just the password). ”
+67http://highscalability.com/blog/2013/8/13/in -memoriam -lavabit -architecture -creating -a-scalable -email -s.html
+https://arstechnica.com/information -technology/2013/11/op -ed-a-critique -of-lavabit/
+https://www.wired.com/2016/03/lavabit -apple -fbi/
+
+Maybe rethink email altogether?
+Secure messaging apps offer many benefits
+True end -to-end encryption:  the provider cannot read message content
+User-friendly verification of contacts’ identities
+Forward secrecy: past communications remain secure even if private keys are stolen
+No spam!  Only approved contacts can send messages
+Best option: Signal
+Double Ratchet Algorithm (precursor: OTR protocol )
+Privacy -preserving contact discovery
+OK alternatives (closed -source): WhatsApp (uses Signal protocol), 
+iMessage
+Metadata is still there!
+Signal is actively trying to minimize it
+68
+
+
+Grand jury subpoena for Signal user data (2016)
+69 https://signal.org/bigbrother/eastern -virginia -grand -jury/
+
+
+Facebook messenger now e2e encrypted
+https://engineering.fb.com/2023/12/06/security/building -end-to-
+end-security -for-messenger/
+71
