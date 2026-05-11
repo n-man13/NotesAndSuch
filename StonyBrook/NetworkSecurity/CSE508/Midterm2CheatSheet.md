@@ -175,6 +175,7 @@ A compact reference for core concepts likely to appear on the midterm.
   - IPSec (site-to-site, transport vs tunnel mode), OpenVPN/TLS-based VPNs, WireGuard (modern, simple, fast), SSH tunnels.
   - Use strong auth (certificates or strong PSKs), encrypt both control and data planes, and enable perfect forward secrecy where possible.
   - NAT traversal: NAT-T for IPsec, UDP encapsulation, STUN/TURN for P2P apps.
+ 
 
 ---
 

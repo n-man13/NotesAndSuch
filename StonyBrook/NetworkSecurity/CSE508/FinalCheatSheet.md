@@ -1,6 +1,8 @@
 # Final Cheat Sheet — CSE508
 
-Confidentiality, Integrity, Anonymity
+Confidentiality - Data is only accessible to authorized parties
+Integrity - Data has not been tampered with or corrupted during transit
+Anonymity - Hide the identity of the participants of the communication
 
 ---
 
@@ -137,6 +139,12 @@ Confidentiality, Integrity, Anonymity
   5. Server verifies the challenge — authorization marked valid
   6. Client submits a CSR signed with the domain key; server issues the certificate
 
+### ACME Challenge Comparison (HTTP vs DNS)
+| Challenge | Pros | Cons |
+| :--- | :--- | :--- |
+| **HTTP-01** | Easy to automate; doesn't require DNS API access; works on standard port 80. | **No wildcard support**; requires web server to be reachable on port 80; firewall must allow inbound traffic. |
+| **DNS-01** | **Supports Wildcard certificates**; works for internal/private servers; no inbound port 80/443 required. | Requires automated API access to DNS provider (security risk); DNS propagation delays; complex setup. |
+
 ---
 
 ## Denial-of-Service (DoS)
@@ -175,6 +183,25 @@ Confidentiality, Integrity, Anonymity
   - IPSec (site-to-site, transport vs tunnel mode), OpenVPN/TLS-based VPNs, WireGuard (modern, simple, fast), SSH tunnels.
   - Use strong auth (certificates or strong PSKs), encrypt both control and data planes, and enable perfect forward secrecy where possible.
   - NAT traversal: NAT-T for IPsec, UDP encapsulation, STUN/TURN for P2P apps.
+
+### Zero Trust (brief)
+- Principle: "Never trust, always verify" — authenticate & authorize every access request regardless of network location.
+- Key controls: identity & device posture checks, least privilege, microsegmentation (per‑service policies), continuous logging/telemetry and conditional access policies.
+- Why use it: reduces lateral movement and blast radius compared with flat trust models; enforce via IAM, device management, service mesh, or policy engines.
+
+### L2 vs L3 boundaries (network segmentation)
+- L2 (layer 2): switches, MAC forwarding, VLANs — good for local segmentation but susceptible to ARP spoofing, CAM table floods, and broadcast storms; use port‑security and DAI at access layer.
+- L3 (layer 3): routers/firewalls, IP routing and ACLs — enforces routing boundaries and IP‑level filtering, reduces broadcast domains and offers clearer policy enforcement for inter‑VLAN traffic.
+- Design note: combine both — use L2 isolation (VLANs) at access, enforce inter‑VLAN policies at L3 (firewall/router), and apply microsegmentation for sensitive workloads.
+
+### SSH Tunneling — specifics & best practices
+- Local forward: `ssh -N -L <local>:<host>:<port> user@bastion` (access remote service via `localhost:<local>`).
+- Remote (reverse) forward: `ssh -N -R <remote>:localhost:<local> user@public` (expose local service through remote host).
+- Dynamic SOCKS proxy: `ssh -N -D <socks_port> user@bastion` → point apps to `socks5://localhost:<socks_port>`.
+- Reliability & safety: use `autossh` for auto-restarts; `-o ServerAliveInterval=60 -o ServerAliveCountMax=3`; prefer key auth and `-o ExitOnForwardFailure=yes` to avoid silent failures.
+- SSH config & restrictions: use `~/.ssh/config` (ControlMaster/ControlPersist) for multiplexing and `PermitOpen`/`GatewayPorts` on server to restrict binds; in `authorized_keys` set `from="...",no-pty,command="...",restrict` options to limit key usage.
+- Security cautions: restrict remote bind address to `localhost` unless necessary; monitor allowed tunnels and log connections; reverse tunnels expose services—apply firewall rules and `PermitOpen` limits on bastion.
+
 
 ---
 
