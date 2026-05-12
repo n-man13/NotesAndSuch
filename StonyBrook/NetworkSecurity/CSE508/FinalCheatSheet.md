@@ -281,11 +281,6 @@ Anonymity - Hide the identity of the participants of the communication
 - For network security QA: know tradeoffs (speed vs non‑repudiation), and when to use AEAD vs separate MAC+enc schemes.
 
 ---
-
-## In Class Highlights
-Firewall Access Control List
-
----
 ## Lecture extras
 - ARP poisoning / spoofing: inject fake ARP replies to poison host caches (enables MITM); defend with static bindings, Dynamic ARP Inspection (DAI) and monitoring.
 - DHCP exhaustion / rogue DHCP: consume IP pool or run fake servers to disrupt clients; mitigate with DHCP snooping, trusted switch ports and rate limits.
