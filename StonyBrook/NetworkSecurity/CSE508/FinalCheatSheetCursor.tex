@@ -21,6 +21,27 @@
 \date{May 2026}
 
 \begin{document}
+\begin{titlepage}
+\centering
+{\LARGE\bfseries CSE 508 Network Security Cheat Sheet\par}
+\vspace{1.5em}
+{\large Nikhil Shah\par}
+{\normalsize May 2026\par}
+\vspace{1em}
+{\normalsize Instructor: Omar Chowdhury\par}
+\vspace{2em}
+\hrulefill\par
+\vspace{0.8em}
+{\small
+\begin{tabular}{c}
+\textbf{Confidentiality}\index{confidentiality} --- Data is only accessible to authorized parties \\
+\textbf{Integrity}\index{integrity} --- Data has not been tampered with or corrupted during transit \\
+\textbf{Anonymity}\index{anonymity} --- Hide the identity of the participants of the communication
+\end{tabular}
+}
+\par\vspace{0.8em}\hrulefill
+\end{titlepage}
+
 \renewcommand{\contentsname}{Table of Contents}
 {\footnotesize\setlength{\parskip}{0.35ex}\tableofcontents}
 \clearpage
@@ -78,22 +99,6 @@
   \item \textbf{IND-CPA}: deterministic public-key encryption (naive RSA) fails; use proper padding/hybrid schemes; OTP gives perfect secrecy only with ideal key management.
   \item \textbf{Network controls vs threat}: DNSSEC $\Rightarrow$ integrity/authentication of DNS data, not privacy (pair with DoH/DoT); RPKI $\Rightarrow$ origin validation for BGP prefixes, not full path attestation; WAFs and rate limits $\Rightarrow$ application-layer DoS.
 \end{itemize}
-
-\clearpage
-
-\maketitle
-\small
-
-\hrulefill
-\medskip
-
-\textbf{Confidentiality}\index{confidentiality} --- Data is only accessible to authorized parties
-
-\textbf{Integrity}\index{integrity} --- Data has not been tampered with or corrupted during transit
-
-\textbf{Anonymity}\index{anonymity} --- Hide the identity of the participants of the communication
-
-\hrulefill
 
 \section{Diffie--Hellman}
 \index{Diffie--Hellman}\index{DLP (discrete logarithm problem)}\index{CDH (computational Diffie--Hellman)}\index{DDH (decisional Diffie--Hellman)}
