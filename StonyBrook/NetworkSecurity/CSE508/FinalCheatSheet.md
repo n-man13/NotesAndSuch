@@ -236,8 +236,6 @@ Anonymity - Hide the identity of the participants of the communication
 - Common uses (conceptually): local forwarding (forward a remote service to a local port), remote forwarding (expose a local service via the server's network), and dynamic proxying (tunnel multiple connections through the SSH channel). These are types of forwarding behavior rather than new protocols.
 - Security implications: the SSH endpoint becomes an exit point — outgoing traffic from the server's network may be visible to that host, and misuse can expose internal services. Authentication should be strong (keys, not passwords), server-side restrictions should be applied (limit permitted forwards and bind addresses), and monitoring/logging of forwarded connections is recommended.
 
-
-
 ---
 
 ## BGP (Border Gateway Protocol)

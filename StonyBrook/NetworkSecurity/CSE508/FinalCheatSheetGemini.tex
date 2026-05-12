@@ -1,0 +1,177 @@
+\documentclass[10pt,landscape]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=0.25in]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{multicol}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{titlesec}
+
+\setlist[itemize]{leftmargin=*, noitemsep, topsep=0pt}
+\setlist[enumerate]{leftmargin=*, noitemsep, topsep=0pt}
+
+\titleformat{\section}{\small\bfseries\uppercase}{}{0pt}{}
+\titlespacing{\section}{0pt}{4pt}{2pt}
+\titleformat{\subsection}{\footnotesize\bfseries}{}{0pt}{}
+\titlespacing{\subsection}{0pt}{3pt}{1pt}
+
+\pagestyle{empty}
+
+\begin{document}
+\begin{multicols*}{3}
+
+\begin{center}
+    \textbf{\large Final Cheat Sheet --- CSE508}
+\end{center}
+
+\section*{Core Principles}
+\textbf{Confidentiality}: Authorized access only. \\
+\textbf{Integrity}: No tampering/corruption. \\
+\textbf{Anonymity}: Hide identities of participants.
+
+\section*{Diffie-Hellman}
+\begin{itemize}
+    \item \textbf{DLP}: Given $g^a$, find $a$.
+    \item \textbf{CDH}: Given $g^a, g^b$, compute $g^{ab}$.
+    \item \textbf{DDH}: Given $g^a, g^b, Z$, decide if $Z=g^{ab}$ or random.
+\end{itemize}
+
+\section*{One-Time Pad (OTP)}
+$C = P \oplus K$. \textbf{Perfect secrecy} if $K$ is random, used once, and secret. \textbf{Danger}: Key reuse leaks $P_1 \oplus P_2$.
+
+\section*{RSA}
+\textbf{Key Gen}: Primes $p,q$; $n=pq$. Select $d,e$ s.t. $x^{de} \equiv x \pmod n$. Public key: $\langle e, n \rangle$; Private key: $\langle d, n \rangle$. \\
+\textbf{Ops}: Encryption $c = m^e \pmod n$; Decryption $m = c^d \pmod n$. \\
+\textbf{Weakness}: Deterministic (fails IND-CPA) because same $M$ gives same $C$; vulnerable to Quantum Computing.
+
+\section*{AES Modes}
+\begin{itemize}
+    \item \textbf{ECB}: Independent 128-bit blocks. Deterministic, leaks patterns.
+    \item \textbf{CBC}: $C_i = E_K(M_i \oplus C_{i-1})$. Needs random IV + integrity.
+    \item \textbf{CTR}: Stream cipher. $C_i = M_i \oplus E_K(IV+i)$. Parallel.
+    \item \textbf{GCM/CCM}: AEAD (Recommended). Confidentiality + Integrity.
+\end{itemize}
+
+\section*{Merkle Tree}
+1. Hash data blocks $\to$ leaves ($H_1, H_2 \dots$). \\
+2. Pair and hash: $H_{12} = H(H_1 \| H_2)$. \\
+3. Repeat until single root hash remains.
+
+\section*{Common Weaknesses}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Weakness & Attack & Mitigation \\ \midrule
+Static keys & Retro Decrypt & Ephemeral (PFS) \\
+No randoms & Replay & Nonces/TS \\
+Weak hash & Collision & SHA-256+ \\
+Handshake & Eavesdropping & Enc Handshake \\ \bottomrule
+\end{tabular}
+
+\section*{Information Flow \& Side-Channels}
+\textbf{Concepts}: MLS labels (High/Low). \textbf{Noninterference}: No flow High $\to$ Low. \textbf{Non-deducibility}: Observer cannot eliminate high inputs. \\
+\textbf{Covert Channels}: Unintended channels (timing, resource usage, storage, stdout) leaking data via low-observable behavior. \\
+\textbf{Side-Channels}: Timing, cache, power, EM analysis. Exploits implementation differences. \\
+\textbf{Defenses}: Constant-time code, noise/padding, blinding (RSA), rate-limiting errors.
+
+\section*{CBC Padding Oracle}
+\textbf{Background}: PKCS\#7 adds $p$ bytes of value $p$. Observable errors leak info. \\
+\textbf{Vaudenay}: Adaptive chosen-ciphertext attack. Manipulation of blocks plus padding validity responses allows decryption without the key. \\
+\textbf{Lucky13 (TLS)}: Timing side-channel leaking padding length from MAC+padding processing. \\
+\textbf{Mitigation}: Use AEAD (GCM), Encrypt-then-MAC, constant-time processing, uniform error messages.
+
+\section*{Privacy, Anonymity \& Tor}
+\textbf{Anonymity}: Prevents linking actions to identities. \textbf{Unlinkability}. \\
+\textbf{Threats}: Local observers (ISP), endpoint collusion, global passive observers. TLS alone does not hide traffic patterns. \\
+\textbf{Fingerprinting}: Browser/device features (canvas, WebGL, Fonts, Audio, battery) deanonymize users. \\
+\textbf{Mixnets}: Add batching/reordering to defeat timing correlation. \\
+\textbf{Tor}: Onion routing. 3-hop circuits (Entry Guard $\to$ Middle $\to$ Exit). Layered encryption. Vulnerable to global passive observers and fingerprinting. \\
+\textbf{Hidden Services}: Uses DHT descriptors, intro points, and rendezvous points to hide server IPs.
+
+\section*{DNS, DNSSEC \& CDNs}
+\textbf{DNS Flow}: Stub $\to$ Recursive $\to$ Root $\to$ TLD $\to$ Auth. \\
+\textbf{Transport}: UDP/53 (Fast); TCP/53 (Truncation/AXFR); DoT/DoH. \\
+\textbf{RRs}: A (v4), AAAA (v6), NS, CNAME, MX, PTR, TXT, SOA. \\
+\textbf{DNSSEC}: Signs records. Integrity/Auth, \textbf{no privacy}. \\
+\textbf{CDNs}: Use DNS/HTTP redirects to nearby PoPs. \textbf{ECS} (EDNS Client Subnet) leaks client location to CDNs. \textbf{Benefits}: Latency, origin offload, DDoS absorption.
+
+\section*{SSL/TLS 1.3}
+\textbf{Handshake (1-RTT)}: \\
+1. \texttt{ClientHello} (Suites + KeyShare + SNI). \\
+2. \texttt{ServerHello} (Selected suite + KeyShare). \\
+3. \textbf{Encrypted}: Cert, CertVerify, Finished (MAC). \\
+\textbf{Features}: AEAD only, No legacy ciphers, PFS via ECDHE, 0-RTT (replay risk), HKDF key derivation. \\
+\textbf{Vulnerabilities}: Misissued CAs, unreliable revocation (CRL/OCSP), downgrade attacks, 0-RTT replay, implementation bugs (Heartbleed).
+
+\section*{FTP (File Transfer)}
+\textbf{Active (PORT)}: Server connects back to Client. NAT issues. \\
+\textbf{Passive (PASV)}: Client connects to Server port. \\
+\textbf{Security}: Plaintext control/data. Use FTPS (TLS) or SFTP (SSH).
+
+\section*{SSL/TLS 1.3}
+\textbf{Handshake (1-RTT)}: \\
+1. \texttt{ClientHello} (Cipher suites + KeyShare). \\
+2. \texttt{ServerHello} (Selected suite + KeyShare). \\
+3. Encrypted: Cert, CertVerify, Finished. \\
+\textbf{Features}: AEAD only, No legacy ciphers, PFS via ECDHE, 0-RTT (replay risk).
+
+\section*{ACME \& CT}
+\textbf{ACME}: Protocol for automated issuance (Let's Encrypt). Short cert lifetimes. \textbf{CT}: Public logs of all issued certs. Uses \textbf{SCTs} and \textbf{Merkle Inclusion Proofs} to audit CAs. \\
+\begin{tabular}{@{}lp{1.5cm}p{2cm}@{}}
+\toprule
+Challenge & Pros & Cons \\ \midrule
+HTTP-01 & Simple, Port 80 & \textbf{No wildcards} \\
+DNS-01 & \textbf{Wildcards} & Needs DNS API access \\ \bottomrule
+\end{tabular}
+
+\section*{DoS \& DDoS}
+\textbf{Volumetric}: DNS/NTP/Smurf amplification. \\
+\textbf{Smurf}: Spoofed victim source IP + ICMP Echo + Broadcast. \\
+\textbf{State Exhaustion}: SYN Flood. Use \textbf{SYN Cookies} (stateless). \\
+\textbf{App Layer}: Slowloris (hold connections), HTTP/2 Rapid Reset. \\
+\textbf{Mitigation}: uRPF (spoofing), Anycast/CDN, WAF, rate limits.
+
+\section*{Firewalls, Tunnels \& Segmentation}
+\textbf{Types}: Stateless (ACL), Stateful (tracks sessions), NGFW (L7). \\
+\textbf{Rule Order}: \texttt{allow ESTABLISHED} $\to$ \texttt{services} $\to$ \texttt{deny all}. \\
+\textbf{UPnP}: Dynamic port mapping. Flaw: Unauthenticated by default. \\
+\textbf{Zero Trust}: "Never trust, always verify". Least privilege, microsegmentation, continuous ID/device checks. \\
+\textbf{L2 vs L3}: L2 (VLANs) susceptible to ARP spoof/CAM floods. L3 (IP ACLs) enforces routing boundaries.
+
+\section*{SSH Tunneling}
+\textbf{Mechanism}: Authenticated pipe for TCP/Proxy traffic. \\
+\textbf{Local (-L)}: Access remote via local. \textbf{Remote (-R)}: Expose local. \\
+\textbf{Bypass}: Bypasses egress filters as firewall only sees allowed SSH.
+
+\section*{BGP (Border Gateway Protocol)}
+\textbf{eBGP}: Between ASes (prepends AS). \textbf{iBGP}: Inside AS. \\
+\textbf{Selection}: Local-Pref $\to$ AS\_PATH $\to$ Origin $\to$ MED. \\
+\textbf{Risks}: Hijacking (bogus prefix), Route Leaks, AS\_PATH spoofing. \\
+\textbf{Mitigation}: RPKI/ROA (origin validation), prefix filtering.
+
+\section*{Practical Comparison \& Notes}
+\begin{tabular}{@{}lll@{}} \toprule
+Feature & MAC & Digital Signature \\ \midrule
+Key & Symmetric & Asymmetric \\
+Speed & Very Fast & Slower \\
+Non-repud & No & Yes (Legal proof) \\ \bottomrule
+\end{tabular} \\
+\textbf{PFS}: Ephemeral keys prevent retro-decryption if CA is lost. \\
+\textbf{AEAD}: Recommended. Encrypt + Auth (GCM, ChaCha20-Poly1305).
+
+\section*{Lecture Extras}
+\textbf{ARP Spoof}: Inject fake ARP replies. Use \textbf{DAI}. \\
+\textbf{DHCP Starvation}: Exhaust IP pool. Use \textbf{Snooping}. \\
+\textbf{MAC/CAM Flooding}: Force fail-open. Use port security. \\
+\textbf{Wi-Fi}: Evil Twin, Deauth attacks. Use \textbf{802.11w} (MFP). \\
+\textbf{Evil Packets}: Ping-of-Death, LAND, Teardrop (stack bugs).
+
+\section*{PKI \& Certificate Validation}
+\textbf{Hierarchy}: Root CA $\to$ Intermediate $\to$ EE Cert (X.509). \\
+\textbf{Cert Fields}: Subject, SAN, Validity, Public Key, Signature. \\
+\textbf{Validation}: Verify chain sigs, expiry, SAN match, EKU policy. \\
+\textbf{Revocation}: CRLs (pull), OCSP (real-time), \textbf{OCSP Stapling}.
+
+\end{multicols*}
+\end{document}
