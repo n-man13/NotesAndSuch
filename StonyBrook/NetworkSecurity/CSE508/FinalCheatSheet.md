@@ -67,27 +67,48 @@ Anonymity - Hide the identity of the participants of the communication
 
 ---
 
+## Information Flow & Side‑Channels
+- Information Flow (MLS concepts): reason about how data labeled `High` (secret) may influence `Low` (public) outputs; properties: noninterference (no flow from High→Low) and non‑deducibility (observer cannot eliminate high inputs).
+- Covert channels: unintended channels (timing, resource usage, stdout) that leak high data through low-observable behavior; examples: timing delays, process scheduling, file system metadata.
+- Side‑channel attacks: timing, cache, power, electromagnetic analysis; attackers exploit observable differences in implementations to recover secrets.
+- Defenses: constant‑time implementations, noise/padding, reduce observable state, limit precision of timers, blinding (RSA), algorithmic changes and rate‑limiting of error messages.
+
+## CBC Padding Oracle (Vaudenay / Lucky13)
+- Background: PKCS#7 padding adds p bytes each with value p; invalid padding triggers errors that may be observable to an attacker.
+- Vaudenay padding oracle: adaptive chosen‑ciphertext attack that uses padding validity responses to decrypt CBC ciphertexts without the key by manipulating ciphertext blocks.
+- Lucky13 (TLS/DTLS): timing side‑channel from MAC+padding processing that leaks information about padding length; exploits subtle timing differences in record processing.
+- Mitigations: use AEAD modes (GCM/CCM) or encrypt‑then‑MAC constructions; ensure indistinguishable error handling (uniform error messages and constant‑time processing); avoid returning padding validity to callers; apply strict record parsing and constant‑time MAC checks.
+
+## Privacy, Anonymity & Tor
+- Privacy vs Anonymity: privacy controls collection/use of PII; anonymity prevents linking actions to identities (unlinkability). Pseudonymity provides persistent but unlinkable identifiers.
+- Threat models: local observers (ISP), on‑path adversaries, endpoint collusion, global passive observers; always assume some intermediaries may be adversarial — TLS alone does not solve traffic analysis.
+- Fingerprinting & traffic analysis: browser/device fingerprinting (canvas, WebGL, fonts, AudioContext, battery), and website fingerprinting (packet sizes/timing) can deanonymize users even over encrypted channels.
+- Anonymity sets & mixnets: larger anonymity sets increase unlinkability; mixers (mixnets) add batching and reordering to defeat timing correlation at the cost of latency and throughput.
+- Tor highlights: onion routing with entry guards, middle relays, exit nodes; client builds layered encryption (three-hop circuits), resists single-relay compromise but is vulnerable to global passive adversaries and website fingerprinting.
+- Hidden services: use introduction points, rendezvous points, and service descriptors (DHT) to publish and connect without exposing IPs; operational care needed to avoid deanonymizing metadata.
+- Defenses/operational tips: reduce fingerprinting surface (resist JS fingerprinting, use Tor Browser), prefer high‑latency mixnets for strong anonymity when acceptable, pad and shape traffic (where feasible), monitor ingress/egress correlation risks, use entry guards and avoid reusing circuits for sensitive links.
+
 ## DNS Protocol Recap
 
 - Flow: stub resolver → recursive resolver → root → TLD → authoritative server; resolver caches and returns the answer.
-
 - Transport: UDP/53 (default, fast) ; TCP/53 (truncation, large responses, AXFR) ; DoT/DoH for encrypted queries.
-
 - Key fields & RRs (very quick): 16‑bit TXID; flags (QR, TC, RD, RA); counts (QD/AN/NS/AR); common RRs: A, AAAA, NS, CNAME, MX, PTR, TXT, SOA.
-
 - Caching/TTL: answers cached for TTL seconds; negative caching via SOA; TTL controls propagation/staleness window.
-
 - Important extensions: EDNS(0) (larger UDP payloads), DNS Cookies, QNAME minimization.
-
 - Attacks & short mitigations: cache poisoning → TXID+source‑port randomization + DNSSEC; amplification → close/harden open resolvers + rate‑limit; on‑path tampering → DoT/DoH.
-
 - Ops notes: TC→retry over TCP; restrict/authenticate AXFR (TSIG); avoid open recursive resolvers.
-
 ![DNS Packet](media/DNSPacket.png)
 
 ### DNSSEC
 - Adds digital signatures to DNS records and a chain of trust (root → TLD → authoritative).
 - Provides integrity and authentication, but not privacy (DNSSEC responses are still visible unless combined with DoT/DoH).
+ 
+### CDN (Content Delivery Network) & DNS
+- CDNs use DNS (geo‑DNS / EDNS client subnet) or HTTP redirects to point clients to a nearby PoP (edge server) IP.
+- Flow: resolver → authoritative CDN DNS → returns IP for best PoP (may use client IP or ECS); TTLs are kept short for agility.
+- Benefits: caches content closer to users, reduces origin load, improves latency, and absorbs volumetric DDoS traffic at edges.
+- Risks: DNS compromise or cache poisoning can redirect users; low TTLs increase DNS query load; EDNS client subnet leaks partial client location to CDNs.
+- Mitigations: protect authoritative DNS (DNSSEC, Anycast, rate‑limit), use CDN security features (WAF, DDoS mitigation), monitor edge health and origin failover.
 
 ---
 
@@ -116,6 +137,15 @@ Anonymity - Hide the identity of the participants of the communication
 - 0-RTT replay risks: TLS 1.3 early data may be replayed unless mitigated at the application layer.
 - RNG & key management: poor randomness, nonce reuse, and long-lived keys (no PFS) weaken security.
 - Side-channel and memory bugs: timing/oracle attacks, Heartbleed-style memory leaks, and other implementation defects.
+ - Side-channel and memory bugs: timing/oracle attacks, Heartbleed-style memory leaks, and other implementation defects.
+
+## FTP (File Transfer Protocol)
+- Plaintext protocol: control channel (TCP/21) sends commands and credentials in cleartext by default.
+- Active vs Passive modes:
+  - Active (PORT): client opens ephemeral port, tells server to connect back → NAT/firewall issues because server connects to client.
+  - Passive (PASV): server opens ephemeral data port, client connects → better for clients behind NAT.
+- Security: use `FTPS` (FTP over TLS) or `SFTP` (SSH File Transfer, different protocol) instead of plain FTP.
+- Common mitigations: disable anonymous access, require strong auth, limit and firewall data port ranges (and document them), prefer SFTP/FTPS, log transfers, chroot or restrict user directories.
 
 ---
 
@@ -163,6 +193,12 @@ Anonymity - Hide the identity of the participants of the communication
 
 - Extra notes: Smurf (broadcast amplification), SYN cookies (state‑less SYN defense), Slowloris (hold connections open), HTTP/2 Rapid Reset (stream-reset abuse).
 
+### Smurf Attacks
+- Mechanism: attacker spoofs victim IP as source and sends ICMP Echo requests to a broadcast address; many hosts reply to the victim causing amplification.
+- Requirements: networks that respond to directed/broadcast pings and lack ingress filtering for spoofed IPs.
+- Mitigations: disable IP‑directed broadcasts on routers, configure hosts to ignore broadcast ICMP, apply ingress filtering/uRPF to block spoofed source IPs, and block/ratelimit ICMP from untrusted sources.
+
+
 ---
 
 ## Firewalls & Tunnels
@@ -194,13 +230,12 @@ Anonymity - Hide the identity of the participants of the communication
 - L3 (layer 3): routers/firewalls, IP routing and ACLs — enforces routing boundaries and IP‑level filtering, reduces broadcast domains and offers clearer policy enforcement for inter‑VLAN traffic.
 - Design note: combine both — use L2 isolation (VLANs) at access, enforce inter‑VLAN policies at L3 (firewall/router), and apply microsegmentation for sensitive workloads.
 
-### SSH Tunneling — specifics & best practices
-- Local forward: `ssh -N -L <local>:<host>:<port> user@bastion` (access remote service via `localhost:<local>`).
-- Remote (reverse) forward: `ssh -N -R <remote>:localhost:<local> user@public` (expose local service through remote host).
-- Dynamic SOCKS proxy: `ssh -N -D <socks_port> user@bastion` → point apps to `socks5://localhost:<socks_port>`.
-- Reliability & safety: use `autossh` for auto-restarts; `-o ServerAliveInterval=60 -o ServerAliveCountMax=3`; prefer key auth and `-o ExitOnForwardFailure=yes` to avoid silent failures.
-- SSH config & restrictions: use `~/.ssh/config` (ControlMaster/ControlPersist) for multiplexing and `PermitOpen`/`GatewayPorts` on server to restrict binds; in `authorized_keys` set `from="...",no-pty,command="...",restrict` options to limit key usage.
-- Security cautions: restrict remote bind address to `localhost` unless necessary; monitor allowed tunnels and log connections; reverse tunnels expose services—apply firewall rules and `PermitOpen` limits on bastion.
+### SSH Tunneling — what it is and how it bypasses firewalls
+- What it is: SSH tunneling uses an authenticated, encrypted SSH connection as a generic transport to carry other TCP connections or proxy traffic through a permitted channel. The SSH connection acts as an encrypted pipe between the client and an SSH server (often a bastion or jump host).
+- How it bypasses firewalls: many networks allow outbound SSH (or another allowed port) to reach an internal/edge host. By encapsulating application traffic inside the SSH session, clients can send and receive data to/through the SSH server even when direct connections are blocked by firewall rules. The SSH server then forwards the encapsulated traffic to the final destination from its network perspective, so the firewall only sees an allowed SSH session rather than the blocked application-level flows.
+- Common uses (conceptually): local forwarding (forward a remote service to a local port), remote forwarding (expose a local service via the server's network), and dynamic proxying (tunnel multiple connections through the SSH channel). These are types of forwarding behavior rather than new protocols.
+- Security implications: the SSH endpoint becomes an exit point — outgoing traffic from the server's network may be visible to that host, and misuse can expose internal services. Authentication should be strong (keys, not passwords), server-side restrictions should be applied (limit permitted forwards and bind addresses), and monitoring/logging of forwarded connections is recommended.
+
 
 
 ---
