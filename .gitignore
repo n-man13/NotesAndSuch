@@ -1,2 +1,14 @@
 AGENTS.md
 .venv
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.idx
+*.ind
+*.ilg
+*.fdb_latexmk
+*.fls
+*.bbl
+*.blg
