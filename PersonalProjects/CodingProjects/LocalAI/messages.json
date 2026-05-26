@@ -1,0 +1,77 @@
+{
+  "project_scope": {
+    "timeline": "Summer 2026 execution",
+    "primary_objective": "Build a headless AI assistant server and secure SSH gateway to home NAS",
+    "secondary_objective": "Repurpose secondary server hardware for infrastructure and utility VMs",
+    "development_focus": "Low-level and systems infrastructure optimization"
+  },
+  "server_consolidation_strategy": {
+    "primary_ai_server": {
+      "chassis": "HP ProLiant DL385p Gen8 (Nugent Beta)",
+      "processors": "2 x AMD Opteron 6274 (16 cores total, natively supports AVX)",
+      "operating_system": "AlmaLinux 9 (Headless, minimal installation)",
+      "deployment_phases": [
+        {
+          "phase": 1,
+          "mode": "Pure CPU Inference",
+          "software_stack": "llama.cpp compiled from source (optimized for native AVX registers)",
+          "model_target": "Large-parameter models in GGUF format (e.g., 70B parameters or Mixture-of-Experts)"
+        },
+        {
+          "phase": 2,
+          "mode": "Hybrid GPU Acceleration",
+          "hardware_addition": "NVIDIA GTX 1070 Ti",
+          "requirement": "Sourcing a proprietary HP 10-pin mini-connector to dual 8-pin GPU power cable",
+          "software_stack": "Ollama or vLLM with partial layer offloading to 8GB VRAM"
+        }
+      ]
+    },
+    "secondary_utility_server": {
+      "chassis": "Dell PowerEdge R710",
+      "processors": "2 x Intel Xeon X5670 (No AVX support)",
+      "operating_system": "Proxmox VE (Type-1 Hypervisor based on Debian Linux)",
+      "use_cases": [
+        "High-performance headless media encoding node",
+        "Deep packet inspection & network monitoring probe (Zeek / Suricata)",
+        "Core infrastructure services (Vaultwarden credential vault, Pi-hole DNS)",
+        "Automated backup orchestration node (BorgBackup / Restic)"
+      ]
+    }
+  },
+  "memory_allocation_architecture": {
+    "hp_dl385p_gen8_allocation": {
+      "total_capacity": "128 GB",
+      "module_specification": "16 x Hynix 8GB 2Rx4 PC3-10600R (DDR3 Registered ECC)",
+      "topology": "Symmetrical NUMA distribution (8 modules / 64GB per CPU socket)",
+      "bus_speed": "Native 1333MHz lockstep execution across all active memory channels"
+    },
+    "dell_r710_allocation": {
+      "total_capacity": "32 GB",
+      "module_specification": "4 x Samsung 8GB 1Rx4 PC3-12800R (DDR3 Registered ECC)",
+      "topology": "Symmetrical slot mapping (Slots A1, A2 for CPU 1; Slots B1, B2 for CPU 2)",
+      "bus_speed": "Native 1600MHz execution"
+    },
+    "discarded_hardware": {
+      "modules": [
+        "2 x 4GB DDR3 ECC loose RAM modules"
+      ],
+      "disposition": "Gift to a friend; excluded from production server environments to maintain architectural symmetry"
+    }
+  },
+  "networking_and_security_topology": {
+    "remote_access_protocol": "Mesh VPN framework (Tailscale or isolated WireGuard tunnel)",
+    "access_demarcation": [
+      {
+        "purpose": "Headless Admin Server Administration",
+        "port": 22,
+        "authentication": "Strict key-based SSH authentication only; password login disabled"
+      },
+      {
+        "purpose": "Remote IDE Workspace Integration",
+        "port": 11434,
+        "binding_interface": "0.0.0.0 (Bound to tunnel interface for remote VS Code Continue.dev extension)"
+      }
+    ],
+    "storage_interconnect": "Direct internal 10Gbps local networking fabric linking the AI server and home NAS"
+  }
+}
