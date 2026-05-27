@@ -80,60 +80,7 @@ Phase 1 (Immediate Summer Goal): Run large-parameter GGUF models (such as Llama-
 
 Phase 2 (Future Upgrade Path): Introduce a dedicated NVIDIA GTX 1070 Ti. This requires sourcing a proprietary HP 10-pin mini-connector to dual 8-pin GPU power cable directly attached to the server riser deck. Once installed, configure partial offloading to let the 8GB VRAM ingest large blocks of code instantly while system RAM handles the deep logic loops.
 
---- 
-
-## Local GGUF Model Comparison
-
-When executing LLM inference on pure CPU infrastructure, performance is heavily bound by memory bandwidth rather than raw FLOPS. The table below outlines architectural trade-offs, pros, and cons for proposed GGUF models (quantized at `Q4_K_M`).
-
-| Model Family | Effective Params | RAM Required | Primary Strengths | Compute Footprint |
-|---|---:|---:|---|---|
-| Meta Llama 3.1 (8B) | 8.03 Billion | ~4.8 GB | General reasoning, canonical tool-use instruction following. | Moderate–high memory bandwidth saturation |
-| Alibaba Qwen 2.5 (7B) | 7.61 Billion | ~4.7 GB | Code generation, structured JSON extraction, multilingual math. | Dense attention matrix operations |
-| Microsoft Phi-3.5-Mini | 3.82 Billion | ~2.6 GB | Low-latency execution, minimal memory footprint. | Lightweight tracking paths; fast prompt ingestion |
-| Gemma 2 (9B) | ~9.0 Billion | ~5.4 GB | Strong instruction-following, balanced reasoning and code capability. | Higher memory bandwidth and slightly increased time-to-first-token |
-
-### 1. Meta Llama 3.1 (8B Instruct)
-
-- **Pros:**
-    - Highly stable attention mechanics with an expanded native context window (up to 128K tokens). Good at preserving persona boundaries across long sessions.
-    - Reliable multi-turn dialogue management with strong system-prompt adherence.
-- **Cons:**
-    - Higher prompt processing overhead (time-to-first-token) on pure CPU setups.
-    - Less specialized for dense code-generation tasks compared to some domain-tuned alternatives.
-
-### 2. Alibaba Qwen 2.5 (7B Instruct)
-
-- **Pros:**
-    - Excellent at system-level tasks: syntax parsing, regex generation, structured log processing, and script generation.
-    - Large vocabulary (≈151k tokens) allows more compressed expression per token slice versus some alternatives.
-    - Can emit deterministic JSON schemas reliably when wrapped by strict local grammar constraints (for example, using `--json-schema` options in `llama.cpp`-style runtimes).
-- **Cons:**
-    - Larger embedding layer due to vocabulary size increases structural RAM allocation per parameter.
-    - May over-generate conversational filler unless constrained by explicit stop tokens or strict system prompts.
-
-### 3. Microsoft Phi-3.5-Mini (Instruct)
-
-- **Pros:**
-    - Fast tokens-per-second on standard server hardware without GPU acceleration.
-    - Optimized for simple local data streams, indexing tasks, and voice-to-text cleanup pipelines.
-    - High parameter efficiency for its size; often matches older 7B/13B models on lighter benchmarks.
-- **Cons:**
-    - Degrades faster on deep multi-step reasoning and complex code-debugging sequences due to lower parameter ceiling.
-    - Lower semantic density limits for very long, multi-layered logs or wide corpora.
-
-### 4. Gemma 2 (9B Instruct)
-
-- **Pros:**
-    - Excellent instruction-following and strong general reasoning capacity at this parameter scale.
-    - Well-balanced for mixed workloads: conversational, code generation, and structured outputs.
-    - Typically exhibits competitive token-quality vs. 8B peers while offering modest parameter headroom.
-- **Cons:**
-    - Larger memory footprint than 8B models; increases system RAM and bandwidth pressure on pure-CPU hosts.
-    - Slightly higher time-to-first-token on cold starts when loaded from disk-backed storage.
-
 ---
-
 
 ## Phase 3: Secondary Server Infrastructure (Dell PowerEdge R710)
 Operating System

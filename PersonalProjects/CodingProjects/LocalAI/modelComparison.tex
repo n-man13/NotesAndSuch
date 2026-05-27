@@ -1,0 +1,136 @@
+\documentclass{article}
+\usepackage{booktabs}
+\usepackage{geometry}
+\usepackage{tabularx}
+\geometry{margin=1in}
+
+\begin{document}
+
+\section*{Architectural Comparison of Proposed Local GGUF Models}
+
+When executing LLM inference on pure CPU infrastructure, performance is heavily bound by memory bandwidth rather than raw FLOPS. The tables below outline the architectural trade-offs, pros, and cons of each proposed configuration quantized at the $Q4\_K\_M$ level.
+
+\noindent
+\begin{tabularx}{\textwidth}{l p{2.2cm} c p{4.5cm} p{4.5cm}}
+\toprule
+\textbf{Model Family} & \textbf{Effective Params} & \textbf{RAM Required} & \textbf{Primary Strengths} & \textbf{Compute Footprint} \\
+\midrule
+\textbf{Llama 3.1 (8B)} & 8.03 Billion & $\sim$4.8 GB & General reasoning, canonical tool-use instruction following. & Moderate-high memory bandwidth saturation. \\
+\textbf{Qwen 2.5 (7B)} & 7.61 Billion & $\sim$4.7 GB & Code generation, structured JSON extraction, multilingual math. & Dense attention matrix operations. \\
+\textbf{Phi-3.5-Mini} & 3.82 Billion & $\sim$2.6 GB & Low-latency execution, minimal memory footprint. & Lightweight tracking paths; fast prompt ingestion. \\
+\textbf{Gemma 2 (9B)} & 9.00 Billion & $\sim$5.4 GB & Strong instruction-following, balanced reasoning, and code capability. & Higher memory bandwidth pressure with a slightly larger cache footprint. \\
+\textbf{Mistral 7B Instruct} & 7.24 Billion & $\sim$4.2 GB & Fast general-purpose chat, clean instruction-following, and reliable summarization. & Efficient decoder stack with modest KV-cache demands. \\
+\textbf{Qwen 2.5 (14B)} & 14.78 Billion & $\sim$8.6 GB & Better reasoning depth, stronger code synthesis, and robust structured output. & Heavier attention and feed-forward passes, but still comfortable in 128GB RAM. \\
+\textbf{Llama 3.1 (70B)} & 70.55 Billion & $\sim$40 GB & High-quality reasoning, long-form planning, and strong tool orchestration. & Large weight footprint; best used with conservative context sizes on CPU. \\
+\bottomrule
+\end{tabularx}
+
+\vspace{0.5cm}
+
+\subsection*{1. Meta Llama 3.1 (8B Instruct)}
+\begin{itemize}
+    \item \textbf{Pros:}
+    \begin{itemize}
+        \item Highly stable attention mechanics with an expanded native context window up to 128K tokens (though performance scales down with token depth on standard RAM configurations).
+        \item Extremely reliable at maintaining character/agent persona boundaries over long local runtime sessions.
+        \item Strong multi-turn dialogue management with clear system prompt adherence.
+    \end{itemize}
+    \item \textbf{Cons:}
+    \begin{itemize}
+        \item High prompt processing overhead (time-to-first-token) when digesting large context blocks over pure CPU execution matrices.
+        \item Sacrifices specialized code-generation capabilities compared to hyper-dense domain-specific alternatives of equal size.
+    \end{itemize}
+\end{itemize}
+
+\subsection*{2. Alibaba Qwen 2.5 (7B Instruct)}
+\begin{itemize}
+    \item \textbf{Pros:}
+    \begin{itemize}
+        \item Phenomenal performance on system-level tasks: syntax parsing, writing regular expressions, processing structural logs, and script generation.
+        \item Highly optimized vocabulary encoding ($\sim$151k tokens), which allows it to express more compressed data per token slice than Llama or Phi.
+        \item Natively structured to emit deterministic JSON schemas when wrapped with strict local grammar constraints (using \texttt{--json-schema} configurations in \texttt{llama.cpp}).
+    \end{itemize}
+    \item \textbf{Cons:}
+    \begin{itemize}
+        \item Large vocabulary size shifts a larger portion of the model's weight tensor allocation into the embedding layer, slightly increasing structural RAM overhead per parameter.
+        \item Can occasionally over-generate conversational filler text unless explicitly constrained by strict system stop-tokens.
+    \end{itemize}
+\end{itemize}
+
+\subsection*{3. Microsoft Phi-3.5-Mini (Instruct)}
+\begin{itemize}
+    \item \textbf{Pros:}
+    \begin{itemize}
+        \item Blistering fast token generation rates (tokens-per-second) on standard server hardware without GPU acceleration.
+        \item Highly optimized for processing simple local data streams, local indexing tasks, or voice-to-text semantic cleaning pipelines.
+        \item Massive parameter efficiency; matches older 7B and 13B parameter architectures on logical benchmarks due to highly curated training datasets.
+    \end{itemize}
+    \item \textbf{Cons:}
+    \begin{itemize}
+        \item Deep multi-step reasoning loops or complex code debugging sequences degrade significantly faster due to the lower raw parameter ceiling.
+        \item Prone to lower semantic density limits when analyzing long, multi-layered log files or wide text corpora simultaneously.
+    \end{itemize}
+
+\end{itemize}
+
+\subsection*{4. Google Gemma 2 (9B Instruct)}
+\begin{itemize}
+    \item \textbf{Pros:}
+    \begin{itemize}
+        \item Strong instruction-following and balanced general reasoning at a size that remains friendly to pure CPU inference.
+        \item Good code completion and editing behavior for local development workflows.
+        \item Efficient enough to leave ample headroom for larger context windows and concurrent OS services on a 128GB host.
+    \end{itemize}
+    \item \textbf{Cons:}
+    \begin{itemize}
+        \item More memory-hungry than 7B-class models, so throughput drops sooner if context windows are pushed aggressively.
+        \item Can be less specialized for structured extraction than Qwen-family models.
+    \end{itemize}
+\end{itemize}
+
+\subsection*{5. Mistral 7B Instruct}
+\begin{itemize}
+    \item \textbf{Pros:}
+    \begin{itemize}
+        \item Very strong baseline for a compact local model: good instruction following, concise answers, and fast inference.
+        \item Excellent fit for always-on CPU services where latency and simplicity matter more than maximum reasoning depth.
+        \item Leaves significant RAM headroom for long prompts, retrieval buffers, and parallel background processes.
+    \end{itemize}
+    \item \textbf{Cons:}
+    \begin{itemize}
+        \item Less capable than larger 9B-14B models on harder reasoning and coding tasks.
+        \item Can be somewhat conservative or terse unless prompted carefully.
+    \end{itemize}
+\end{itemize}
+
+\subsection*{6. Qwen 2.5 (14B Instruct)}
+\begin{itemize}
+    \item \textbf{Pros:}
+    \begin{itemize}
+        \item Stronger reasoning and code synthesis than the 7B variant while preserving excellent structured-output behavior.
+        \item Very practical on a 128GB dual-CPU server, especially if the workload mixes coding, logs, and tool use.
+        \item Good balance of quality and resource usage for serious local assistant workflows.
+    \end{itemize}
+    \item \textbf{Cons:}
+    \begin{itemize}
+        \item Heavier than the 7B-class models and slower at the same quantization level.
+        \item More sensitive to context length growth and KV-cache size when running multiple long sessions.
+    \end{itemize}
+\end{itemize}
+
+\subsection*{7. Meta Llama 3.1 (70B Instruct)}
+\begin{itemize}
+    \item \textbf{Pros:}
+    \begin{itemize}
+        \item Best suited for the most demanding local reasoning, planning, and long-form synthesis tasks.
+        \item A strong use case for a 128GB server if you want one flagship model rather than several smaller specialists.
+        \item Excellent quality at moderate quantization levels, with enough RAM available to support the model plus runtime overhead.
+    \end{itemize}
+    \item \textbf{Cons:}
+    \begin{itemize}
+        \item Much slower than smaller models on pure CPU hardware, especially for first-token latency.
+        \item Requires careful context budgeting and may reduce concurrency if the machine is shared with other services.
+    \end{itemize}
+\end{itemize}
+
+\end{document}
