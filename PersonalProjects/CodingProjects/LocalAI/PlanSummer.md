@@ -43,7 +43,7 @@ Because the dual AMD Opteron 6274 processors natively support **AVX** but lack n
    sudo dnf install cmake numactl epel-release -y
 
 2. Clone the inference engine and compile it locally
-     # Clone and compile llama.cpp locally
+   Clone and compile llama.cpp locally
   git clone [https://github.com/ggerganov/llama.cpp](https://github.com/ggerganov/llama.cpp)
   cd llama.cpp
   make -j$(nproc)
@@ -76,9 +76,11 @@ sudo systemctl restart ollama
 
 ### Step 4: Iterative Execution Strategy (Pure CPU to GPU)
 
-#### Phase 1 (Immediate Summer Goal): Run large-parameter GGUF models (such as Llama-3-70B or large Mixture-of-Experts coding models) entirely in system memory. Execute using numactl --interleave=all to spread memory pages uniformly across both sockets and minimize cross-node HyperTransport penalties.
+Phase 1 (Immediate Summer Goal): Run large-parameter GGUF models (such as Llama-3-70B or large Mixture-of-Experts coding models) entirely in system memory. Execute using numactl --interleave=all to spread memory pages uniformly across both sockets and minimize cross-node HyperTransport penalties.
 
-#### Phase 2 (Future Upgrade Path): Introduce a dedicated NVIDIA GTX 1070 Ti. This requires sourcing a proprietary HP 10-pin mini-connector to dual 8-pin GPU power cable directly attached to the server riser deck. Once installed, configure partial offloading to let the 8GB VRAM ingest large blocks of code instantly while system RAM handles the deep logic loops.
+Phase 2 (Future Upgrade Path): Introduce a dedicated NVIDIA GTX 1070 Ti. This requires sourcing a proprietary HP 10-pin mini-connector to dual 8-pin GPU power cable directly attached to the server riser deck. Once installed, configure partial offloading to let the 8GB VRAM ingest large blocks of code instantly while system RAM handles the deep logic loops.
+
+--- 
 
 ## Phase 3: Secondary Server Infrastructure (Dell PowerEdge R710)
 Operating System
