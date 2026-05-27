@@ -73,3 +73,38 @@ Bash
 
 sudo systemctl daemon-reload
 sudo systemctl restart ollama
+
+### Step 4: Iterative Execution Strategy (Pure CPU to GPU)
+
+#### Phase 1 (Immediate Summer Goal): Run large-parameter GGUF models (such as Llama-3-70B or large Mixture-of-Experts coding models) entirely in system memory. Execute using numactl --interleave=all to spread memory pages uniformly across both sockets and minimize cross-node HyperTransport penalties.
+
+#### Phase 2 (Future Upgrade Path): Introduce a dedicated NVIDIA GTX 1070 Ti. This requires sourcing a proprietary HP 10-pin mini-connector to dual 8-pin GPU power cable directly attached to the server riser deck. Once installed, configure partial offloading to let the 8GB VRAM ingest large blocks of code instantly while system RAM handles the deep logic loops.
+
+## Phase 3: Secondary Server Infrastructure (Dell PowerEdge R710)
+Operating System
+
+Install Proxmox VE (Virtual Environment). This Type-1 hypervisor runs directly on a bare-metal Debian Linux foundation, offering a web-based dashboard to partition your 12 logical cores and newly balanced 32GB Samsung RAM pool into isolated environments.
+Non-Development Utility Workloads
+1. Core Home Infrastructure Services
+
+    Deploy containerized, lightweight Linux Containers (LXC) to run core network software independently of the AI Node.
+
+    AdGuard Home / Pi-hole: Handles caching local DNS queries to speed up network resolution.
+
+    Vaultwarden: Hosts a private, locally encrypted credential and SSH key vault.
+
+2. Deep Packet Inspection & Security Monitoring
+
+    Connect one of the R710's physical gigabit interfaces to a mirrored port (SPAN) on your managed network switch.
+
+    Run a virtualized node running Zeek or Suricata to capture and analyze network packet headers, logging protocol interactions and monitoring traffic patterns between your workstation, the AI server, and the NAS in real-time.
+
+3. Automated Media Processing Pipeline
+
+    Dedicate a VM to handle headless background encoding arrays (utilizing Handbrake CLI or automated processing scripts). This acts as a centralized transcoding farm to ingest, convert, and compress media formats into storage-efficient profiles on your home network.
+
+4. Isolated Backup Orchestration Array
+
+    Utilize the 4 populated front drive bays as a dedicated, separate backup destination.
+
+    Run BorgBackup or Restic services to pull encrypted, deduplicated incremental filesystem snapshots from both the home NAS and the primary AI server across the local 10Gbps link.
