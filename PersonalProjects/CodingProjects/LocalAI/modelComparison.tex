@@ -2,6 +2,8 @@
 \usepackage{booktabs}
 \usepackage{geometry}
 \usepackage{tabularx}
+\usepackage{array}
+\setlength{\extrarowheight}{2pt}
 \geometry{margin=1in}
 
 \begin{document}
@@ -11,12 +13,14 @@
 When executing LLM inference on pure CPU infrastructure, performance is heavily bound by memory bandwidth rather than raw FLOPS. The tables below outline the architectural trade-offs, pros, and cons of each proposed configuration quantized at the $Q4\_K\_M$ level.
 
 \noindent
-\begin{tabularx}{\textwidth}{l p{2.2cm} c p{4.5cm} p{4.5cm}}
+\small
+\begin{tabularx}{\textwidth}{l p{2.0cm} c >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X}
 \toprule
 \textbf{Model Family} & \textbf{Effective Params} & \textbf{RAM Required} & \textbf{Primary Strengths} & \textbf{Compute Footprint} \\
 \midrule
 \textbf{Llama 3.1 (8B)} & 8.03 Billion & $\sim$4.8 GB & General reasoning, canonical tool-use instruction following. & Moderate-high memory bandwidth saturation. \\
 \textbf{Qwen 2.5 (7B)} & 7.61 Billion & $\sim$4.7 GB & Code generation, structured JSON extraction, multilingual math. & Dense attention matrix operations. \\
+\textbf{Qwen 2.5 Coder (1.5B)} & 1.50 Billion & $\sim$1.0 GB & Extremely low-latency tab-autocomplete and IDE-assist; very small memory footprint for always-on services. & Minimal KV-cache and low memory bandwidth demands. \\
 \textbf{Phi-3.5-Mini} & 3.82 Billion & $\sim$2.6 GB & Low-latency execution, minimal memory footprint. & Lightweight tracking paths; fast prompt ingestion. \\
 \textbf{Gemma 2 (9B)} & 9.00 Billion & $\sim$5.4 GB & Strong instruction-following, balanced reasoning, and code capability. & Higher memory bandwidth pressure with a slightly larger cache footprint. \\
 \textbf{Mistral 7B Instruct} & 7.24 Billion & $\sim$4.2 GB & Fast general-purpose chat, clean instruction-following, and reliable summarization. & Efficient decoder stack with modest KV-cache demands. \\
@@ -80,6 +84,34 @@ hf_hub_download(
     token="Insert_Token_Here"
 )
 \end{verbatim}
+
+\subsection*{2a. Alibaba Qwen 2.5 Coder (1.5B — Tab Autocomplete)}
+\begin{itemize}
+    \item \textbf{Pros:}
+    \begin{itemize}
+        \item Extremely low-latency and compact for IDE tab-autocomplete and inline code suggestions.
+        \item Small memory footprint makes it suitable for always-on background completion services on developer machines or constrained servers.
+        \item Retains strong tokenization and deterministic completions when constrained with strict stop sequences.
+    \end{itemize}
+    \item \textbf{Cons:}
+    \begin{itemize}
+        \item Lower overall reasoning and long-form synthesis capability compared to 7B+ models.
+        \item May require careful temperature and sampling tuning to avoid repetitious completions in interactive sessions.
+    \end{itemize}
+\end{itemize}
+
+\noindent\textbf{Download command example:}
+\begin{verbatim}
+from huggingface_hub import hf_hub_download
+
+hf_hub_download(
+    repo_id="bartowski/Qwen2.5-coder-1.5B-GGUF",
+    filename="Qwen2.5-Coder-1.5B.Q4_K_M.gguf",
+    local_dir=".",
+    token="Insert_Token_Here"
+)
+\end{verbatim}
+
 
 \subsection*{3. Microsoft Phi-3.5-Mini (Instruct)}
 \begin{itemize}
