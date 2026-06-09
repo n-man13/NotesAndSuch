@@ -33,7 +33,7 @@ A private, offline-first journaling application that converts spoken audio into 
 - **Speech-to-Text:** `whisper.cpp` (C/C++ implementation of OpenAI Whisper)
 - **Data Storage:** `SQLite` with FTS5 (Full-Text Search)
 - **User Interface (UI):** `Dear ImGui` (C++) for a simple, functional UI, or `Qt`/`GTK` for a more feature-rich desktop experience.
-- **Build System:** `CMake`
+- **Build System:** `Makefile`
 
 ## 3. System Architecture
 
@@ -313,7 +313,7 @@ int main() {
    
 ## 6. Build & Setup
 
-This project will use `CMake` for building.
+This project uses a standard `Makefile` for building.
 ```bash
 # Clone whisper.cpp and build it (needed for libwhisper.a)
 git clone https://github.com/ggerganov/whisper.cpp.git
@@ -343,11 +343,15 @@ make
 # For Dear ImGui, it's usually added as a submodule or copied directly
 # git submodule add https://github.com/ocornut/imgui.git extern/imgui
 
-# Project's CMakeLists.txt will link these libraries.
+# Compile the project using the provided Makefile
+make
+
+# Run the application
+./journal_app
+
 # Example project structure:
 # my_journal_app/
-# ├── CMakeLists.txt
-# ├── src/
+# ├── Makefile
 # │   ├── main.cpp
 # │   ├── AudioRecorder.h
 # │   ├── AudioRecorder.cpp
@@ -356,7 +360,8 @@ make
 # │   ├── WhisperTranscriber.h
 # │   ├── WhisperTranscriber.cpp
 # │   ├── JournalDB.h
-# │   ├── JournalDB.cpp
+# │   ├── JournalDB.hpp
+# │   ├── VoiceActivityDetector.hpp
 # └── extern/
 #     ├── imgui/
 #     ├── whisper.cpp/ (symlink or submodule)
