@@ -5,6 +5,7 @@
 \usepackage{enumitem}
 \usepackage{titlesec}
 \usepackage{xcolor}
+\usepackage{wasysym}
 
 \definecolor{sbu-red}{RGB}{153, 0, 0}
 \definecolor{slate-grey}{RGB}{70, 80, 95}
@@ -38,19 +39,23 @@ These classic papers established fundamental abstractions such as processes, thr
 \begin{enumerate}
     \item \textbf{The UNIX Time-Sharing System} \\
     \textit{Dennis M. Ritchie and Ken Thompson (1974)} \\
-    The foundational text for UNIX. Introduces the paradigm of treating "everything as a file," hierarchical file systems, and shell pipelines.
+    The foundational text for UNIX. Introduces the paradigm of treating "everything as a file," hierarchical file systems, and shell pipelines. \\
+    \CheckedBox
     
     \item \textbf{The Nucleus of a Multiprogramming System} \\
     \textit{Per Brinch Hansen (1970)} \\
-    An early, highly influential exploration of separating operating system policy from mechanism, serving as a philosophical precursor to microkernels.
+    An early, highly influential exploration of separating operating system policy from mechanism, serving as a philosophical precursor to microkernels. \\
+    \Box
     
     \item \textbf{The Protection of Information in Computer Systems} \\
     \textit{Jerome H. Saltzer and Michael D. Schroeder (1975)} \\
-    The definitive security architecture paper. Establishes timeless design principles including "least privilege" and "fail-safe defaults."
+    The definitive security architecture paper. Establishes timeless design principles including "least privilege" and "fail-safe defaults." \\
+    \Box
     
     \item \textbf{Hints for Computer System Design} \\
     \textit{Butler W. Lampson (1983)} \\
-    A distillation of practical wisdom for system builders, championing principles like "keep it simple," "use hints," and "plan to throw one away."
+    A distillation of practical wisdom for system builders, championing principles like "keep it simple," "use hints," and "plan to throw one away." \\
+    \Box
 \end{enumerate}
 
 \section{Part II: Kernel Design Evolutions (Microkernels \& Extensibility)}
@@ -59,15 +64,18 @@ Key milestones in the historical structural debate regarding whether the kernel 
 \begin{enumerate}[resume]
     \item \textbf{The Performance of Micro-Kernel Implementations} \\
     \textit{Jochen Liedtke (1993)} \\
-    The landmark paper that revitalized microkernel research by introducing L4 and demonstrating that IPC bottlenecks were implementation flaws, not architectural limitations.
+    The landmark paper that revitalized microkernel research by introducing L4 and demonstrating that IPC bottlenecks were implementation flaws, not architectural limitations. \\
+    \Box
     
     \item \textbf{Extensibility, Safety and Performance in the SPIN Operating System} \\
     \textit{Brian N. Bershad, Stefan Savage, Pardha Pratim, Emin G\"{u}n Sirer, Marc E. Fiuczynski, David Becker, Craig Chambers, and Susan Eggers (1995)} \\
-    Explored dynamically downloading user code safely into kernel space via type-safe languages (Modula-3), serving as a spiritual ancestor to eBPF.
+    Explored dynamically downloading user code safely into kernel space via type-safe languages (Modula-3), serving as a spiritual ancestor to eBPF. \\
+    \Box
     
     \item \textbf{Exokernel: An Operating System Architecture for Application-Specific Resource Management} \\
     \textit{Dawson R. Engler, M. Frans Kaashoek, and James O'Toole Jr. (1995)} \\
-    Advocated for eliminating standard abstractions to give untrusted applications low-level, direct access to physical hardware resources.
+    Advocated for eliminating standard abstractions to give untrusted applications low-level, direct access to physical hardware resources. \\
+    \Box
 \end{enumerate}
 
 \section{Part III: Classical and Local File Systems}
@@ -76,15 +84,18 @@ The evolution of persistent storage mapping physical layouts to handle physical 
 \begin{enumerate}[resume]
     \item \textbf{A Fast File System for UNIX} \\
     \textit{Marshall Kirk McKusick, William N. Joy, Samuel J. Leffler, and Robert S. Fabry (1984)} \\
-    The classic BSD FFS paper detailing how optimizing block layout into "cylinder groups" drastically improved physical disk locality and bandwidth.
+    The classic BSD FFS paper detailing how optimizing block layout into "cylinder groups" drastically improved physical disk locality and bandwidth. \\
+    \Box
     
     \item \textbf{The Design and Implementation of a Log-Structured File System} \\
     \textit{Mendel Rosenblum and John K. Ousterhout (1992)} \\
-    Introduced LFS, treating disk storage as a continuous, append-only log to optimize write throughput; highly applicable to modern Flash Translation Layers (FTL).
+    Introduced LFS, treating disk storage as a continuous, append-only log to optimize write throughput; highly applicable to modern Flash Translation Layers (FTL). \\
+    \Box
     
     \item \textbf{Analysis and Evolution of Journaling File Systems} \\
     \textit{Vijayan Prabhakaran, Andrea C. Arpaci-Dusseau, and Remzi H. Arpaci-Dusseau (2005)} \\
-    An exhaustive analysis of transactional logging variants (data vs. metadata journaling) under failure states to preserve consistency.
+    An exhaustive analysis of transactional logging variants (data vs. metadata journaling) under failure states to preserve consistency. \\
+    \Box
 \end{enumerate}
 
 \section{Part IV: Distributed Systems \& Network File Systems}
@@ -93,19 +104,23 @@ Architectures adapting state, caching, consistency protocols, and scale across n
 \begin{enumerate}[resume]
     \item \textbf{Scale and Performance in a Distributed File System} \\
     \textit{John H. Howard, Michael J. Kazar, Sherri G. Menees, David A. Nichols, Mahadev Satyanarayanan, Robert N. Sidebotham, and Michael J. West (1988)} \\
-    Introduced the Andrew File System (AFS), detailing aggressive client-side whole-file caching and stateful callback architectures.
+    Introduced the Andrew File System (AFS), detailing aggressive client-side whole-file caching and stateful callback architectures. \\
+    \Box
     
     \item \textbf{The Google File System} \\
     \textit{Sanjay Ghemawat, Howard Gobioff, and Shun-Tak Leung (2003)} \\
-    Pioneered warehouse-scale storage by assuming commodity hardware failure is the norm, optimizing for multi-gigabyte, append-only workloads.
+    Pioneered warehouse-scale storage by assuming commodity hardware failure is the norm, optimizing for multi-gigabyte, append-only workloads. \\
+    \Box
     
     \item \textbf{Bigtable: A Distributed Storage System for Structured Data} \\
     \textit{Fay Chang, Jeffrey Dean, Sanjay Ghemawat, Wilson C. Hsieh, Deborah A. Wallach, Mike Burrows, Tushar Chandra, Andrew Fikes, and Robert E. Gruber (2006)} \\
-    A wide-column, highly scalable database layer built on top of GFS using Log-Structured Merge-trees (LSM-trees).
+    A wide-column, highly scalable database layer built on top of GFS using Log-Structured Merge-trees (LSM-trees). \\
+    \Box
     
     \item \textbf{Ceph: A Scalable, High-Performance Distributed File System} \\
     \textit{Sage A. Weil, Scott A. Brandt, Ethan L. Miller, Darrell D. E. Long, and Carlos Maltzahn (2006)} \\
-    Decoupled storage metadata maps via the algorithmic CRUSH pseudo-random data placement function, removing structural centralized lookup tables.
+    Decoupled storage metadata maps via the algorithmic CRUSH pseudo-random data placement function, removing structural centralized lookup tables. \\
+    \Box
 \end{enumerate}
 
 \section{Part V: Virtualization, Concurrency, \& Modern Paradigms}
@@ -114,27 +129,33 @@ Adapting operating systems to massive core scaling, direct memory buses, and sin
 \begin{enumerate}[resume]
     \item \textbf{SOSP's Do's and Don'ts: The Virtual Machine Monitor} \\
     \textit{Mendel Rosenblum and Tal Garfinkel (2005)} \\
-    A retrospective and forward-looking text outlining the practical industrial rebirth of full virtualization and hypervisors.
+    A retrospective and forward-looking text outlining the practical industrial rebirth of full virtualization and hypervisors. \\
+    \Box
     
     \item \textbf{Xen and the Art of Virtualization} \\
     \textit{Paul Barham, Boris Dragovic, Keir Fraser, Steven Hand, Tim Harris, Alex Ho, Rolf Neugebauer, Ian Pratt, and Andrew Warfield (2003)} \\
-    Introduced paravirtualization, requiring hypervisor-aware modifications to guest OS kernels to hit near-native computation performance.
+    Introduced paravirtualization, requiring hypervisor-aware modifications to guest OS kernels to hit near-native computation performance. \\
+    \Box
     
     \item \textbf{The Multikernel: A New OS Architecture for Scalable Multicore Systems} \\
     \textit{Andrew Baumann, Paul Barham, Pierre-Evariste Dagand, Tim Harris, Rebecca Isaacs, Simon Peter, Timothy Roscoe, Adrian Sch\"{u}pbach, and Akhilesh Singhania (2009)} \\
-    The Barrelfish paper, treating cache-coherent multicore chips as a network of message-passing distributed nodes rather than a unified global shared memory pool.
+    The Barrelfish paper, treating cache-coherent multicore chips as a network of message-passing distributed nodes rather than a unified global shared memory pool. \\
+    \Box
     
     \item \textbf{Non-Volatile Memory} \\
     \textit{Steven Pelley, Thomas F. Wenisch, Brian T. Gold, and David Bridge (2014)} \\
-    Analyzes the architectural impacts of placing fast persistent memory directly on the processor's memory bus, collapsing storage and volatile caches.
+    Analyzes the architectural impacts of placing fast persistent memory directly on the processor's memory bus, collapsing storage and volatile caches. \\
+    \Box
     
     \item \textbf{OSV---An Operating System for the Cloud} \\
     \textit{Avi Kivity, Dor Laor, Glauber Costa, Pekka Enberg, Nadav Har'El, Don Marti, and Vlad Zolotarov (2014)} \\
-    Pioneered modern cloud "unikernels" by removing ancient multi-user isolation constructs to streamline runtime environments inside virtualized infrastructure.
+    Pioneered modern cloud "unikernels" by removing ancient multi-user isolation constructs to streamline runtime environments inside virtualized infrastructure. \\
+    \Box
     
     \item \textbf{Verifying a File System Implementation} \\
     \textit{Konstantine Arkoudas, Karen Zee, Viktor Kuncak, and Martin Rinard (2004)} \\
-    Presents rigorous formal systems verification methods using simulation relations to mathematically validate structural correctness against data corruption.
+    Presents rigorous formal systems verification methods using simulation relations to mathematically validate structural correctness against data corruption. \\
+    \Box
 \end{enumerate}
 
 \section{Part VI: Selected Systems Research from Stony Brook University}
@@ -143,27 +164,33 @@ Advanced research originating from labs at Stony Brook University (COMPAS, FSL, 
 \begin{enumerate}[resume]
     \item \textbf{Clearing the Clouds: A Study of Emerging Scale-out Workloads} \\
     \textit{Michael Ferdman, Almutaz Adileh, Onur Kocatyali, Volkan Volkan, Jevgenijs Jaleckis, Djordje Jevdjic, Saurabh Kestur, Per Ekman, Adrianne Castro, Mark D. Hill, and Babak Falsafi (2012)} \\
-    Winner of the ASPLOS Test-of-Time Award. Highlights the disconnect between conventional CPU architectures and modern data-center scales.
+    Winner of the ASPLOS Test-of-Time Award. Highlights the disconnect between conventional CPU architectures and modern data-center scales. \\
+    \Box
     
     \item \textbf{A Case for Hardware-Managed Virtual Memory on FPGAs} \\
     \textit{Zeljko Korolija, Timothy Roscoe, and Michael Ferdman (2020)} \\
-    Investigates decoupling hardware accelerators from core kernel virtualization mechanics by placing memory management units directly inside FPGAs.
+    Investigates decoupling hardware accelerators from core kernel virtualization mechanics by placing memory management units directly inside FPGAs. \\
+    \Box
     
     \item \textbf{TailCheck: A Lightweight Heap Overflow Detection Mechanism} \\
     \textit{Seonmyeong So, Gyuwan Kim, and Michael Ferdman (2022)} \\
-    Demonstrates hardware-software co-design using specialized structural tags to eliminate heap memory safety threats with negligible runtime overhead.
+    Demonstrates hardware-software co-design using specialized structural tags to eliminate heap memory safety threats with negligible runtime overhead. \\
+    \Box
     
     \item \textbf{To FUSE or Not to FUSE: Performance of User-Space File Systems} \\
     \textit{Bharath Kumar Reddy Vangoor, Vasily Tarasov, and Erez Zadok (2017)} \\
-    Provides a deep structural audit of performance degradation patterns and memory copying boundaries in standard user-space file systems layers.
+    Provides a deep structural audit of performance degradation patterns and memory copying boundaries in standard user-space file systems layers. \\
+    \Box
     
     \item \textbf{Performance and Resource Utilization of FUSE User-Space File Systems} \\
     \textit{Vasily Tarasov, Bharath Kumar Reddy Vangoor, and Erez Zadok (2019)} \\
-    Extends user-space layout profiling to show specific interaction mechanics during high context-switching and concurrent multi-threaded I/O workloads.
+    Extends user-space layout profiling to show specific interaction mechanics during high context-switching and concurrent multi-threaded I/O workloads. \\
+    \Box
     
     \item \textbf{Evaluating Performance and Energy in File System Server Workloads} \\
     \textit{Priya Sehgal, Ming Chen, and Erez Zadok (2010)} \\
-    Examines the tangible electrical footprints and efficiency boundaries of competing Linux storage layouts across intensive cloud servers.
+    Examines the tangible electrical footprints and efficiency boundaries of competing Linux storage layouts across intensive cloud servers. \\
+    \Box
 \end{enumerate}
 
 \end{document}
