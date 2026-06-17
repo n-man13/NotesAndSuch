@@ -24,7 +24,7 @@ A private, offline-first journaling application that converts spoken audio into 
 - **Audio Preservation:** Store original audio recordings alongside their transcripts.
 - **Privacy-Focused:** No data leaves the user's machine.
 - **Efficient:** Optimized for local execution on a laptop.
-- **C/C++:** Primarily C/C++ implementation
+- **Cross-Platform:** Supports Windows and Linux using C++17 and CMake.
 
 ## 2. Core Technologies
 
@@ -62,11 +62,12 @@ The application will follow a modular design, with data flowing through several 
 
 **Purpose:** Continuously capture audio from the microphone, buffer it, and write segments to WAV files when speech is detected.
 
-**Libraries:** `PortAudio` is a good cross-platform choice for low-latency audio I/O.
+**Libraries:** `PortAudio` (cross-platform audio I/O).
 
 **Implementation Details:**
 - Initialize `PortAudio` to capture 16kHz, mono, 32-bit float PCM audio (Whisper's required format).
 - Maintain a circular buffer to store incoming audio. This buffer will be continuously fed to the VAD module.
+- Use `std::filesystem` to manage recording paths across Windows and Linux.
 - When the VAD module signals a speech segment, start writing the buffered audio (and subsequent live audio) to a temporary `.wav` file.
 - When VAD signals sustained silence, finalize the current `.wav` file and prepare it for transcription.
 
@@ -74,7 +75,7 @@ The application will follow a modular design, with data flowing through several 
 ```cpp
 // AudioRecorder.h
 #include <portaudio.h>
-#include <vector>
+#include <filesystem>
 #include <string>
 #include <functional>
 
@@ -140,7 +141,7 @@ private:
 
 **Purpose:** Transcribe the saved audio segments into text.
 
-**Libraries:** `whisper.cpp` provides a C/C++ API for local Whisper inference.
+**Libraries:** `whisper.cpp`.
 
 **Implementation Details:**
 - Load a pre-trained Whisper model (e.g., `ggml-base.en.bin` or `ggml-small.en.bin`).
@@ -186,6 +187,7 @@ private:
     - Insert new entries.
     - Query entries by date/time.
     - Perform full-text searches using FTS5.
+- **Storage Location:** Use platform-specific app data folders (e.g., `%LOCALAPPDATA%` on Windows).
 
 **Code Snippet (Conceptual C++):**
 ```cpp
@@ -369,3 +371,4 @@ cmake --build .
 #     ├── imgui/
 #     ├── whisper.cpp/ (symlink or submodule)
 #     └── libfvad/ (symlink or submodule)
+```
