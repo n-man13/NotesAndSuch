@@ -191,6 +191,155 @@ do
             -n 128"
     echo "| $batch | $LAST_PP | $LAST_TG | $LAST_ELAPSED |" >> "$OUTFILE"
 done
+
+########################################################################
+# KV CACHE QUANTIZATION SWEEP (full offload, -ngl 99)
+########################################################################
+echo "" >> "$OUTFILE"
+echo "# KV Cache Quantization Sweep" >> "$OUTFILE"
+echo "" >> "$OUTFILE"
+echo "| Cache Type (K/V) | pp512 | tg128 | Elapsed (s) |" >> "$OUTFILE"
+echo "|------------------|-------|-------|-------------|" >> "$OUTFILE"
+
+# Test standard f16 cache vs 8-bit / 4-bit alternatives
+for cache_type in "f16" "q8_0" "q4_0"
+do
+    run_bench \
+        "KV Cache $cache_type" \
+        "CUDA_VISIBLE_DEVICES=0 numactl --cpunodebind=$GPU_NUMA_NODE --membind=$GPU_NUMA_NODE \
+            ./build/bin/llama-bench \
+            -m $MODEL \
+            -t 8 \
+            -ngl 99 \
+            -ctk $cache_type \
+            -ctv $cache_type \
+            -p 512 \
+            -n 128"
+    echo "| $cache_type | $LAST_PP | $LAST_TG | $LAST_ELAPSED |" >> "$OUTFILE"
+done
+
+########################################################################
+# CONTEXT LENGTH SCALING SWEEP (full offload, -ngl 99)
+########################################################################
+echo "" >> "$OUTFILE"
+echo "# Context Length Scaling Sweep" >> "$OUTFILE"
+echo "" >> "$OUTFILE"
+echo "| Context (Prompt) | pp | tg128 | Elapsed (s) |" >> "$OUTFILE"
+echo "|------------------|----|-------|-------------|" >> "$OUTFILE"
+
+for ctx in 512 1024 2048 4096 8192
+do
+    run_bench \
+        "Context Size $ctx" \
+        "CUDA_VISIBLE_DEVICES=0 numactl --cpunodebind=$GPU_NUMA_NODE --membind=$GPU_NUMA_NODE \
+            ./build/bin/llama-bench \
+            -m $MODEL \
+            -t 8 \
+            -ngl 99 \
+            -p $ctx \
+            -n 128"
+    echo "| $ctx | $LAST_PP | $LAST_TG | $LAST_ELAPSED |" >> "$OUTFILE"
+done
+
+########################################################################
+# FLASH ATTENTION SWEEP (full offload, -ngl 99)
+########################################################################
+echo "" >> "$OUTFILE"
+echo "# Flash Attention Sweep" >> "$OUTFILE"
+echo "" >> "$OUTFILE"
+echo "| Flash Attention | pp512 | tg128 | Elapsed (s) |" >> "$OUTFILE"
+echo "|-----------------|-------|-------|-------------|" >> "$OUTFILE"
+
+for fa in 0 1
+do
+    run_bench \
+        "Flash Attention Enable: $fa" \
+        "CUDA_VISIBLE_DEVICES=0 numactl --cpunodebind=$GPU_NUMA_NODE --membind=$GPU_NUMA_NODE \
+            ./build/bin/llama-bench \
+            -m $MODEL \
+            -t 8 \
+            -ngl 99 \
+            -fa $fa \
+            -p 512 \
+            -n 128"
+    echo "| $fa | $LAST_PP | $LAST_TG | $LAST_ELAPSED |" >> "$OUTFILE"
+done
+
+# Add this straight into your initial BASELINE TESTS block:
+run_bench \
+    "Command 4 - Anti-Optimized Cross-NUMA" \
+    "numactl --cpunodebind=2 --membind=2 \
+        ./build/bin/llama-bench \
+        -m $MODEL \
+        -t 8 \
+        -ngl 14 \
+        -p 512 \
+        -n 128"
+
+########################################################################
+# 14B MODEL ARCHITECTURAL ARCHETYPE BENCHMARK
+########################################################################
+MODEL_14B="models/thinker/Qwen2.5-14B-Instruct-Q4_K_M.gguf"
+
+if [ -f "$MODEL_14B" ]; then
+    echo "" >> "$OUTFILE"
+    echo "# 14B Architectural Target Comparison" >> "$OUTFILE"
+    echo "" >> "$OUTFILE"
+    echo "Testing optimal deployment strategies for a 14B model on system architecture." >> "$OUTFILE"
+    echo "" >> "$OUTFILE"
+    echo "| Strategy | pp512 | tg128 | Elapsed (s) |" >> "$OUTFILE"
+    echo "|----------|-------|-------|-------------|" >> "$OUTFILE"
+
+    # Save original 7B model context
+    TEMP_MODEL_HOLD="$MODEL"
+    MODEL="$MODEL_14B"
+
+    # Strategy A: Pure CPU, strictly pinned to a single NUMA Node (Node 0)
+    # Minimizes inter-socket communication overhead.
+    run_bench \
+        "14B - CPU Only (Single NUMA Node 0)" \
+        "numactl --cpunodebind=0 --membind=0 \
+            ./build/bin/llama-bench \
+            -m $MODEL \
+            -t 8 \
+            -ngl 0 \
+            -p 512 \
+            -n 128"
+    echo "| CPU (1 NUMA Node 0) | $LAST_PP | $LAST_TG | $LAST_ELAPSED |" >> "$OUTFILE"
+
+    # Strategy B: Pure CPU, Interleaved across all nodes
+    # Maximizes raw memory channels/bandwidth but scales thread counts up.
+    run_bench \
+        "14B - CPU Only (Interleave All)" \
+        "numactl --interleave=all \
+            ./build/bin/llama-bench \
+            -m $MODEL \
+            -t 32 \
+            -ngl 0 \
+            -p 512 \
+            -n 128"
+    echo "| CPU (Interleave All) | $LAST_PP | $LAST_TG | $LAST_ELAPSED |" >> "$OUTFILE"
+
+    # Strategy C: Partial GPU Offload (Split-Compute)
+    # Pins host threads to the GPU's closest PCIe root lane node. 
+    # Qwen 2.5 14B has 48 transformer layers. At ~9GB, an 8GB GPU can roughly hold 
+    # 18-22 layers before VRAM allocation crashes. Let's step safely at 16 layers.
+    run_bench \
+        "14B - Partial GPU Offload (16 Layers)" \
+        "CUDA_VISIBLE_DEVICES=0 numactl --cpunodebind=$GPU_NUMA_NODE --membind=$GPU_NUMA_NODE \
+            ./build/bin/llama-bench \
+            -m $MODEL \
+            -t 8 \
+            -ngl 16 \
+            -p 512 \
+            -n 128"
+    echo "| Partial GPU Offload (16 layers) | $LAST_PP | $LAST_TG | $LAST_ELAPSED |" >> "$OUTFILE"
+
+    # Restore baseline model definitions
+    MODEL="$TEMP_MODEL_HOLD"
+else
+    echo "Warning: $MODEL_14B not found. Skipping 14B specific sweeps."
+fi
 ########################################################################
 # BEST RESULTS SUMMARY
 ########################################################################
