@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+set -x
 
 # Model Definitions
 MODEL_7B="./models/Qwen2.5-7B-Instruct-Q4_K_M.gguf"
