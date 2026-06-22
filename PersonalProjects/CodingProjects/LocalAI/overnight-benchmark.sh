@@ -5,7 +5,7 @@ set -x
 # Model Definitions
 MODEL_7B="./models/Qwen2.5-7B-Instruct-Q4_K_M.gguf"
 MODEL_14B="./models/thinker/Qwen2.5-14B-Instruct-Q4_K_M.gguf"
-OUTFILE="overnight_results.md"
+OUTFILE="overnight-results.md"
 
 # Identify closest NUMA node to the GPU's PCIe slot
 GPU_NUMA_NODE="${GPU_NUMA_NODE:-1}"
@@ -69,26 +69,18 @@ echo "| Parallel Streams (-np) | Context Limit (-c) | pp512 | tg128 | Elapsed (s
 echo "|------------------------|--------------------|-------|-------|-------------|" >> "$OUTFILE"
 
 # Walk concurrency from single-user up to 16 parallel streams
-for streams in 1 2 4 8 16
-do
-    # Keep total allocated context bounds protected within limits (e.g. 2048 per user stream max)
-    ctx_size=$((streams * 1024))
-    
-    run_bench \
-        "7B Concurrency - $streams Users" \
-        "CUDA_VISIBLE_DEVICES=0 numactl --cpunodebind=$GPU_NUMA_NODE --membind=$GPU_NUMA_NODE \
-            ./build/bin/llama-bench \
-            -m $MODEL_7B \
-            -ngl 99 \
-            -c $ctx_size \
-            -b 2048 \
-            -ub 512 \
-            -p 512 \
-            -n 128 \
-            -np $streams"
-            
-    echo "| $streams | $ctx_size | $LAST_PP | $LAST_TG | $LAST_ELAPSED |" >> "$OUTFILE"
-done
+# Old loop block failing on -np:
+# for streams in 1 2 4 8 16 ...
+
+# New native llama-bench implementation:
+run_bench "7B Concurrency Sweep" \
+    "CUDA_VISIBLE_DEVICES=0 numactl --cpunodebind=1 --membind=1 \
+    ./build/bin/llama-bench \
+    -m ./models/Qwen2.5-7B-Instruct-Q4_K_M.gguf \
+    -ngl 99 \
+    -p 512 \
+    -n 128 \
+    -pg 1,2,4,8,16"
 
 ########################################################################
 # SECTION 2: PHYSICAL MICRO-BATCH ARCHITECTURE TUNING MATRIX
