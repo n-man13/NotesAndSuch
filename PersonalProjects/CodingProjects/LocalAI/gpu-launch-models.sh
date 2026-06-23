@@ -348,8 +348,44 @@ case "$ACTION" in
     log "Force-stop sequence complete"
     ;;
 
+  stop-only)
+    TARGET="${2:-}"
+    if [[ -z "$TARGET" ]]; then
+      echo "Error: stop-only requires a target component name." >&2
+      echo "Usage: $0 stop-only [autocomplete|router|thinker]" >&2
+      exit 1
+    fi
+
+    case "$TARGET" in
+      autocomplete)
+        log "Gracefully spinning down Autocomplete Services..."
+        stop_instance "Dedicated Autocomplete Daemon (Proxy)" "$LOG_DIR/autocomplete_engine.pid"
+        stop_instance "Dedicated Autocomplete Backend Engine" "$LOG_DIR/autocomplete_engine.backend.pid"
+        pkill -f "socat .*TCP-LISTEN:$PUBLIC_AUTOCOMPLETE_PORT" || true
+        ;;
+      router)
+        log "Gracefully spinning down Router Services..."
+        stop_instance "Dynamic Router Engine (Proxy)" "$LOG_DIR/router_engine.pid"
+        stop_instance "Dynamic Router Backend Engine" "$LOG_DIR/router_engine.backend.pid"
+        pkill -f "socat .*TCP-LISTEN:$PUBLIC_ROUTER_PORT" || true
+        ;;
+      thinker)
+        log "Gracefully spinning down Thinker Services..."
+        stop_instance "Thinker Engine (Proxy)" "$LOG_DIR/thinker_engine.pid"
+        stop_instance "Thinker Engine Backend Engine" "$LOG_DIR/thinker_engine.backend.pid"
+        pkill -f "socat .*TCP-LISTEN:$PUBLIC_THINKER_PORT" || true
+        ;;
+      *)
+        echo "Unknown target: '$TARGET'. Valid components are: autocomplete, router, thinker" >&2
+        exit 1
+        ;;
+    esac
+    log "Selective stop sequence complete for target: $TARGET"
+    ;;
+
   *)
-    echo "Usage: $0 [start|quiet-start|stop|force-stop]" >&2
+    echo "Usage: $0 [start|quiet-start|stop|force-stop|stop-only]" >&2
+    echo "       $0 stop-only [autocomplete|router|thinker]" >&2
     exit 1
     ;;
 esac
