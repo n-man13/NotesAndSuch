@@ -211,6 +211,8 @@ do
             -m $MODEL \
             -t 8 \
             -ngl 99 \
+            -b 512 \
+            -ub 512 \
             -ctk $cache_type \
             -ctv $cache_type \
             -p 512 \
