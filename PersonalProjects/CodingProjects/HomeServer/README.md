@@ -50,7 +50,7 @@ I installed Glances to monitor system resources like CPU, memory, and disk usage
 | **AlmaLinux** | Code Autocomplete AI Agent | 8086 | AI Server | Coding Autocomplete|
 | **AlmaLinux** | Code AI Agent | 8085 | AI Server | Coding Agent|
 | **AlmaLinux** | Code Deep Thinking AI Agent | 8087 | AI Server | Heavy Thinking Coding Agent|
-| **Debian** | Nginx Proxy Manager | 80, 443, 81 | Infrastructure | Web/SSL routing (Admin UI on 81) |
+| **Debian** | Nginx Proxy Manager | 80, 443, 81 | Infrastructure | Web/SSL routing |
 | **Debian** | Homepage | 3000 | Management | Start page / dashboard |
 | **Debian** | Portainer | 9443, 8000 | Management | Container UI (HTTPS on 9443) |
 | **Debian** | Glances | Internal / Host | Management | System resource monitor |
